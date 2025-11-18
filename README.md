@@ -98,7 +98,14 @@ Score each passage on:
   2. Controversy / sensitivity
   3. Novelty
   4. Power linkage
-Assign an importance_score from 0 (no meaningful lead) to 100 (blockbuster lead linking powerful actors to fresh controversy). Reserve 70+ for claims that, if true, would represent major revelations or next-step investigations.
+Assign an importance_score from 0 (no meaningful lead) to 100 (blockbuster lead linking powerful actors to fresh controversy). Use the scale consistently:
+  • 0–10  : noise, duplicates, previously published facts, or gossip with no actors.
+  • 10–30 : low-value context; speculative or weak leads lacking specifics.
+  • 30–50 : moderate leads with partial details or missing novelty.
+  • 50–70 : strong leads with actionable info or notable controversy.
+  • 70–85 : high-impact, new revelations tying powerful actors to clear misconduct.
+  • 85–100: blockbuster revelations demanding immediate follow-up.
+Reserve 70+ for claims that, if true, would represent major revelations or next-step investigations.
 Return strict JSON with fields: headline, importance_score, reason, key_insights, tags, power_mentions, agency_involvement, lead_types.
 ```
 
