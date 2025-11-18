@@ -328,6 +328,7 @@ def call_model(
     api_key: Optional[str],
     timeout: float,
     reasoning_effort: Optional[str],
+    config_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Send the document to the local GPT server and return parsed JSON."""
     payload = {
@@ -350,6 +351,10 @@ def call_model(
     }
     if reasoning_effort:
         payload["reasoning"] = {"effort": reasoning_effort}
+
+    # Include config metadata in the request if provided
+    if config_metadata:
+        payload["metadata"] = config_metadata
 
     headers = {}
     if api_key:
@@ -543,7 +548,13 @@ def format_duration(seconds: float) -> str:
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
-def format_eta(start_time: float, processed: int, total: int) -> str:
+def format_eta(
+    start_time: float,
+    processed: int,
+    total: int,
+    power_watts: Optional[float] = None,
+    electric_rate: Optional[float] = None,
+) -> str:
     if total <= 0:
         return ""
     if processed == 0:
@@ -556,7 +567,18 @@ def format_eta(start_time: float, processed: int, total: int) -> str:
         return "(ETA --:--:--)"
     remaining = max(total - processed, 0)
     eta_seconds = remaining / rate if rate else 0
-    return f"(ETA {format_duration(eta_seconds)})"
+
+    # Base ETA message
+    eta_msg = f"(ETA {format_duration(eta_seconds)})"
+
+    # Add energy/cost estimates if available
+    if power_watts is not None and electric_rate is not None:
+        total_estimated_hours = (elapsed + eta_seconds) / 3600
+        energy_cost = calculate_energy_cost(power_watts, electric_rate, total_estimated_hours)
+        if energy_cost:
+            eta_msg += f" | Est. total: {energy_cost['energy_kwh']:.2f} kWh / ${energy_cost['cost_usd']:.2f}"
+
+    return eta_msg
 
 
 class OutputRouter:
@@ -676,6 +698,37 @@ class OutputRouter:
             self.chunk_manifest.parent.mkdir(parents=True, exist_ok=True)
             with self.chunk_manifest.open("w", encoding="utf-8") as handle:
                 json.dump(entries, handle, indent=2)
+
+def build_config_metadata(args: argparse.Namespace) -> Dict[str, Any]:
+    """Build metadata dictionary from config for inclusion in requests and outputs."""
+    metadata = {
+        "endpoint": args.endpoint,
+        "model": args.model,
+        "temperature": 0,
+    }
+    if args.reasoning_effort:
+        metadata["reasoning_effort"] = args.reasoning_effort
+    if args.api_key:
+        metadata["api_key_used"] = True
+    if args.power_watts is not None:
+        metadata["power_watts"] = args.power_watts
+    if args.electric_rate is not None:
+        metadata["electric_rate"] = args.electric_rate
+    return metadata
+
+
+def calculate_energy_cost(
+    power_watts: Optional[float],
+    electric_rate: Optional[float],
+    hours: float,
+) -> Optional[Dict[str, float]]:
+    """Calculate energy consumption and cost."""
+    if power_watts is None or electric_rate is None or hours <= 0:
+        return None
+    energy_kwh = (power_watts * hours) / 1000.0
+    cost = energy_kwh * electric_rate
+    return {"energy_kwh": energy_kwh, "cost_usd": cost}
+
 
 def format_cost_summary(
     power_watts: Optional[float],
@@ -799,6 +852,10 @@ def main() -> None:
     checkpoint_handle = (
         args.checkpoint.open("a", encoding="utf-8") if args.checkpoint else None
     )
+
+    # Build config metadata to include in requests and outputs
+    config_metadata = build_config_metadata(args)
+
     start_time = time.monotonic()
     try:
         for idx, row in enumerate(iter_rows(args.input), start=1):
@@ -821,7 +878,13 @@ def main() -> None:
                 if target_total
                 else f"[{processed + 1}]"
             )
-            eta_text = format_eta(start_time, processed, target_total)
+            eta_text = format_eta(
+                start_time,
+                processed,
+                target_total,
+                args.power_watts,
+                args.electric_rate,
+            )
             print(f"{progress_prefix} Processing {filename}... {eta_text}", flush=True)
 
             try:
@@ -834,6 +897,7 @@ def main() -> None:
                     api_key=args.api_key,
                     timeout=args.timeout,
                     reasoning_effort=args.reasoning_effort,
+                    config_metadata=config_metadata,
                 )
             except Exception as exc:  # noqa: BLE001
                 print(f"  ! Failed to analyze {filename}: {exc}", file=sys.stderr)
@@ -882,6 +946,7 @@ def main() -> None:
                 "metadata": {
                     "source_row_index": idx,
                     "original_row": row,
+                    "config": config_metadata,
                 },
             }
             if args.include_action_items:

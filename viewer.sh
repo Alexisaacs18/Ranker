@@ -14,7 +14,15 @@ fi
 echo "Serving viewer on http://localhost:${PORT}"
 echo "Press Ctrl+C to stop."
 cd "$VIEWER_DIR"
+
+# Create symlinks so the viewer can access data/ and contrib/ directories
 if [ ! -e "data" ] && [ -d "$DATA_DIR" ]; then
   ln -s ../data data
 fi
+
+CONTRIB_DIR="${SCRIPT_DIR}/contrib"
+if [ ! -e "contrib" ] && [ -d "$CONTRIB_DIR" ]; then
+  ln -s ../contrib contrib
+fi
+
 python -m http.server "$PORT"

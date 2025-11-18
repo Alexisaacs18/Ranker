@@ -1,5 +1,5 @@
-const DATA_URL = "../data/epstein_ranked.jsonl";
-const CHUNK_MANIFEST_URL = "../data/chunks.json";
+const DATA_URL = "data/epstein_ranked.jsonl";
+const CHUNK_MANIFEST_URL = "data/chunks.json";
 const DEFAULT_CHUNK_SIZE = 1000;
 
 const elements = {
@@ -543,7 +543,7 @@ async function loadSequentialChunks(chunkSize = DEFAULT_CHUNK_SIZE, maxChunks = 
   let misses = 0;
   while (attempts < maxChunks && misses < 5) {
     const end = start + chunkSize - 1;
-    const path = `../contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
+    const path = `contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
       end
     ).padStart(5, "0")}.jsonl`;
     attempts += 1;
@@ -591,13 +591,16 @@ function resolveChunkPath(path) {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
+  // Remove leading ../ if present (we serve from viewer/ with symlinks)
   if (path.startsWith("../")) {
-    return path;
+    return path.substring(3);
   }
+  // Remove leading ./ if present
   if (path.startsWith("./")) {
-    return path.replace("./", "../");
+    return path.substring(2);
   }
-  return `../${path}`;
+  // Return path as-is (should be relative to viewer/)
+  return path;
 }
 
 function resetFilters() {
