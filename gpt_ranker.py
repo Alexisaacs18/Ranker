@@ -295,7 +295,16 @@ def parse_args() -> argparse.Namespace:
         help="Override elapsed hours for cost estimate (otherwise uses wall time).",
     )
     args = parser.parse_args()
+    config_path = None
     if args.config:
+        config_path = Path(args.config)
+    else:
+        for candidate in (Path("ranker_config.toml"), Path("ranker_config.example.toml")):
+            if candidate.exists():
+                config_path = candidate
+                break
+    if config_path:
+        args.config = config_path
         apply_config_defaults(parser, args)
     return args
 
@@ -552,11 +561,11 @@ class OutputRouter:
         self.json_handle = None
         self.csv_writer = None
         self.current_chunk: Optional[Tuple[int, int]] = None
-        self.current_paths: Optional[Tuple[Path, Path]] = None
+        self.current_json_path: Optional[Path] = None
         if self.mode == "single":
             self._init_single()
         else:
-            self._init_chunk()
+            self._init_chunk_state()
 
     def _init_single(self) -> None:
         csv_mode = "a" if self.args.resume and self.args.output.exists() else "w"
@@ -569,7 +578,7 @@ class OutputRouter:
         self.args.json_output.parent.mkdir(parents=True, exist_ok=True)
         self.json_handle = self.args.json_output.open(json_mode, encoding="utf-8")
 
-    def _init_chunk(self) -> None:
+    def _init_chunk_state(self) -> None:
         self.chunk_dir: Path = self.args.chunk_dir
         self.chunk_dir.mkdir(parents=True, exist_ok=True)
         self.chunk_manifest: Path = self.args.chunk_manifest
@@ -602,8 +611,6 @@ class OutputRouter:
 
         chunk_bounds = self._chunk_bounds(row_idx)
         self._ensure_chunk(chunk_bounds)
-        self.csv_writer.writerow(csv_row)
-        self.csv_handle.flush()
         self.json_handle.write(json.dumps(json_record, ensure_ascii=False) + "\n")
         self.json_handle.flush()
 
@@ -621,48 +628,31 @@ class OutputRouter:
         self.current_chunk = chunk_bounds
         chunk_start, chunk_end = chunk_bounds
         base = f"epstein_ranked_{chunk_start:05d}_{chunk_end:05d}"
-        csv_path = self.chunk_dir / f"{base}.csv"
         json_path = self.chunk_dir / f"{base}.jsonl"
-        csv_exists = csv_path.exists()
         json_exists = json_path.exists()
-        if csv_exists and not self.args.resume and not self.args.overwrite_output:
-            raise FileExistsError(
-                f"Chunk CSV {csv_path} exists. Use --resume or --overwrite-output."
-            )
         if json_exists and not self.args.resume and not self.args.overwrite_output:
             raise FileExistsError(
                 f"Chunk JSON {json_path} exists. Use --resume or --overwrite-output."
             )
-        csv_mode = "a" if self.args.resume and csv_exists else "w"
         json_mode = "a" if self.args.resume and json_exists else "w"
-        self.csv_handle = csv_path.open(csv_mode, newline="", encoding="utf-8")
-        self.csv_writer = csv.DictWriter(self.csv_handle, fieldnames=self.fieldnames)
-        if csv_mode == "w":
-            self.csv_writer.writeheader()
         self.json_handle = json_path.open(json_mode, encoding="utf-8")
-        self.current_paths = (csv_path, json_path)
+        self.current_json_path = json_path
 
     def _close_chunk(self) -> None:
-        if self.csv_handle:
-            self.csv_handle.close()
-            self.csv_handle = None
         if self.json_handle:
             self.json_handle.close()
             self.json_handle = None
-        if self.current_chunk and self.current_paths:
+        if self.current_chunk and self.current_json_path:
             chunk_start, chunk_end = self.current_chunk
-            csv_path, json_path = self.current_paths
             entry = {
                 "start_row": chunk_start,
                 "end_row": chunk_end,
-                "csv": str(csv_path.as_posix()),
-                "json": str(json_path.as_posix()),
+                "json": str(self.current_json_path.as_posix()),
             }
             self.manifest_entries[self.current_chunk] = entry
             self.manifest_dirty = True
         self.current_chunk = None
-        self.current_paths = None
-        self.csv_writer = None
+        self.current_json_path = None
 
     def close(self) -> None:
         if self.mode == "single":

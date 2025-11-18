@@ -80,8 +80,7 @@ Notable flags:
 
 Outputs:
 
-- `contrib/epstein_ranked_<start>_<end>.csv` – Spreadsheet-friendly chunk (headline, score, tags, power mentions, agencies, lead types).
-- `contrib/epstein_ranked_<start>_<end>.jsonl` – Full JSON for the same chunk, including the original row metadata.
+- `contrib/epstein_ranked_<start>_<end>.jsonl` – Default chunked outputs (one file per 1,000 rows) that contain the headline, score, metadata, and original text for each document.
 - `data/chunks.json` – Manifest listing all chunk files (the viewer ingests this automatically).
 - `data/epstein_ranked.csv/jsonl` – Only produced if you disable chunking via `--chunk-size 0`.
 
@@ -157,22 +156,19 @@ Want to help process more of the corpus? Fork the repo, claim a range of rows, a
      --resume
    ```
 
-   This only processes documents in that range, emits `contrib/epstein_ranked_<range>.{csv,jsonl}`, and updates the manifest.  
+   This only processes documents in that range, emits `contrib/epstein_ranked_<range>.jsonl`, and updates the manifest.  
    `--known-json` makes the script aware of previously merged results (so duplicates are skipped automatically). Combine with `--resume` if you need to pause and continue later.
 
-3. **Export your outputs** – store the resulting CSV/JSONL subset in `contrib/`. Suggested naming:
+3. **Export your outputs** – each run writes the chunk JSONL straight into `contrib/`. Keep the naming pattern `contrib/epstein_ranked_<start>_<end>.jsonl`.
 
-   - `contrib/epstein_ranked_<start>_<end>.csv`
-   - `contrib/epstein_ranked_<start>_<end>.jsonl`
-
-4. **Submit a PR** with your chunk. We’ll merge the contributions into the global dataset and credit collaborators in the README.
+4. **Submit a PR** with your chunk (the JSONL + updated `data/chunks.json`). We’ll merge the contributions into the global dataset and credit collaborators in the README.
 
 Guidelines:
 
 - Do **not** commit the original 100 MB source CSV; each contributor should download it separately.
 - Keep the JSONL chunks intact (no reformatting) so we can merge them programmatically.
 - If you discover inconsistencies or interesting leads, open an issue to coordinate follow-up analysis.
-- Pull the latest `data/epstein_ranked.jsonl` before starting; pass it via `--known-json` so you never duplicate work.
+- Pull the latest `data/chunks.json` (and any merged JSONL files) before starting; pass the merged JSON via `--known-json` so you never duplicate work.
 
 ---
 
