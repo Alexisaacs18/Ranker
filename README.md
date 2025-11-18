@@ -67,12 +67,16 @@ Set `--chunk-size 0` if you really want a single CSV/JSONL output (not recommend
 
 Notable flags:
 
+- `--prompt-file`: specify a custom system prompt file (defaults to `prompts/default_system_prompt.txt`). See `prompts/README.md` for details on creating custom prompts.
+- `--system-prompt`: provide an inline system prompt string (overrides `--prompt-file`).
 - `--resume`: skips rows already present in the JSONL/checkpoint so you can stop/restart long runs.
 - `--checkpoint data/.epstein_checkpoint`: stores processed filenames to guard against duplication.
 - `--reasoning-effort low/high`: trade accuracy for speed if your model exposes the reasoning control knob.
 - `--include-action-items`: opt-in if you want the LLM to list action items (off by default for brevity).
+- `--timeout`: HTTP request timeout in seconds (default: 600 = 10 minutes). Increase for very large documents (100K+ tokens).
 - `--max-rows N`: smoke-test on a small subset.
 - `--list-models`: query your endpoint for available model IDs.
+- `--rebuild-manifest`: scan `contrib/` for chunk files and rebuild `data/chunks.json` (useful if the manifest gets out of sync).
 - `--start-row`, `--end-row`: process only a slice of the dataset (ideal for collaborative chunking).
 - `--chunk-size`, `--chunk-dir`, `--chunk-manifest`: control chunk splitting, where chunk files live, and where the manifest is written.
 - `--overwrite-output`: explicitly allow truncating existing files (default is to refuse unless `--resume` or unique paths are used).
@@ -81,14 +85,61 @@ Notable flags:
 Outputs:
 
 - `contrib/epstein_ranked_<start>_<end>.jsonl` – Default chunked outputs (one file per 1,000 rows) that contain the headline, score, metadata, and original text for each document.
-- `data/chunks.json` – Manifest listing all chunk files (the viewer ingests this automatically).
+- `data/chunks.json` – Manifest listing all chunk files (the viewer uses this to load data).
 - `data/epstein_ranked.csv/jsonl` – Only produced if you disable chunking via `--chunk-size 0`.
+
+### Chunk Manifest
+
+The ranker automatically updates `data/chunks.json` after each chunk is completed. This manifest tells the viewer which chunk files exist and what row ranges they cover.
+
+**If the manifest gets out of sync** (e.g., due to interrupted runs or manual file moves), you can rebuild it:
+
+```bash
+python gpt_ranker.py --rebuild-manifest
+```
+
+This scans `contrib/` for all chunk files and regenerates the manifest automatically.
+
+---
+
+## Customizing the system prompt
+
+The ranker uses a system prompt to instruct the model on how to analyze and score documents. You can customize this prompt to fit your specific needs:
+
+### Using a custom prompt file
+
+1. Create your own prompt file in the `prompts/` directory (e.g., `prompts/my_custom_prompt.txt`)
+2. Run the ranker with `--prompt-file`:
+
+```bash
+python gpt_ranker.py --prompt-file prompts/my_custom_prompt.txt --config ranker_config.toml
+```
+
+Or set it in your config file:
+
+```toml
+prompt_file = "prompts/my_custom_prompt.txt"
+```
+
+See `prompts/README.md` for detailed guidance on creating custom prompts, and check out `prompts/example_strict_scoring.txt` for an example of a stricter scoring methodology.
+
+### Prompt priority
+
+The ranker loads prompts in this order of priority:
+1. `--system-prompt` (inline string argument)
+2. `--prompt-file` or `prompt_file` in config
+3. `prompts/default_system_prompt.txt` (if it exists)
+4. Hardcoded default prompt (fallback)
+
+### Tracking prompt usage
+
+The prompt source is automatically included in the output metadata for each document, so you can always see which prompt was used for analysis.
 
 ---
 
 ## Scoring methodology (LLM prompt)
 
-The model receives every row with the following instruction (excerpt):
+The default prompt instructs the model with the following criteria (excerpt):
 
 ```
 You analyze primary documents related to court and investigative filings.

@@ -319,12 +319,48 @@ select[multiple] {
   max-height: none;
 }
 
-.detail-text pre {
+.detail-text-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.detail-text-header h3 {
+  margin: 0;
+}
+
+.text-toggle {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(90, 208, 255, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(90, 208, 255, 0.3);
+}
+
+.text-toggle:hover {
+  background: rgba(90, 208, 255, 0.25);
+  transform: none;
+  box-shadow: none;
+}
+
+.text-preview {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.text-full {
   margin: 0;
   max-height: none;
   min-height: 360px;
   overflow: auto;
   white-space: pre-wrap;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 @media (max-width: 1200px) {

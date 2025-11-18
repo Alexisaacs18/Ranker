@@ -22,7 +22,10 @@ const elements = {
   detailLeadTypes: document.getElementById("detailLeadTypes"),
   detailPower: document.getElementById("detailPower"),
   detailAgencies: document.getElementById("detailAgencies"),
+  detailModel: document.getElementById("detailModel"),
   detailText: document.getElementById("detailText"),
+  detailTextPreview: document.getElementById("detailTextPreview"),
+  detailTextToggle: document.getElementById("detailTextToggle"),
   detailClose: document.getElementById("detailClose"),
 };
 
@@ -30,6 +33,7 @@ const state = {
   raw: [],
   filtered: [],
   lastUpdated: null,
+  manifestMetadata: null,
   gridOptions: null,
   leadChart: null,
   scoreChart: null,
@@ -290,7 +294,26 @@ function updateSummary() {
       : state.filtered.reduce((sum, row) => sum + row.importance_score, 0) / count;
   const leadCounts = aggregateCounts(state.filtered, "lead_types");
   const topLead = leadCounts.length ? leadCounts[0].label : "None";
-  elements.countStat.textContent = count.toLocaleString();
+
+  // Display count with total info if available
+  const totalLoaded = state.raw.length;
+  if (state.manifestMetadata && state.manifestMetadata.total_dataset_rows) {
+    const totalDataset = state.manifestMetadata.total_dataset_rows;
+    if (typeof totalDataset === 'number') {
+      if (count === totalLoaded) {
+        // No filters applied
+        elements.countStat.textContent = `${count.toLocaleString()} of ${totalDataset.toLocaleString()} loaded`;
+      } else {
+        // Filters applied
+        elements.countStat.textContent = `${count.toLocaleString()} of ${totalLoaded.toLocaleString()} loaded (${totalDataset.toLocaleString()} total)`;
+      }
+    } else {
+      elements.countStat.textContent = `${count.toLocaleString()} (${totalLoaded.toLocaleString()} loaded)`;
+    }
+  } else {
+    elements.countStat.textContent = `${count.toLocaleString()} (${totalLoaded.toLocaleString()} loaded)`;
+  }
+
   elements.avgStat.textContent = average.toFixed(1);
   elements.leadStat.textContent = topLead;
   elements.updatedStat.textContent = state.lastUpdated
@@ -469,7 +492,7 @@ function updateAgencyChart() {
 async function loadData() {
   try {
     const manifest = await fetchManifest();
-    if (manifest && manifest.length > 0) {
+    if (manifest && manifest.chunks && manifest.chunks.length > 0) {
       await loadChunks(manifest);
       return;
     }
@@ -500,19 +523,29 @@ async function fetchManifest() {
     if (!response.ok) {
       return null;
     }
-    const manifest = await response.json();
-    if (!Array.isArray(manifest) || manifest.length === 0) {
-      return null;
+    const data = await response.json();
+
+    // Handle both old format (array) and new format (object with metadata)
+    if (Array.isArray(data)) {
+      // Old format: just an array of chunks
+      return { chunks: data, metadata: null };
+    } else if (data.chunks && Array.isArray(data.chunks)) {
+      // New format: object with metadata and chunks
+      return { chunks: data.chunks, metadata: data.metadata || null };
     }
-    return manifest;
+
+    return null;
   } catch (error) {
     return null;
   }
 }
 
-async function loadChunks(manifest) {
+async function loadChunks(manifestData) {
+  const chunks = manifestData.chunks || manifestData;
+  const metadata = manifestData.metadata || null;
+
   const rows = [];
-  for (const entry of manifest) {
+  for (const entry of chunks) {
     const jsonPath = resolveChunkPath(entry?.json);
     if (!jsonPath) continue;
     try {
@@ -531,6 +564,7 @@ async function loadChunks(manifest) {
     throw new Error("Chunk manifest contained no readable data.");
   }
   state.raw = rows.map(normalizeRow);
+  state.manifestMetadata = metadata;
   state.lastUpdated = new Date();
   populateFilters(state.raw);
   applyFilters();
@@ -624,6 +658,22 @@ function wireEvents() {
   elements.resetFilters.addEventListener("click", resetFilters);
   elements.refreshButton.addEventListener("click", () => loadData());
   elements.detailClose.addEventListener("click", () => clearDetail());
+  elements.detailTextToggle.addEventListener("click", toggleDetailText);
+}
+
+function toggleDetailText() {
+  const isExpanded = !elements.detailText.classList.contains("hidden");
+  if (isExpanded) {
+    // Collapse
+    elements.detailText.classList.add("hidden");
+    elements.detailTextPreview.classList.remove("hidden");
+    elements.detailTextToggle.textContent = "Expand";
+  } else {
+    // Expand
+    elements.detailText.classList.remove("hidden");
+    elements.detailTextPreview.classList.add("hidden");
+    elements.detailTextToggle.textContent = "Collapse";
+  }
 }
 
 function debounce(fn, delay) {
@@ -703,7 +753,24 @@ function renderDetail(row) {
   elements.detailLeadTypes.textContent = row.lead_types.join(", ") || "—";
   elements.detailPower.textContent = row.power_mentions.join(", ") || "—";
   elements.detailAgencies.textContent = row.agency_involvement.join(", ") || "—";
-  elements.detailText.textContent = row.original_text || "No source text captured.";
+
+  // Display model if available in metadata
+  const model = row.metadata?.config?.model || "—";
+  elements.detailModel.textContent = model;
+
+  // Handle original text with collapse/expand
+  const originalText = row.original_text || "No source text captured.";
+  const wordCount = originalText.split(/\s+/).filter(Boolean).length;
+  const snippet = originalText.split(/\s+/).slice(0, 30).join(" ");
+
+  elements.detailText.textContent = originalText;
+  elements.detailTextPreview.textContent = `${snippet}... (${wordCount.toLocaleString()} words)`;
+
+  // Reset to collapsed state
+  elements.detailText.classList.add("hidden");
+  elements.detailTextPreview.classList.remove("hidden");
+  elements.detailTextToggle.textContent = "Expand";
+
   elements.detailInsights.innerHTML =
     row.key_insights.length > 0
       ? row.key_insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
@@ -717,6 +784,11 @@ function clearDetail() {
   elements.detailLeadTypes.textContent = "—";
   elements.detailPower.textContent = "—";
   elements.detailAgencies.textContent = "—";
+  elements.detailModel.textContent = "—";
   elements.detailText.textContent = "—";
+  elements.detailTextPreview.textContent = "—";
+  elements.detailText.classList.add("hidden");
+  elements.detailTextPreview.classList.remove("hidden");
+  elements.detailTextToggle.textContent = "Expand";
   elements.detailInsights.innerHTML = "";
 }

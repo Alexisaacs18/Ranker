@@ -191,9 +191,15 @@ def parse_args() -> argparse.Namespace:
         help="Model identifier exposed by the server (check via --list-models).",
     )
     parser.add_argument(
+        "--prompt-file",
+        type=Path,
+        default=None,
+        help="Path to a text file containing the system prompt (overrides default).",
+    )
+    parser.add_argument(
         "--system-prompt",
-        default=DEFAULT_SYSTEM_PROMPT,
-        help="Override the default system instructions sent to the model.",
+        default=None,
+        help="Inline system prompt string (overrides --prompt-file and default).",
     )
     parser.add_argument(
         "--api-key",
@@ -277,13 +283,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--timeout",
         type=float,
-        default=120.0,
-        help="HTTP request timeout in seconds.",
+        default=600.0,
+        help="HTTP request timeout in seconds (default: 600 = 10 minutes).",
     )
     parser.add_argument(
         "--list-models",
         action="store_true",
         help="List models exposed by the endpoint and exit.",
+    )
+    parser.add_argument(
+        "--rebuild-manifest",
+        action="store_true",
+        help="Scan chunk files and rebuild the manifest (data/chunks.json), then exit.",
     )
     parser.add_argument(
         "--power-watts",
@@ -316,6 +327,38 @@ def parse_args() -> argparse.Namespace:
         args.config = config_path
         apply_config_defaults(parser, args)
     return args
+
+
+def load_system_prompt(args: argparse.Namespace) -> Tuple[str, str]:
+    """Load the system prompt from file or use inline/default prompt.
+
+    Returns:
+        Tuple of (prompt_text, prompt_source_description)
+    """
+    # Priority: inline --system-prompt > --prompt-file > default file > hardcoded default
+    if args.system_prompt:
+        return args.system_prompt, "inline (--system-prompt)"
+
+    prompt_file = args.prompt_file
+    if not prompt_file:
+        # Try default prompt file location
+        default_prompt_file = Path("prompts") / "default_system_prompt.txt"
+        if default_prompt_file.exists():
+            prompt_file = default_prompt_file
+        else:
+            # Fall back to hardcoded default
+            return DEFAULT_SYSTEM_PROMPT, "default (hardcoded)"
+
+    if not prompt_file.exists():
+        raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
+
+    with prompt_file.open("r", encoding="utf-8") as f:
+        prompt = f.read().strip()
+
+    if not prompt:
+        raise ValueError(f"Prompt file is empty: {prompt_file}")
+
+    return prompt, str(prompt_file)
 
 
 def call_model(
@@ -515,6 +558,13 @@ def normalize_text_list(values: List[str], *, strip_descriptor: bool = False) ->
     return normalized
 
 
+def count_total_csv_rows(path: Path) -> int:
+    """Count total number of data rows in the CSV (excluding header)."""
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        return sum(1 for _ in reader)
+
+
 def calculate_workload(
     path: Path,
     *,
@@ -615,6 +665,7 @@ class OutputRouter:
         self.chunk_manifest: Path = self.args.chunk_manifest
         self.manifest_entries = self._load_manifest()
         self.manifest_dirty = False
+        self.total_dataset_rows = None  # Will be set by main()
 
     def _load_manifest(self) -> Dict[Tuple[int, int], Dict[str, Any]]:
         if not self.chunk_manifest.exists():
@@ -624,8 +675,19 @@ class OutputRouter:
                 data = json.load(handle)
         except (json.JSONDecodeError, FileNotFoundError):
             return {}
+
+        # Handle both old format (array) and new format (object with chunks)
+        if isinstance(data, list):
+            # Old format: array of chunks
+            chunk_list = data
+        elif isinstance(data, dict) and "chunks" in data:
+            # New format: object with metadata and chunks
+            chunk_list = data["chunks"]
+        else:
+            return {}
+
         entries: Dict[Tuple[int, int], Dict[str, Any]] = {}
-        for entry in data:
+        for entry in chunk_list:
             key = (entry.get("start_row"), entry.get("end_row"))
             if not isinstance(key[0], int) or not isinstance(key[1], int):
                 continue
@@ -682,8 +744,40 @@ class OutputRouter:
             }
             self.manifest_entries[self.current_chunk] = entry
             self.manifest_dirty = True
+            # Write manifest immediately after each chunk closes
+            self._write_manifest()
         self.current_chunk = None
         self.current_json_path = None
+
+    def _write_manifest(self) -> None:
+        """Write the manifest file to disk."""
+        if not self.manifest_dirty:
+            return
+        entries = sorted(self.manifest_entries.values(), key=lambda e: e["start_row"])
+
+        # Calculate total rows processed
+        total_processed = 0
+        for entry in entries:
+            # Count actual lines in the chunk file
+            chunk_path = Path(entry["json"])
+            if chunk_path.exists():
+                with chunk_path.open(encoding="utf-8") as f:
+                    total_processed += sum(1 for _ in f)
+
+        # Build manifest with metadata
+        manifest = {
+            "metadata": {
+                "total_dataset_rows": self.total_dataset_rows if self.total_dataset_rows else "unknown",
+                "rows_processed": total_processed,
+                "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            "chunks": entries
+        }
+
+        self.chunk_manifest.parent.mkdir(parents=True, exist_ok=True)
+        with self.chunk_manifest.open("w", encoding="utf-8") as handle:
+            json.dump(manifest, handle, indent=2)
+        self.manifest_dirty = False
 
     def close(self) -> None:
         if self.mode == "single":
@@ -693,18 +787,15 @@ class OutputRouter:
                 self.json_handle.close()
             return
         self._close_chunk()
-        if self.manifest_dirty:
-            entries = sorted(self.manifest_entries.values(), key=lambda e: e["start_row"])
-            self.chunk_manifest.parent.mkdir(parents=True, exist_ok=True)
-            with self.chunk_manifest.open("w", encoding="utf-8") as handle:
-                json.dump(entries, handle, indent=2)
+        self._write_manifest()
 
-def build_config_metadata(args: argparse.Namespace) -> Dict[str, Any]:
+def build_config_metadata(args: argparse.Namespace, prompt_source: str) -> Dict[str, Any]:
     """Build metadata dictionary from config for inclusion in requests and outputs."""
     metadata = {
         "endpoint": args.endpoint,
         "model": args.model,
         "temperature": 0,
+        "prompt_source": prompt_source,
     }
     if args.reasoning_effort:
         metadata["reasoning_effort"] = args.reasoning_effort
@@ -767,11 +858,110 @@ def list_models(endpoint: str, api_key: Optional[str], timeout: float) -> None:
         print(f" - {model_id}{extra}")
 
 
+def rebuild_manifest(chunk_dir: Path, manifest_path: Path) -> None:
+    """Scan chunk directory and rebuild the manifest file."""
+    import re
+
+    # Pattern to match chunk files: epstein_ranked_XXXXX_YYYYY.jsonl
+    pattern = re.compile(r"epstein_ranked_(\d{5})_(\d{5})\.jsonl")
+
+    chunks = []
+    if not chunk_dir.exists():
+        print(f"Chunk directory not found: {chunk_dir}")
+        return
+
+    for file_path in sorted(chunk_dir.glob("epstein_ranked_*.jsonl")):
+        match = pattern.match(file_path.name)
+        if not match:
+            print(f"Skipping non-matching file: {file_path.name}")
+            continue
+
+        start_row = int(match.group(1))
+        end_row = int(match.group(2))
+
+        # Use relative path: chunk_dir/filename
+        relative_path = chunk_dir / file_path.name
+
+        chunks.append({
+            "start_row": start_row,
+            "end_row": end_row,
+            "json": str(relative_path.as_posix()),
+        })
+
+    if not chunks:
+        print(f"No chunk files found in {chunk_dir}")
+        return
+
+    # Sort by start_row
+    chunks.sort(key=lambda c: c["start_row"])
+
+    # Count total rows processed
+    total_processed = 0
+    for chunk in chunks:
+        chunk_path = Path(chunk["json"])
+        if chunk_path.exists():
+            with chunk_path.open(encoding="utf-8") as f:
+                total_processed += sum(1 for _ in f)
+
+    # Try to get total dataset rows from the source CSV
+    # Look for common CSV filenames in data/ directory
+    csv_candidates = [
+        Path("data/EPS_FILES_20K_NOV2026.csv"),
+        Path("data") / "epstein_files.csv",
+    ]
+    total_dataset_rows = None
+    for csv_path in csv_candidates:
+        if csv_path.exists():
+            print(f"Counting total rows in {csv_path}...")
+            try:
+                total_dataset_rows = count_total_csv_rows(csv_path)
+                print(f"Found {total_dataset_rows:,} total rows in dataset")
+                break
+            except Exception as e:
+                print(f"Error counting rows: {e}")
+
+    # Fall back to highest end_row if CSV not found
+    if total_dataset_rows is None:
+        total_dataset_rows = max((c["end_row"] for c in chunks), default=0) if chunks else "unknown"
+        print(f"Source CSV not found, using highest chunk end_row: {total_dataset_rows}")
+
+    # Build manifest with metadata
+    manifest = {
+        "metadata": {
+            "total_dataset_rows": total_dataset_rows,
+            "rows_processed": total_processed,
+            "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+        },
+        "chunks": chunks
+    }
+
+    # Write manifest
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    with manifest_path.open("w", encoding="utf-8") as handle:
+        json.dump(manifest, handle, indent=2)
+
+    print(f"Rebuilt manifest with {len(chunks)} chunks:")
+    for chunk in chunks:
+        print(f"  - Rows {chunk['start_row']:,}–{chunk['end_row']:,}: {chunk['json']}")
+    if isinstance(total_dataset_rows, int):
+        print(f"Total: {total_processed:,} rows processed out of {total_dataset_rows:,} dataset rows")
+    else:
+        print(f"Total: {total_processed:,} rows processed")
+    print(f"Manifest written to: {manifest_path}")
+
+
 def main() -> None:
     args = parse_args()
     if args.list_models:
         list_models(args.endpoint, args.api_key, args.timeout)
         return
+
+    if args.rebuild_manifest:
+        rebuild_manifest(args.chunk_dir, args.chunk_manifest)
+        return
+
+    # Load system prompt from file or use inline/default
+    system_prompt, prompt_source = load_system_prompt(args)
 
     if not args.input.exists():
         sys.exit(f"Input CSV not found: {args.input}")
@@ -849,12 +1039,19 @@ def main() -> None:
     )
 
     output_router = OutputRouter(args, fieldnames)
+
+    # Count total rows in dataset for manifest metadata
+    if output_router.mode == "chunk":
+        print("Counting total rows in dataset...")
+        output_router.total_dataset_rows = count_total_csv_rows(args.input)
+        print(f"Total dataset: {output_router.total_dataset_rows:,} rows")
+
     checkpoint_handle = (
         args.checkpoint.open("a", encoding="utf-8") if args.checkpoint else None
     )
 
     # Build config metadata to include in requests and outputs
-    config_metadata = build_config_metadata(args)
+    config_metadata = build_config_metadata(args, prompt_source)
 
     start_time = time.monotonic()
     try:
@@ -870,14 +1067,15 @@ def main() -> None:
             text = row["text"]
 
             if filename in completed_filenames:
-                print(f"[skip] {filename} already processed.", flush=True)
+                print(f"[Row {idx}] [skip] {filename} already processed.", flush=True)
                 continue
 
-            progress_prefix = (
-                f"[{processed + 1}/{target_total}]"
-                if target_total
-                else f"[{processed + 1}]"
-            )
+            # Show both source row index and processing progress
+            if target_total:
+                progress_prefix = f"[Row {idx}] [{processed + 1}/{target_total} new]"
+            else:
+                progress_prefix = f"[Row {idx}] [{processed + 1}]"
+
             eta_text = format_eta(
                 start_time,
                 processed,
@@ -893,7 +1091,7 @@ def main() -> None:
                     model=args.model,
                     filename=filename,
                     text=text,
-                    system_prompt=args.system_prompt,
+                    system_prompt=system_prompt,
                     api_key=args.api_key,
                     timeout=args.timeout,
                     reasoning_effort=args.reasoning_effort,

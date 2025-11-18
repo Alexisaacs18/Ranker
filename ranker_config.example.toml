@@ -5,6 +5,14 @@ endpoint = "http://localhost:5002/v1"
 model = "openai/gpt-oss-120b"
 reasoning_effort = "low"
 sleep = 0.5
+timeout = 600.0  # HTTP request timeout in seconds (10 minutes)
+                 # For very large documents (100K+ tokens), increase to 1800 (30 min) or higher
+
+# System prompt configuration
+# Use a custom prompt file (optional - defaults to prompts/default_system_prompt.txt)
+# prompt_file = "prompts/my_custom_prompt.txt"
+# Or provide an inline system prompt (overrides prompt_file)
+# system_prompt = "Your custom prompt here..."
 
 # Chunking defaults
 chunk_size = 1000
