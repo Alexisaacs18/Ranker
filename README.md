@@ -131,7 +131,7 @@ Open <http://localhost:9000>. Features:
 - Charts showing lead-type distribution, score histogram, top power mentions, and top agencies.
 - Methodology accordion describing the scoring criteria, prompt, and compute footprint.
 
-`viewer/app.js` reads `data/chunks.json` by default, so remember to commit updated manifests + chunk files. If no manifest exists, it falls back to `data/epstein_ranked.jsonl`.
+`viewer/app.js` reads `data/chunks.json` by default, so remember to commit updated manifests + chunk files. If no manifest exists, it automatically scans for files named `contrib/epstein_ranked_*.jsonl` before falling back to `data/epstein_ranked.jsonl`.
 
 ### Screenshots
 

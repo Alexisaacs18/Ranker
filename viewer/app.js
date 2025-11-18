@@ -1,4 +1,6 @@
 const DATA_URL = "../data/epstein_ranked.jsonl";
+const CHUNK_MANIFEST_URL = "../data/chunks.json";
+const DEFAULT_CHUNK_SIZE = 1000;
 
 const elements = {
   scoreFilter: document.getElementById("scoreFilter"),
@@ -476,18 +478,25 @@ async function loadData() {
   }
 
   try {
+    await loadSequentialChunks();
+    return;
+  } catch (seqErr) {
+    console.warn("Sequential chunk scan failed, falling back to single file.", seqErr);
+  }
+
+  try {
     await loadSingleFile();
   } catch (error) {
     console.error("Failed to load data", error);
     alert(
-      "Unable to load ranked outputs. Ensure chunk files (data/chunks.json + contrib/*.jsonl) or data/epstein_ranked.jsonl exist."
+      "Unable to load ranked outputs. Ensure contrib/epstein_ranked_*.jsonl files or data/epstein_ranked.jsonl exist."
     );
   }
 }
 
 async function fetchManifest() {
   try {
-    const response = await fetch(`${MANIFEST_URL}?t=${Date.now()}`);
+    const response = await fetch(`${CHUNK_MANIFEST_URL}?t=${Date.now()}`);
     if (!response.ok) {
       return null;
     }
@@ -520,6 +529,43 @@ async function loadChunks(manifest) {
   }
   if (rows.length === 0) {
     throw new Error("Chunk manifest contained no readable data.");
+  }
+  state.raw = rows.map(normalizeRow);
+  state.lastUpdated = new Date();
+  populateFilters(state.raw);
+  applyFilters();
+}
+
+async function loadSequentialChunks(chunkSize = DEFAULT_CHUNK_SIZE, maxChunks = 500) {
+  const rows = [];
+  let start = 1;
+  let attempts = 0;
+  let misses = 0;
+  while (attempts < maxChunks && misses < 5) {
+    const end = start + chunkSize - 1;
+    const path = `../contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
+      end
+    ).padStart(5, "0")}.jsonl`;
+    attempts += 1;
+    try {
+      const response = await fetch(`${path}?t=${Date.now()}`);
+      if (!response.ok) {
+        misses += 1;
+        start += chunkSize;
+        continue;
+      }
+      const text = await response.text();
+      rows.push(...parseJsonl(text));
+      misses = 0;
+      start += chunkSize;
+    } catch (error) {
+      console.warn("Chunk scan error", path, error);
+      misses += 1;
+      start += chunkSize;
+    }
+  }
+  if (rows.length === 0) {
+    throw new Error("No sequential chunks readable");
   }
   state.raw = rows.map(normalizeRow);
   state.lastUpdated = new Date();
