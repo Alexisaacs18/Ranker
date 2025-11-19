@@ -170,16 +170,17 @@ select[multiple] {
 .cell-headline {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.05rem;
 }
 
 .cell-text {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
+  line-height: 1.3;
 }
 
 .cell-headline span {
@@ -199,6 +200,14 @@ select[multiple] {
   --ag-border-color: #1f2b3f;
   --ag-row-hover-color: rgba(90, 208, 255, 0.12);
   --ag-header-foreground-color: #d9e3f2;
+  --ag-cell-horizontal-padding: 8px;
+}
+
+.ag-theme-alpine .ag-cell {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  display: flex;
+  align-items: center;
 }
 
 .detail-panel {

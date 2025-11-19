@@ -22,6 +22,7 @@ const elements = {
   detailLeadTypes: document.getElementById("detailLeadTypes"),
   detailPower: document.getElementById("detailPower"),
   detailAgencies: document.getElementById("detailAgencies"),
+  detailTags: document.getElementById("detailTags"),
   detailModel: document.getElementById("detailModel"),
   detailText: document.getElementById("detailText"),
   detailTextPreview: document.getElementById("detailTextPreview"),
@@ -47,7 +48,7 @@ const gridColumnDefs = [
   {
     headerName: "Score",
     field: "importance_score",
-    width: 110,
+    width: 80,
     filter: "agNumberColumnFilter",
     cellClass: "score-cell",
     tooltipValueGetter: (params) => `Score: ${params.value ?? 0}`,
@@ -55,8 +56,8 @@ const gridColumnDefs = [
   {
     headerName: "Headline / File",
     field: "headline",
-    flex: 2,
-    minWidth: 280,
+    flex: 6,
+    minWidth: 400,
     cellRenderer: (params) => {
       const headline = params.value || "Untitled lead";
       const file = params.data?.filename ?? "";
@@ -71,47 +72,34 @@ const gridColumnDefs = [
       `${params.data?.headline || "Untitled lead"}\n${params.data?.filename || ""}`,
   },
   {
-    headerName: "Reason",
-    field: "reason",
-    flex: 2,
-    minWidth: 260,
-    cellRenderer: (params) => `<span class="cell-text">${params.value || ""}</span>`,
-    tooltipValueGetter: (params) => params.data?.reason || "",
-  },
-  {
     headerName: "Power Mentions",
     field: "power_mentions",
-    minWidth: 200,
+    flex: 2,
+    minWidth: 180,
     cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
     tooltipValueGetter: (params) => (params.data?.power_mentions || []).join(", "),
   },
   {
     headerName: "Lead Types",
     field: "lead_types",
-    minWidth: 200,
+    flex: 1.2,
+    minWidth: 150,
     cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
     tooltipValueGetter: (params) => (params.data?.lead_types || []).join(", "),
   },
   {
     headerName: "Agencies",
     field: "agency_involvement",
-    minWidth: 200,
+    flex: 1.2,
+    minWidth: 140,
     cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
     tooltipValueGetter: (params) => (params.data?.agency_involvement || []).join(", "),
   },
   {
-    headerName: "Key Insights",
-    field: "key_insights",
-    flex: 2,
-    minWidth: 260,
-    cellRenderer: (params) =>
-      `<span class="cell-text">${(params.value || []).join(" • ")}</span>`,
-    tooltipValueGetter: (params) => (params.data?.key_insights || []).join(" • "),
-  },
-  {
     headerName: "Tags",
     field: "tags",
-    minWidth: 180,
+    flex: 1.2,
+    minWidth: 140,
     cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
     tooltipValueGetter: (params) => (params.data?.tags || []).join(", "),
   },
@@ -134,7 +122,7 @@ function initGrid() {
     animateRows: true,
     pagination: true,
     paginationPageSize: 25,
-    rowHeight: 70,
+    rowHeight: 58,
     onGridReady: (params) => {
       params.api.setRowData(state.filtered);
       params.columnApi.applyColumnState({
@@ -753,6 +741,7 @@ function renderDetail(row) {
   elements.detailLeadTypes.textContent = row.lead_types.join(", ") || "—";
   elements.detailPower.textContent = row.power_mentions.join(", ") || "—";
   elements.detailAgencies.textContent = row.agency_involvement.join(", ") || "—";
+  elements.detailTags.textContent = row.tags.join(", ") || "—";
 
   // Display model if available in metadata
   const model = row.metadata?.config?.model || "—";
@@ -784,6 +773,7 @@ function clearDetail() {
   elements.detailLeadTypes.textContent = "—";
   elements.detailPower.textContent = "—";
   elements.detailAgencies.textContent = "—";
+  elements.detailTags.textContent = "—";
   elements.detailModel.textContent = "—";
   elements.detailText.textContent = "—";
   elements.detailTextPreview.textContent = "—";
