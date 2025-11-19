@@ -54,22 +54,23 @@ const gridColumnDefs = [
     tooltipValueGetter: (params) => `Score: ${params.value ?? 0}`,
   },
   {
-    headerName: "Headline / File",
+    headerName: "Headline",
     field: "headline",
     flex: 6,
     minWidth: 400,
     cellRenderer: (params) => {
       const headline = params.value || "Untitled lead";
-      const file = params.data?.filename ?? "";
-      return `
-        <div class="cell-headline">
-          <strong class="cell-text">${headline}</strong>
-          <span>${file}</span>
-        </div>
-      `;
+      return `<strong class="cell-text">${headline}</strong>`;
     },
-    tooltipValueGetter: (params) =>
-      `${params.data?.headline || "Untitled lead"}\n${params.data?.filename || ""}`,
+    tooltipValueGetter: (params) => params.data?.headline || "Untitled lead",
+  },
+  {
+    headerName: "File",
+    field: "filename",
+    flex: 1,
+    minWidth: 120,
+    cellRenderer: (params) => `<span class="cell-text">${params.value || ""}</span>`,
+    tooltipValueGetter: (params) => params.data?.filename || "",
   },
   {
     headerName: "Power Mentions",
