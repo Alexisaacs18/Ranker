@@ -1,8 +1,8 @@
 {
   "metadata": {
     "total_dataset_rows": 25800,
-    "rows_processed": 11064,
-    "last_updated": "2025-11-19 13:17:41"
+    "rows_processed": 14995,
+    "last_updated": "2025-11-20 07:42:44"
   },
   "chunks": [
     {
@@ -64,6 +64,21 @@
       "start_row": 11001,
       "end_row": 12000,
       "json": "contrib/epstein_ranked_11001_12000.jsonl"
+    },
+    {
+      "start_row": 12001,
+      "end_row": 13000,
+      "json": "contrib/epstein_ranked_12001_13000.jsonl"
+    },
+    {
+      "start_row": 13001,
+      "end_row": 14000,
+      "json": "contrib/epstein_ranked_13001_14000.jsonl"
+    },
+    {
+      "start_row": 14001,
+      "end_row": 15000,
+      "json": "contrib/epstein_ranked_14001_15000.jsonl"
     }
   ]
 }
