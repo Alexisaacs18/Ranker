@@ -514,8 +514,9 @@ select[multiple] {
 }
 
 .detail-content article.detail-text {
-  grid-column: span 2;
+  grid-column: 1 / -1;
   max-height: none;
+  order: 999;
 }
 
 .detail-text-header {
@@ -564,11 +565,11 @@ select[multiple] {
 
 @media (max-width: 1200px) {
   .detail-content {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   }
 
   .detail-content article.detail-text {
-    grid-column: span 1;
+    grid-column: 1 / -1;
   }
 }
 
@@ -723,6 +724,50 @@ footer {
   padding: 1rem;
   max-height: 360px;
   overflow: auto;
+}
+
+/* Tablet: intermediate text sizing for better space utilization */
+@media (min-width: 769px) and (max-width: 1024px) {
+  body {
+    font-size: 15px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  header p {
+    font-size: 0.85rem;
+  }
+
+  .charts h2 {
+    font-size: 1rem;
+  }
+
+  .detail-drawer h2 {
+    font-size: 1.15rem;
+  }
+
+  .detail-content h3 {
+    font-size: 0.95rem;
+  }
+
+  .detail-content p,
+  .detail-content ul {
+    font-size: 0.9rem;
+  }
+
+  .methodology-collapse > summary {
+    font-size: 1.1rem;
+  }
+
+  .methodology-note {
+    font-size: 0.9rem;
+  }
+
+  footer {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -927,7 +972,7 @@ footer {
   }
 
   .detail-content article.detail-text {
-    grid-column: span 1;
+    grid-column: 1 / -1;
   }
 
   .text-preview {
