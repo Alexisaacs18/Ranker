@@ -576,17 +576,19 @@ select[multiple] {
   display: none;
 }
 
-@media (max-width: 1200px) {
-  .charts {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  }
-}
-
+/* Default: 4x1 grid (all in one row) for wide screens */
 .charts {
   margin-top: 1.5rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+/* Desktop & Mobile: 2x2 grid */
+@media (max-width: 1400px) {
+  .charts {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .charts article {
@@ -594,7 +596,12 @@ select[multiple] {
   border: 1px solid var(--panel-border);
   border-radius: 16px;
   padding: 1rem;
-  min-height: 240px;
+  height: 320px;
+  overflow: hidden;
+}
+
+.charts canvas {
+  max-width: 100%;
 }
 
 .charts h2 {
@@ -945,7 +952,7 @@ footer {
   }
 
   .charts article {
-    min-height: 180px;
+    height: 280px;
     padding: 0.6rem;
   }
 
@@ -1104,6 +1111,6 @@ footer {
   }
 
   .charts article {
-    min-height: 160px;
+    height: 320px;
   }
 }

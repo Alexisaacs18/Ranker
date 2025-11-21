@@ -678,6 +678,11 @@ function updateLeadChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      layout: {
+        padding: { top: 10, bottom: 20, left: 10, right: 10 },
+      },
       plugins: {
         legend: { display: false },
       },
@@ -720,6 +725,10 @@ function updateScoreChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: { top: 10, bottom: 20, left: 10, right: 10 },
+      },
       plugins: {
         legend: { display: false },
       },
@@ -755,7 +764,11 @@ function updatePowerChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       indexAxis: "y",
+      layout: {
+        padding: { top: 10, bottom: 20, left: 10, right: 10 },
+      },
       plugins: {
         legend: { display: false },
       },
@@ -791,7 +804,11 @@ function updateAgencyChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       indexAxis: "y",
+      layout: {
+        padding: { top: 10, bottom: 20, left: 10, right: 10 },
+      },
       plugins: {
         legend: { display: false },
       },
