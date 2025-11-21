@@ -125,86 +125,102 @@ function hideInlineLoader() {
   elements.inlineLoaderText.textContent = "";
 }
 
-const gridColumnDefs = [
-  {
-    headerName: "Score",
-    field: "importance_score",
-    width: 80,
-    filter: "agNumberColumnFilter",
-    cellClass: "score-cell",
-    tooltipValueGetter: (params) => `Score: ${params.value ?? 0}`,
-  },
-  {
-    headerName: "Headline",
-    field: "headline",
-    flex: 6,
-    minWidth: 400,
-    cellRenderer: (params) => {
-      const headline = params.value || "Untitled lead";
-      return `<strong class="cell-text">${headline}</strong>`;
+function isMobileView() {
+  return window.innerWidth <= 768;
+}
+
+function getGridColumnDefs() {
+  const isMobile = isMobileView();
+  return [
+    {
+      headerName: "Score",
+      field: "importance_score",
+      width: isMobile ? 65 : 80,
+      minWidth: isMobile ? 65 : 80,
+      maxWidth: isMobile ? 65 : 100,
+      filter: "agNumberColumnFilter",
+      cellClass: "score-cell",
+      pinned: isMobile ? "left" : null,
+      tooltipValueGetter: (params) => `Score: ${params.value ?? 0}`,
     },
-    tooltipValueGetter: (params) => params.data?.headline || "Untitled lead",
-  },
-  {
-    headerName: "File",
-    field: "filename",
-    flex: 1,
-    minWidth: 120,
-    cellRenderer: (params) => `<span class="cell-text">${params.value || ""}</span>`,
-    tooltipValueGetter: (params) => params.data?.filename || "",
-  },
-  {
-    headerName: "Power Mentions",
-    field: "power_mentions",
-    flex: 2,
-    minWidth: 180,
-    cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-    tooltipValueGetter: (params) => (params.data?.power_mentions || []).join(", "),
-  },
-  {
-    headerName: "Lead Types",
-    field: "lead_types",
-    flex: 1.2,
-    minWidth: 150,
-    cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-    tooltipValueGetter: (params) => (params.data?.lead_types || []).join(", "),
-  },
-  {
-    headerName: "Agencies",
-    field: "agency_involvement",
-    flex: 1.2,
-    minWidth: 140,
-    cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-    tooltipValueGetter: (params) => (params.data?.agency_involvement || []).join(", "),
-  },
-  {
-    headerName: "Tags",
-    field: "tags",
-    flex: 1.2,
-    minWidth: 140,
-    cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-    tooltipValueGetter: (params) => (params.data?.tags || []).join(", "),
-  },
-];
+    {
+      headerName: "Headline",
+      field: "headline",
+      flex: isMobile ? 1 : 6,
+      minWidth: isMobile ? 200 : 400,
+      cellRenderer: (params) => {
+        const headline = params.value || "Untitled lead";
+        return `<strong class="cell-text">${headline}</strong>`;
+      },
+      tooltipValueGetter: (params) => params.data?.headline || "Untitled lead",
+    },
+    {
+      headerName: "File",
+      field: "filename",
+      flex: 1,
+      minWidth: 120,
+      hide: isMobile,
+      cellRenderer: (params) => `<span class="cell-text">${params.value || ""}</span>`,
+      tooltipValueGetter: (params) => params.data?.filename || "",
+    },
+    {
+      headerName: "Power Mentions",
+      field: "power_mentions",
+      flex: 2,
+      minWidth: 180,
+      hide: isMobile,
+      cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
+      tooltipValueGetter: (params) => (params.data?.power_mentions || []).join(", "),
+    },
+    {
+      headerName: "Lead Types",
+      field: "lead_types",
+      flex: 1.2,
+      minWidth: 150,
+      hide: isMobile,
+      cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
+      tooltipValueGetter: (params) => (params.data?.lead_types || []).join(", "),
+    },
+    {
+      headerName: "Agencies",
+      field: "agency_involvement",
+      flex: 1.2,
+      minWidth: 140,
+      hide: isMobile,
+      cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
+      tooltipValueGetter: (params) => (params.data?.agency_involvement || []).join(", "),
+    },
+    {
+      headerName: "Tags",
+      field: "tags",
+      flex: 1.2,
+      minWidth: 140,
+      hide: isMobile,
+      cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
+      tooltipValueGetter: (params) => (params.data?.tags || []).join(", "),
+    },
+  ];
+}
 
 function initGrid() {
   const gridElement = document.getElementById("grid");
+  const isMobile = isMobileView();
   state.gridOptions = {
-    columnDefs: gridColumnDefs,
+    columnDefs: getGridColumnDefs(),
     defaultColDef: {
       resizable: true,
       sortable: true,
       filter: true,
       flex: 1,
-      minWidth: 130,
+      minWidth: isMobile ? 80 : 130,
       wrapText: false,
       autoHeight: false,
       tooltipComponentParams: { color: "#fff" },
     },
     animateRows: true,
     pagination: true,
-    paginationPageSize: 25,
-    rowHeight: 58,
+    paginationPageSize: isMobile ? 15 : 25,
+    rowHeight: isMobile ? 50 : 58,
     onGridReady: (params) => {
       params.api.setRowData(state.filtered);
       params.columnApi.applyColumnState({
@@ -219,7 +235,7 @@ function initGrid() {
         renderDetail(state.filtered[0]);
       }
     },
-    onRowClicked: (event) => renderDetail(event.data),
+    onRowClicked: (event) => renderDetail(event.data, { scrollToDetail: true }),
     getRowId: (params) => params.data.filename,
   };
 
@@ -1058,7 +1074,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-function renderDetail(row) {
+function renderDetail(row, options = {}) {
   if (!row) {
     clearDetail();
     return;
@@ -1093,6 +1109,13 @@ function renderDetail(row) {
     row.key_insights.length > 0
       ? row.key_insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
       : "<li>—</li>";
+
+  // Scroll to detail drawer on mobile only when user clicks a row
+  if (options.scrollToDetail && isMobileView()) {
+    setTimeout(() => {
+      elements.detailDrawer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }
 }
 
 function clearDetail() {

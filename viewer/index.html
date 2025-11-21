@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Epstein Files Intelligence Briefing</title>
+    <title>U.S. House Oversight Epstein Estate Documents - Intelligence Briefing</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-grid.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-theme-alpine.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -30,12 +30,8 @@
 
     <header>
       <div>
-        <h1>Epstein Files Intelligence Briefing</h1>
-        <p>Exploring potential leads across the document trove. Adjust filters to focus on controversies, power links, or investigative value.</p>
-      </div>
-      <div class="header-actions">
-        <a href="https://github.com/sponsors/latent-variable" target="_blank" rel="noopener noreferrer" class="support-link">Support this project</a>
-        <a href="https://github.com/latent-variable/epstein-ranker-deploy/issues" target="_blank" rel="noopener noreferrer" class="support-link">Request features / Report issues</a>
+        <h1>U.S. House Oversight Epstein Estate Documents</h1>
+        <p>AI-ranked analysis of 20,000+ pages released by the House Oversight Committee. These are the estate documents already made public—not the unreleased files still pending disclosure.</p>
       </div>
     </header>
 
@@ -153,24 +149,25 @@
     </section>
 
     <section class="methodology">
-      <h2>How the Importance Score Works</h2>
-      <p>
-        Each document is analyzed locally through LM Studio using the open-source OpenAI GPT-OSS-120B model, running entirely offline on
-        commodity hardware. The model scores passages from 0 (no meaningful lead) to 100 (critical revelation).
-      </p>
-      <details class="accordion" open>
-        <summary>Scoring criteria (click to toggle)</summary>
-        <ul>
-          <li><strong>Investigative usefulness:</strong> Are there concrete follow-ups such as names, transactions, or dates?</li>
-          <li><strong>Controversy &amp; sensitivity:</strong> Would confirmation trigger public scrutiny or legal risk?</li>
-          <li><strong>Novelty:</strong> Does this surface new information versus repeating well-known facts?</li>
-          <li><strong>Power linkage:</strong> Does the lead implicate heads of state, major financiers, intelligence services, or similar actors?</li>
-        </ul>
-        <p>Rows above ~70 typically warrant deeper review—they combine unusual claims with explicit power connections.</p>
-      </details>
-      <details class="accordion">
-        <summary>LLM prompt (full text)</summary>
-        <pre>
+      <details class="methodology-collapse">
+        <summary>How the Importance Score Works</summary>
+        <p>
+          Each document is analyzed locally through LM Studio using the open-source OpenAI GPT-OSS-120B model, running entirely offline on
+          commodity hardware. The model scores passages from 0 (no meaningful lead) to 100 (critical revelation).
+        </p>
+        <details class="accordion" open>
+          <summary>Scoring criteria (click to toggle)</summary>
+          <ul>
+            <li><strong>Investigative usefulness:</strong> Are there concrete follow-ups such as names, transactions, or dates?</li>
+            <li><strong>Controversy &amp; sensitivity:</strong> Would confirmation trigger public scrutiny or legal risk?</li>
+            <li><strong>Novelty:</strong> Does this surface new information versus repeating well-known facts?</li>
+            <li><strong>Power linkage:</strong> Does the lead implicate heads of state, major financiers, intelligence services, or similar actors?</li>
+          </ul>
+          <p>Rows above ~70 typically warrant deeper review—they combine unusual claims with explicit power connections.</p>
+        </details>
+        <details class="accordion">
+          <summary>LLM prompt (full text)</summary>
+          <pre>
 You analyze primary documents related to court and investigative filings.
 Focus on whether the passage offers potential leads—even if unverified—that connect influential actors (presidents, cabinet officials, foreign leaders, billionaires, intelligence agencies) to controversial actions, financial flows, or possible misconduct.
 Score each passage on:
@@ -196,21 +193,25 @@ Return strict JSON with the following fields:
   - agency_involvement (array naming government, intelligence, or law-enforcement bodies involved or implicated)
   - lead_types (array describing lead categories such as 'financial flow', 'legal exposure', 'foreign influence', 'sexual misconduct', etc.)
 If a category has no data, return an empty array for it.
-        </pre>
+          </pre>
+        </details>
       </details>
-      <p class="methodology-note">
-        Infrastructure: Apple MacBook Pro (M3 Max, 128&nbsp;GB RAM). Average draw ~100&nbsp;W, so a 60-hour batch consumes roughly 6&nbsp;kWh.
-        At SoCal off-peak rates (~$0.25/kWh) the full run costs about $1.50 in electricity, with zero cloud or API spend.
-      </p>
+    </section>
 
+    <section class="credits">
       <h2>Source &amp; Credits</h2>
       <p>
-        Raw text was sourced from the <em>20,000 Epstein Files</em> dataset prepared by <strong>tensonaut</strong>, who OCR’d ~25,000 pages released by
+        Raw text was sourced from the <em>20,000 Epstein Files</em> dataset prepared by <strong>tensonaut</strong>, who OCR'd ~25,000 pages released by
         the House Oversight Committee and shared them publicly: <a href="https://www.reddit.com/r/LocalLLaMA/comments/1ozu5v4/20000_epstein_files_in_a_single_text_file/" target="_blank" rel="noreferrer">Reddit post</a>.
         The processed CSV mirrors the Hugging Face release: <a href="https://huggingface.co/datasets/tensonaut/EPSTEIN_FILES_20K" target="_blank" rel="noreferrer">tensonaut/EPSTEIN_FILES_20K</a>.
         This project builds atop that foundational OCR work to provide ranking and analysis layers.
       </p>
     </section>
+
+    <footer class="site-footer">
+      <a href="https://github.com/sponsors/latent-variable" target="_blank" rel="noopener noreferrer" class="support-link">Support this project</a>
+      <a href="https://github.com/latent-variable/epstein-ranker-deploy/issues" target="_blank" rel="noopener noreferrer" class="support-link">Request features / Report issues</a>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/dist/ag-grid-community.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
