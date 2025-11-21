@@ -785,7 +785,7 @@ function updateAgencyChart() {
         {
           label: "Mentions",
           data: values,
-          backgroundColor: "rgba(90, 208, 255, 0.7)",
+          backgroundColor: "rgba(153, 102, 255, 0.7)",
         },
       ],
     },
