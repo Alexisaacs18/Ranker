@@ -67,6 +67,7 @@ const state = {
   currentLoadId: 0,
   activeRowId: null,
   powerDisplayNames: {},
+  filtersEnabled: false,
 };
 
 const powerAliasLookup = buildPowerAliasLookup(POWER_ALIASES);
@@ -78,6 +79,7 @@ function resetLoadingState(title = "Loading Epstein Files…", subtitle = "Prepa
   state.powerDisplayNames = {};
   state.loading.loadedChunks = 0;
   state.loading.totalChunks = 0;
+  setFiltersEnabled(false);
   if (elements.loadingOverlay) {
     elements.loadingOverlay.classList.remove("hidden");
     elements.loadingTitle.textContent = title;
@@ -113,6 +115,21 @@ function finishInitialLoadingUI() {
   if (elements.loadingOverlay) {
     elements.loadingOverlay.classList.add("hidden");
   }
+}
+
+function setFiltersEnabled(enabled) {
+  state.filtersEnabled = !!enabled;
+  const controls = [
+    elements.scoreFilter,
+    elements.leadFilter,
+    elements.powerFilter,
+    elements.searchInput,
+    elements.limitInput,
+    elements.resetFilters,
+  ];
+  controls.forEach((el) => {
+    if (el) el.disabled = !enabled;
+  });
 }
 
 function showInlineLoader(message) {
@@ -492,36 +509,58 @@ function normalizeRow(row) {
 function populateFilters(data, preserveSelection = false) {
   const prevLead = preserveSelection ? getSelectedValues(state.leadChoices) : [];
   const prevPower = preserveSelection ? getSelectedValues(state.powerChoices) : [];
-  const leadTypeSet = new Set();
-  const powerSet = new Set();
-  data.forEach((row) => {
-    row.lead_types.forEach((t) => leadTypeSet.add(t));
-    row.power_mentions.forEach((p) => powerSet.add(p));
-  });
-  setChoiceOptions(state.leadChoices, Array.from(leadTypeSet).sort(), prevLead);
+  const leadCounts = buildCountMap(data, "lead_types");
+  const powerCounts = buildCountMap(data, "power_mentions");
+
+  const sortedLeads = sortValuesByCount(Array.from(leadCounts.keys()), leadCounts);
+  const sortedPowers = sortValuesByCount(Array.from(powerCounts.keys()), powerCounts);
+
+  setChoiceOptions(state.leadChoices, sortedLeads, prevLead, null, leadCounts, leadCounts);
   setChoiceOptions(
     state.powerChoices,
-    Array.from(powerSet).sort(),
+    sortedPowers,
     prevPower,
-    powerKeywordMap
+    powerKeywordMap,
+    powerCounts,
+    powerCounts
   );
 }
 
-function setChoiceOptions(choiceInstance, values, previouslySelected = [], keywordMap = null) {
+function setChoiceOptions(
+  choiceInstance,
+  values,
+  previouslySelected = [],
+  keywordMap = null,
+  countMap = null,
+  baseCountMap = null
+) {
   if (!choiceInstance) {
     return;
   }
   const selectedSet = new Set(
     previouslySelected.length > 0 ? previouslySelected : getSelectedValues(choiceInstance)
   );
-  const options = values.map((value) => ({
-    value,
-    label: value,
-    customProperties: keywordMap ? { keywords: keywordMap.get(value) || [] } : undefined,
-    selected: selectedSet.has(value),
-  }));
-  choiceInstance.clearChoices();
-  choiceInstance.setChoices(options, "value", "label", true);
+  const options = values.map((value) => {
+    const customProps = {};
+    if (keywordMap) {
+      customProps.keywords = keywordMap.get(value) || [];
+    }
+    if (countMap) {
+      customProps.count = countMap.get ? countMap.get(value) || 0 : countMap[value] || 0;
+    }
+    if (baseCountMap) {
+      customProps.baseCount = baseCountMap.get
+        ? baseCountMap.get(value) || 0
+        : baseCountMap[value] || 0;
+    }
+    return {
+      value,
+      label: value,
+      customProperties: Object.keys(customProps).length > 0 ? customProps : undefined,
+      selected: selectedSet.has(value),
+    };
+  });
+  refreshChoices(choiceInstance, options, Array.from(selectedSet));
 }
 
 function getSelectedValues(choiceInstance) {
@@ -537,6 +576,7 @@ function getSelectedValues(choiceInstance) {
 }
 
 function applyFilters() {
+  if (!state.filtersEnabled) return;
   const minScore = Number(elements.scoreFilter.value) || 0;
   elements.scoreValue.textContent = minScore.toString();
   const leadSelected = new Set(getSelectedValues(state.leadChoices));
@@ -563,6 +603,7 @@ function applyFilters() {
   filtered.sort((a, b) => b.importance_score - a.importance_score);
 
   state.filtered = filtered;
+  updateChoiceOrdering(filtered, leadSelected, powerSelectedRaw);
   if (state.gridOptions?.api) {
     const api = state.gridOptions.api;
     const columnApi = state.gridOptions.columnApi;
@@ -652,6 +693,75 @@ function updateCharts() {
   updateScoreChart();
   updatePowerChart();
   updateAgencyChart();
+}
+
+function buildCountMap(rows, field) {
+  const map = new Map();
+  rows.forEach((row) => {
+    (row[field] || []).forEach((value) => {
+      map.set(value, (map.get(value) || 0) + 1);
+    });
+  });
+  return map;
+}
+
+function sortValuesByCount(values, primaryCounts, secondaryCounts = null) {
+  return Array.from(values).sort((a, b) => {
+    const aPrimary = primaryCounts?.get ? primaryCounts.get(a) || 0 : 0;
+    const bPrimary = primaryCounts?.get ? primaryCounts.get(b) || 0 : 0;
+    if (aPrimary !== bPrimary) return bPrimary - aPrimary;
+    if (secondaryCounts) {
+      const aSecondary = secondaryCounts.get ? secondaryCounts.get(a) || 0 : 0;
+      const bSecondary = secondaryCounts.get ? secondaryCounts.get(b) || 0 : 0;
+      if (aSecondary !== bSecondary) return bSecondary - aSecondary;
+    }
+    return a.localeCompare(b);
+  });
+}
+
+function refreshChoices(choiceInstance, options, selectedValues = []) {
+  if (!choiceInstance) return;
+  const uniqueSelected = Array.from(new Set(selectedValues));
+  choiceInstance.clearStore();
+  choiceInstance.setChoices(options, "value", "label", true);
+  if (uniqueSelected.length > 0) {
+    choiceInstance.setChoiceByValue(uniqueSelected);
+  }
+}
+
+function updateChoiceOrdering(filteredRows, leadSelectedSet, powerSelectedRaw) {
+  const leadCountsAll = buildCountMap(state.raw, "lead_types");
+  const powerCountsAll = buildCountMap(state.raw, "power_mentions");
+  const leadCountsFiltered = buildCountMap(filteredRows, "lead_types");
+  const powerCountsFiltered = buildCountMap(filteredRows, "power_mentions");
+
+  const sortedLeads = sortValuesByCount(
+    Array.from(leadCountsAll.keys()),
+    leadCountsFiltered,
+    leadCountsAll
+  );
+  const sortedPowers = sortValuesByCount(
+    Array.from(powerCountsAll.keys()),
+    powerCountsFiltered,
+    powerCountsAll
+  );
+
+  setChoiceOptions(
+    state.leadChoices,
+    sortedLeads,
+    Array.from(leadSelectedSet || []),
+    null,
+    leadCountsFiltered,
+    leadCountsAll
+  );
+  setChoiceOptions(
+    state.powerChoices,
+    sortedPowers,
+    powerSelectedRaw || [],
+    powerKeywordMap,
+    powerCountsFiltered,
+    powerCountsAll
+  );
 }
 
 function updateLeadChart() {
@@ -829,6 +939,7 @@ async function loadData() {
     if (manifest && manifest.chunks && manifest.chunks.length > 0) {
       await loadChunks(manifest, loadId);
       finishInitialLoadingUI();
+      setFiltersEnabled(true);
       return;
     }
   } catch (err) {
@@ -838,6 +949,7 @@ async function loadData() {
   try {
     await loadSequentialChunks(DEFAULT_CHUNK_SIZE, 500, loadId);
     finishInitialLoadingUI();
+    setFiltersEnabled(true);
     return;
   } catch (seqErr) {
     console.warn("Sequential chunk scan failed, falling back to single file.", seqErr);
@@ -846,6 +958,7 @@ async function loadData() {
   try {
     await loadSingleFile(loadId);
     finishInitialLoadingUI();
+    setFiltersEnabled(true);
   } catch (error) {
     console.error("Failed to load data", error);
     finishInitialLoadingUI();
@@ -1100,17 +1213,32 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initChoices() {
+  const frequencySorter = (a, b) => {
+    const countA = a.customProperties?.count ?? 0;
+    const countB = b.customProperties?.count ?? 0;
+    if (countA !== countB) return countB - countA;
+    const baseA = a.customProperties?.baseCount ?? 0;
+    const baseB = b.customProperties?.baseCount ?? 0;
+    if (baseA !== baseB) return baseB - baseA;
+    const indexA = a.customProperties?.originalIndex ?? 9999;
+    const indexB = b.customProperties?.originalIndex ?? 9999;
+    return indexA - indexB;
+  };
+
   state.leadChoices = new Choices(elements.leadFilter, {
     removeItemButton: true,
     placeholder: true,
     placeholderValue: "Select leads…",
     searchPlaceholderValue: "Search…",
+    shouldSort: true,
+    sorter: frequencySorter,
     searchResultLimit: 500,
     renderChoiceLimit: 500,
     fuseOptions: {
       keys: ["label", "value", "customProperties.keywords"],
       threshold: 0.3,
       ignoreLocation: true,
+      shouldSort: false,
     },
   });
   state.powerChoices = new Choices(elements.powerFilter, {
@@ -1118,12 +1246,15 @@ function initChoices() {
     placeholder: true,
     placeholderValue: "Select names…",
     searchPlaceholderValue: "Search…",
+    shouldSort: true,
+    sorter: frequencySorter,
     searchResultLimit: 500,
     renderChoiceLimit: 500,
     fuseOptions: {
       keys: ["label", "value", "customProperties.keywords"],
       threshold: 0.3,
       ignoreLocation: true,
+      shouldSort: false,
     },
   });
 }
