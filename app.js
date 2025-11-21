@@ -45,6 +45,7 @@ const elements = {
   loadingProgress: document.getElementById("loadingProgress"),
   inlineLoader: document.getElementById("inlineLoader"),
   inlineLoaderText: document.getElementById("inlineLoaderText"),
+  processedCount: document.getElementById("processedCount"),
 };
 
 const state = {
@@ -71,6 +72,7 @@ const state = {
 const powerAliasLookup = buildPowerAliasLookup(POWER_ALIASES);
 const canonicalPowerList = buildCanonicalPowerList(powerAliasLookup);
 const powerKeywordMap = buildPowerKeywordMap(POWER_ALIASES, powerAliasLookup);
+const canonicalAliasKeyMap = buildCanonicalAliasKeyMap(POWER_ALIASES);
 
 function resetLoadingState(title = "Loading Epstein Files…", subtitle = "Preparing data") {
   state.powerDisplayNames = {};
@@ -307,6 +309,44 @@ function buildPowerKeywordMap(aliasMap) {
   return keywordMap;
 }
 
+function buildCanonicalAliasKeyMap(aliasMap) {
+  const map = new Map();
+  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
+    const canonicalKey = cleanPowerAlias(canonical);
+    if (!canonicalKey) return;
+    const keys = new Set();
+    keys.add(canonicalKey);
+    (aliases || []).forEach((alias) => {
+      const key = cleanPowerAlias(alias);
+      if (key) {
+        keys.add(key);
+      }
+    });
+    map.set(canonical, keys);
+  });
+  return map;
+}
+
+function canonicalizePowerSelection(value) {
+  const candidates = generatePowerAliasCandidates(value);
+  for (const key of candidates.keys) {
+    const canonical = powerAliasLookup.get(key);
+    if (canonical) return canonical;
+  }
+  const fallback = findCanonicalByToken(candidates.bestKey);
+  return fallback || value;
+}
+
+function aliasKeysForCanonical(canonical) {
+  const canonicalKey = cleanPowerAlias(canonical);
+  if (!canonicalKey) return new Set();
+
+  if (canonicalAliasKeyMap.has(canonical)) {
+    return new Set(canonicalAliasKeyMap.get(canonical));
+  }
+  return new Set([canonicalKey]);
+}
+
 function cleanPowerAlias(name) {
   if (!name) return "";
   return String(name)
@@ -344,6 +384,28 @@ function normalizePowerMentions(values) {
     }
   });
   return normalized;
+}
+
+function expandPowerSelection(values) {
+  const canonicalKeys = new Set();
+  const aliasKeys = new Set();
+  (values || []).forEach((value) => {
+    const selectedCanonical = canonicalizePowerSelection(value);
+    const canonicalKey = cleanPowerAlias(selectedCanonical);
+    if (!canonicalKey) return;
+    canonicalKeys.add(canonicalKey);
+    aliasKeysForCanonical(selectedCanonical).forEach((key) => aliasKeys.add(key));
+  });
+  return { canonicalKeys, aliasKeys };
+}
+
+function matchesPowerSelection(name, selection) {
+  const canonical = canonicalizePowerSelection(name);
+  const canonicalKey = cleanPowerAlias(canonical);
+  if (!canonicalKey || !selection || selection.aliasKeys.size === 0) return false;
+  if (selection.aliasKeys.has(canonicalKey)) return true;
+  const rowAliasKeys = aliasKeysForCanonical(canonical);
+  return Array.from(rowAliasKeys).some((key) => selection.aliasKeys.has(key));
 }
 
 function generatePowerAliasCandidates(name) {
@@ -478,7 +540,8 @@ function applyFilters() {
   const minScore = Number(elements.scoreFilter.value) || 0;
   elements.scoreValue.textContent = minScore.toString();
   const leadSelected = new Set(getSelectedValues(state.leadChoices));
-  const powerSelected = new Set(getSelectedValues(state.powerChoices));
+  const powerSelectedRaw = getSelectedValues(state.powerChoices);
+  const powerSelection = expandPowerSelection(powerSelectedRaw);
   const limit = Number(elements.limitInput.value) || null;
   const term = elements.searchInput.value.trim().toLowerCase();
 
@@ -486,8 +549,10 @@ function applyFilters() {
   if (leadSelected.size > 0) {
     filtered = filtered.filter((row) => row.lead_types.some((lead) => leadSelected.has(lead)));
   }
-  if (powerSelected.size > 0) {
-    filtered = filtered.filter((row) => row.power_mentions.some((name) => powerSelected.has(name)));
+  if (powerSelection.aliasKeys.size > 0) {
+    filtered = filtered.filter((row) =>
+      row.power_mentions.some((name) => matchesPowerSelection(name, powerSelection))
+    );
   }
   if (term) {
     filtered = filtered.filter((row) => row.search_blob.includes(term));
@@ -563,6 +628,11 @@ function updateSummary() {
   elements.updatedStat.textContent = state.lastUpdated
     ? state.lastUpdated.toLocaleTimeString()
     : "–";
+
+  // Update processed count in the notice
+  if (elements.processedCount) {
+    elements.processedCount.textContent = totalLoaded.toLocaleString();
+  }
 }
 
 function aggregateCounts(rows, field) {
@@ -944,15 +1014,18 @@ function resolveChunkPath(path) {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
-  // Remove leading ../ if present (we serve from viewer/ with symlinks)
+  // Remove leading ../ if present
   if (path.startsWith("../")) {
-    return path.substring(3);
+    path = path.substring(3);
   }
   // Remove leading ./ if present
   if (path.startsWith("./")) {
-    return path.substring(2);
+    path = path.substring(2);
   }
-  // Return path as-is (should be relative to viewer/)
+  // Make absolute if not already
+  if (!path.startsWith("/")) {
+    return "/" + path;
+  }
   return path;
 }
 
@@ -1013,8 +1086,8 @@ function initChoices() {
   state.leadChoices = new Choices(elements.leadFilter, {
     removeItemButton: true,
     placeholder: true,
-    placeholderValue: "Select lead types",
-    searchPlaceholderValue: "Search lead types",
+    placeholderValue: "Select leads…",
+    searchPlaceholderValue: "Search…",
     searchResultLimit: 500,
     renderChoiceLimit: 500,
     fuseOptions: {
@@ -1026,8 +1099,8 @@ function initChoices() {
   state.powerChoices = new Choices(elements.powerFilter, {
     removeItemButton: true,
     placeholder: true,
-    placeholderValue: "Select power mentions",
-    searchPlaceholderValue: "Search people/agencies",
+    placeholderValue: "Select names…",
+    searchPlaceholderValue: "Search…",
     searchResultLimit: 500,
     renderChoiceLimit: 500,
     fuseOptions: {

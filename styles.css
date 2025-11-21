@@ -144,6 +144,20 @@ header {
   border-bottom: 1px solid var(--panel-border);
 }
 
+.processing-notice {
+  margin: 0.75rem 0;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  color: #ffc107;
+  font-size: 0.9rem;
+}
+
+.processing-notice strong {
+  color: #ffca2c;
+}
+
 header h1 {
   margin: 0 0 0.35rem;
   font-size: clamp(1.4rem, 2.4vw, 2rem);
@@ -210,6 +224,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .control-group.stretch {
@@ -238,18 +253,40 @@ select[multiple] {
   min-height: 120px;
 }
 
+.choices {
+  width: 100%;
+}
+
 .choices__inner {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   color: inherit;
-  min-height: 3rem;
+  min-height: 2.5rem;
   padding: 0.35rem;
+}
+
+.choices__placeholder {
+  opacity: 0.6;
+}
+
+.choices__input {
+  background: transparent !important;
+  color: inherit !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  flex: 1;
+  min-width: 80px !important;
 }
 
 .choices__list--dropdown {
   max-height: 260px;
   overflow-y: auto;
+  z-index: 100;
+}
+
+.choices.is-open {
+  overflow: visible;
 }
 
 .choices__list--multiple .choices__item {
@@ -261,6 +298,16 @@ select[multiple] {
 .choices__list--dropdown,
 .choices__item {
   color: #0b111b;
+}
+
+@media (min-width: 769px) {
+  .choices__list--dropdown .choices__item {
+    white-space: nowrap;
+  }
+  .choices__list--dropdown {
+    width: max-content;
+    max-width: 400px;
+  }
 }
 
 .summary {
@@ -693,6 +740,12 @@ footer {
     line-height: 1.4;
   }
 
+  .processing-notice {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.5rem 0;
+  }
+
   .site-footer {
     padding: 1rem;
     gap: 0.5rem;
@@ -716,14 +769,13 @@ footer {
   .control-group {
     padding: 0.4rem;
     border-radius: 6px;
+    min-width: 0;
   }
 
   /* Score takes full width on its own row */
   .control-group:first-child {
     grid-column: span 2;
   }
-
-  /* Lead Types and Power Mentions side by side (default 1fr 1fr handles this) */
 
   /* Search takes full width */
   .control-group.stretch {
@@ -738,28 +790,59 @@ footer {
   .control-group label {
     font-size: 0.7rem;
     margin-bottom: 0.15rem;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .control-group input,
   .control-group select {
     padding: 0.3rem 0.4rem;
     font-size: 0.8rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
+  .control-group input[type="range"] {
+    width: 100%;
+  }
+
+  /* Choices.js mobile fixes */
   .choices__inner {
-    min-height: 2rem;
-    padding: 0.2rem;
+    min-height: 2.2rem;
+    padding: 0.25rem;
     font-size: 0.8rem;
   }
 
   .choices__list--multiple .choices__item {
     font-size: 0.7rem;
-    padding: 1px 5px;
+    padding: 2px 5px;
     margin: 1px;
   }
 
   .choices__input {
-    font-size: 0.8rem;
+    font-size: 0.8rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .choices__list--dropdown .choices__item {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .choices__placeholder {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .choices[data-type*="select-multiple"] .choices__inner {
+    padding-right: 0.25rem;
+  }
+
+  .choices__list--single {
+    padding: 0;
   }
 
   /* Compact summary */

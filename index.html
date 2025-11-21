@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-grid.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-theme-alpine.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div id="loadingOverlay" class="loading-overlay hidden" role="status" aria-live="polite">
@@ -34,6 +34,10 @@
         <p>AI-ranked analysis of 20,000+ pages released by the House Oversight Committee. These are the estate documents already made public—not the unreleased files still pending disclosure.</p>
       </div>
     </header>
+
+    <div class="processing-notice">
+      <strong>Note:</strong> We are still processing the remaining files. Currently showing <span id="processedCount">—</span> of ~25,800 documents.
+    </div>
 
     <section class="controls">
       <div class="control-group">
@@ -216,6 +220,6 @@ If a category has no data, return an empty array for it.
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/dist/ag-grid-community.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
