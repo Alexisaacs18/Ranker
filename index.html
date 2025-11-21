@@ -4,10 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Epstein Files Intelligence Briefing</title>
+    <meta name="description" content="An AI-powered intelligence briefing dashboard analyzing 20,000+ pages from the House Oversight Committee's Epstein Estate release, ranked by investigative value using local LLM analysis." />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/assets/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="manifest" href="/assets/site.webmanifest" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://epsteinfileranker.web.app/" />
+    <meta property="og:title" content="Epstein Files Intelligence Briefing" />
+    <meta property="og:description" content="Explore 20,000+ Epstein files ranked by investigative value using local AI analysis. Filter by importance, power mentions, lead types, and agencies." />
+    <meta property="og:image" content="https://epsteinfileranker.web.app/assets/table.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://epsteinfileranker.web.app/" />
+    <meta property="twitter:title" content="Epstein Files Intelligence Briefing" />
+    <meta property="twitter:description" content="Explore 20,000+ Epstein files ranked by investigative value using local AI analysis." />
+    <meta property="twitter:image" content="https://epsteinfileranker.web.app/assets/table.png" />
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-grid.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/styles/ag-theme-alpine.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div id="loadingOverlay" class="loading-overlay hidden" role="status" aria-live="polite">
@@ -204,7 +226,7 @@ If a category has no data, return an empty array for it.
 
       <h2>Source &amp; Credits</h2>
       <p>
-        Raw text was sourced from the <em>20,000 Epstein Files</em> dataset prepared by <strong>tensonaut</strong>, who OCR’d ~25,000 pages released by
+        Raw text was sourced from the <em>20,000 Epstein Files</em> dataset prepared by <strong>tensonaut</strong>, who OCR'd ~25,000 pages released by
         the House Oversight Committee and shared them publicly: <a href="https://www.reddit.com/r/LocalLLaMA/comments/1ozu5v4/20000_epstein_files_in_a_single_text_file/" target="_blank" rel="noreferrer">Reddit post</a>.
         The processed CSV mirrors the Hugging Face release: <a href="https://huggingface.co/datasets/tensonaut/EPSTEIN_FILES_20K" target="_blank" rel="noreferrer">tensonaut/EPSTEIN_FILES_20K</a>.
         This project builds atop that foundational OCR work to provide ranking and analysis layers.
@@ -214,6 +236,6 @@ If a category has no data, return an empty array for it.
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/dist/ag-grid-community.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>

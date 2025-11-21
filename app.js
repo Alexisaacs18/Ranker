@@ -1,5 +1,5 @@
-const DATA_URL = "data/epstein_ranked.jsonl";
-const CHUNK_MANIFEST_URL = "data/chunks.json";
+const DATA_URL = "/data/epstein_ranked.jsonl";
+const CHUNK_MANIFEST_URL = "/data/chunks.json";
 const DEFAULT_CHUNK_SIZE = 1000;
 
 const elements = {
@@ -688,7 +688,7 @@ async function loadSequentialChunks(chunkSize = DEFAULT_CHUNK_SIZE, maxChunks = 
       return;
     }
     const end = start + chunkSize - 1;
-    const path = `contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
+    const path = `/contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
       end
     ).padStart(5, "0")}.jsonl`;
     attempts += 1;
