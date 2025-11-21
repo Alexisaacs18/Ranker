@@ -136,6 +136,10 @@ function setFiltersEnabled(enabled, { triggerApply = false } = {}) {
   if (state.powerChoices) {
     enabled ? state.powerChoices.enable() : state.powerChoices.disable();
   }
+  const waitNote = document.getElementById("filterWaitNote");
+  if (waitNote) {
+    waitNote.classList.toggle("hidden", enabled);
+  }
   if (enabled && triggerApply) {
     applyFilters({ force: true });
   }
@@ -1047,16 +1051,38 @@ async function loadChunks(manifestData, loadId, initialChunkCount = 2) {
   });
 }
 
-async function backgroundLoadChunks(chunks, loadId) {
-  for (const entry of chunks) {
-    if (loadId !== state.currentLoadId) return;
-    const rows = await fetchChunkEntry(entry, loadId);
-    if (rows.length > 0 && loadId === state.currentLoadId) {
-      await hydrateRows(rows, { append: true, preserveFilters: true });
-    }
-    state.loading.loadedChunks += 1;
-    updateLoadingProgress(state.loading.loadedChunks, state.loading.totalChunks, "Loading remaining files…");
+async function backgroundLoadChunks(chunks, loadId, concurrency = 8) {
+  if (!Array.isArray(chunks) || chunks.length === 0) {
+    setFiltersEnabled(true, { triggerApply: true });
+    return;
   }
+
+  let index = 0;
+  const worker = async () => {
+    while (index < chunks.length) {
+      const current = index;
+      index += 1;
+      const entry = chunks[current];
+      if (loadId !== state.currentLoadId) return;
+      try {
+        const rows = await fetchChunkEntry(entry, loadId);
+        if (rows.length > 0 && loadId === state.currentLoadId) {
+          await hydrateRows(rows, { append: true, preserveFilters: true });
+        }
+      } finally {
+        state.loading.loadedChunks += 1;
+        updateLoadingProgress(
+          state.loading.loadedChunks,
+          state.loading.totalChunks,
+          "Loading remaining files…"
+        );
+      }
+    }
+  };
+
+  const workers = Array.from({ length: Math.min(concurrency, chunks.length) }, () => worker());
+  await Promise.all(workers);
+
   if (loadId === state.currentLoadId) {
     hideInlineLoader();
     setFiltersEnabled(true, { triggerApply: true });
