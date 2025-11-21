@@ -1,6 +1,8 @@
 # Epstein Ranker
 
-LLM-powered tooling for triaging the **U.S. House Oversight Epstein Estate** document release.  
+**Live Site: [https://epsteingate.org](https://epsteingate.org)**
+
+LLM-powered tooling for triaging the **U.S. House Oversight Epstein Estate** document release.
 This project:
 
 1. Streams the document corpus through a locally hosted, open-source model (`openai/gpt-oss-120b` running via **LM Studio**) to produce ranked, structured leads.
