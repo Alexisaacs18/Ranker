@@ -2,7 +2,7 @@
   "metadata": {
     "total_dataset_rows": 26000,
     "rows_processed": 26000,
-    "last_updated": "2025-11-22 19:28:32",
+    "last_updated": "2025-11-22 19:26:52",
     "storage_backend": "firebase-storage-emulator"
   },
   "chunks": [
