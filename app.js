@@ -249,6 +249,7 @@ function initGrid() {
       autoHeight: false,
       tooltipComponentParams: { color: "#fff" },
     },
+    suppressMovableColumns: true,
     animateRows: true,
     pagination: true,
     paginationPageSize: isMobile ? 15 : 25,
