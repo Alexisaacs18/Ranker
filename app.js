@@ -1333,6 +1333,105 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+function getHighlightTerms() {
+  const terms = [];
+
+  // Add search input term
+  const searchTerm = elements.searchInput?.value?.trim();
+  if (searchTerm) {
+    terms.push(searchTerm);
+  }
+
+  // Add selected power mentions
+  const selectedPowers = getSelectedValues(state.powerChoices);
+  selectedPowers.forEach(power => {
+    if (power) {
+      terms.push(power);
+      // Also add individual words from multi-word names
+      const words = power.split(/\s+/).filter(w => w.length > 2);
+      terms.push(...words);
+    }
+  });
+
+  // Add selected lead types
+  const selectedLeads = getSelectedValues(state.leadChoices);
+  selectedLeads.forEach(lead => {
+    if (lead) {
+      terms.push(lead);
+    }
+  });
+
+  return terms.filter(Boolean);
+}
+
+function highlightText(text, terms) {
+  if (!text || !terms || terms.length === 0) {
+    return escapeHtml(text);
+  }
+
+  // Escape the text first
+  let result = escapeHtml(text);
+
+  // Sort terms by length (longest first) to avoid partial replacements
+  const sortedTerms = [...new Set(terms)].sort((a, b) => b.length - a.length);
+
+  // Create a map to store positions and terms
+  const matches = [];
+
+  sortedTerms.forEach(term => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'gi');
+    let match;
+
+    const lowerText = text.toLowerCase();
+    const lowerTerm = term.toLowerCase();
+    let searchPos = 0;
+
+    while ((match = lowerText.indexOf(lowerTerm, searchPos)) !== -1) {
+      matches.push({
+        start: match,
+        end: match + term.length,
+        term: text.substring(match, match + term.length)
+      });
+      searchPos = match + 1;
+    }
+  });
+
+  // Sort matches by position
+  matches.sort((a, b) => a.start - b.start);
+
+  // Remove overlapping matches
+  const filteredMatches = [];
+  let lastEnd = -1;
+  matches.forEach(match => {
+    if (match.start >= lastEnd) {
+      filteredMatches.push(match);
+      lastEnd = match.end;
+    }
+  });
+
+  // Build the highlighted text
+  if (filteredMatches.length === 0) {
+    return result;
+  }
+
+  let highlighted = '';
+  let lastIndex = 0;
+
+  filteredMatches.forEach(match => {
+    // Add text before the match
+    highlighted += escapeHtml(text.substring(lastIndex, match.start));
+    // Add highlighted match
+    highlighted += '<mark class="highlight">' + escapeHtml(match.term) + '</mark>';
+    lastIndex = match.end;
+  });
+
+  // Add remaining text
+  highlighted += escapeHtml(text.substring(lastIndex));
+
+  return highlighted;
+}
+
 function renderDetail(row, options = {}) {
   if (!row) {
     clearDetail();
@@ -1340,12 +1439,16 @@ function renderDetail(row, options = {}) {
   }
   state.activeRowId = row.filename || null;
   elements.detailDrawer.classList.remove("hidden");
+
+  // Get terms to highlight
+  const highlightTerms = getHighlightTerms();
+
   elements.detailTitle.textContent = `${row.headline || row.filename} (${row.filename})`;
-  elements.detailReason.textContent = row.reason || "—";
-  elements.detailLeadTypes.textContent = row.lead_types.join(", ") || "—";
-  elements.detailPower.textContent = row.power_mentions.join(", ") || "—";
-  elements.detailAgencies.textContent = row.agency_involvement.join(", ") || "—";
-  elements.detailTags.textContent = row.tags.join(", ") || "—";
+  elements.detailReason.innerHTML = highlightText(row.reason || "—", highlightTerms);
+  elements.detailLeadTypes.innerHTML = highlightText(row.lead_types.join(", ") || "—", highlightTerms);
+  elements.detailPower.innerHTML = highlightText(row.power_mentions.join(", ") || "—", highlightTerms);
+  elements.detailAgencies.innerHTML = highlightText(row.agency_involvement.join(", ") || "—", highlightTerms);
+  elements.detailTags.innerHTML = highlightText(row.tags.join(", ") || "—", highlightTerms);
 
   // Display model if available in metadata
   const model = row.metadata?.config?.model || "—";
@@ -1356,8 +1459,11 @@ function renderDetail(row, options = {}) {
   const wordCount = originalText.split(/\s+/).filter(Boolean).length;
   const snippet = originalText.split(/\s+/).slice(0, 30).join(" ");
 
-  elements.detailText.textContent = originalText;
-  elements.detailTextPreview.textContent = `${snippet}... (${wordCount.toLocaleString()} words)`;
+  const highlightedText = highlightText(originalText, highlightTerms);
+  const highlightedSnippet = highlightText(snippet, highlightTerms);
+
+  elements.detailText.innerHTML = highlightedText;
+  elements.detailTextPreview.innerHTML = `${highlightedSnippet}... (${wordCount.toLocaleString()} words)`;
 
   // Reset to collapsed state
   elements.detailText.classList.add("hidden");
@@ -1366,7 +1472,7 @@ function renderDetail(row, options = {}) {
 
   elements.detailInsights.innerHTML =
     row.key_insights.length > 0
-      ? row.key_insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+      ? row.key_insights.map((item) => `<li>${highlightText(item, highlightTerms)}</li>`).join("")
       : "<li>—</li>";
 
   // Scroll to detail drawer when user clicks a row
@@ -1381,14 +1487,14 @@ function clearDetail() {
   elements.detailDrawer.classList.add("hidden");
   state.activeRowId = null;
   elements.detailTitle.textContent = "Select a row to inspect full context";
-  elements.detailReason.textContent = "—";
-  elements.detailLeadTypes.textContent = "—";
-  elements.detailPower.textContent = "—";
-  elements.detailAgencies.textContent = "—";
-  elements.detailTags.textContent = "—";
+  elements.detailReason.innerHTML = "—";
+  elements.detailLeadTypes.innerHTML = "—";
+  elements.detailPower.innerHTML = "—";
+  elements.detailAgencies.innerHTML = "—";
+  elements.detailTags.innerHTML = "—";
   elements.detailModel.textContent = "—";
-  elements.detailText.textContent = "—";
-  elements.detailTextPreview.textContent = "—";
+  elements.detailText.innerHTML = "—";
+  elements.detailTextPreview.innerHTML = "—";
   elements.detailText.classList.add("hidden");
   elements.detailTextPreview.classList.remove("hidden");
   elements.detailTextToggle.textContent = "Expand";

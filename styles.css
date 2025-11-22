@@ -1187,3 +1187,13 @@ footer {
     height: 320px;
   }
 }
+
+/* Highlight styles for search and filter matches */
+mark.highlight {
+  background: rgba(255, 193, 7, 0.35);
+  color: #ffd54f;
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.5);
+}
