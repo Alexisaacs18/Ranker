@@ -1197,3 +1197,36 @@ mark.highlight {
   font-weight: 600;
   box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.5);
 }
+
+/* Qui Tam Risk Level Colors */
+.risk-critical {
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.risk-high {
+  background-color: #fd7e14;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.risk-medium {
+  background-color: #ffc107;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.risk-low {
+  background-color: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}

@@ -1,0 +1,24 @@
+# GPT Ranker Configuration for Medical Fraud Data
+# Save as: ranker_config.toml
+
+# Input/Output paths
+input = "data/processed/combined_qui_tam_data.csv"
+output = "data/results/qui_tam_ranked.csv"
+json-output = "data/results/qui_tam_ranked.jsonl"
+
+# Disable chunking (set to 0 for single-file output)
+chunk-size = 0
+
+# Model configuration
+endpoint = "http://127.0.0.1:1234/v1"
+model = "openai/gpt-oss-120b"
+temperature = 0.0
+timeout = 600.0
+
+# Processing options
+resume = false
+max-rows = 10  # Remove this line or set higher for full processing
+
+# Optional: Energy tracking
+# power-watts = 350.0
+# electric-rate = 0.12

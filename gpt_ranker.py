@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rank Epstein file rows by querying a local GPT server."""
+"""Rank medical provider records by querying a local GPT server for qui tam potential."""
 
 from __future__ import annotations
 
@@ -26,109 +26,104 @@ except OverflowError:
     csv.field_size_limit(2**31 - 1)
 
 
-DEFAULT_SYSTEM_PROMPT = (
-    "You analyze primary documents related to court and investigative filings.\n"
-    "Focus on whether the passage offers potential leads—even if unverified—that\n"
-    "connect influential actors (presidents, cabinet officials, foreign leaders,\n"
-    "billionaires, intelligence agencies) to controversial actions, financial flows, or\n"
-    "possible misconduct.\n"
-    "Score each passage on:\n"
-    "  1. Investigative usefulness: Does it suggest concrete follow-up steps, names,\n"
-    "     transactions, dates, or relationships worth pursuing?\n"
-    "  2. Controversy / sensitivity: Would the lead cause public outcry or legal risk if\n"
-    "     validated?\n"
-    "  3. Novelty: Is this information new or rarely reported, versus already known?\n"
-    "  4. Power linkage: Does it implicate high-ranking officials or major power\n"
-    "     centers? Leads tying unknown individuals only to minor issues should score\n"
-    "     lower.\n"
-    "Assign an importance_score from 0 (no meaningful lead) to 100 (blockbuster lead\n"
-"linking powerful actors to fresh controversy). Use the full range—avoid clustering\n"
-"around a few favorite numbers so similar passages can still be differentiated.\n"
-"Use the scale consistently:\n"
-"  • 0–10  : noise, duplicates, previously published facts, or gossip with no actors.\n"
-"  • 10–30 : low-value context; speculative or weak leads lacking specifics.\n"
-"  • 30–50 : moderate leads with partial details or missing novelty.\n"
-"  • 50–70 : strong leads with actionable info or notable controversy.\n"
-"  • 70–85 : high-impact, new revelations tying powerful actors to clear misconduct.\n"
-"  • 85–100: blockbuster revelations demanding immediate follow-up.\n"
-"Reserve 70+ for claims that, if true, would represent major revelations or\n"
-"next-step investigations.\n"
-    "Return strict JSON with the following fields:\n"
-    "  - headline (string)\n"
-    "  - importance_score (0-100 number)\n"
-    "  - reason (string explaining score)\n"
-    "  - key_insights (array of short bullet strings)\n"
-    "  - tags (array of topical strings)\n"
-    "  - power_mentions (array listing high-profile people or institutions mentioned;\n"
-    "    include titles or roles if possible)\n"
-    "  - agency_involvement (array naming government, intelligence, or law-enforcement\n"
-    "    bodies involved or implicated)\n"
-    "  - lead_types (array describing lead categories such as 'financial flow',\n"
-    "    'legal exposure', 'foreign influence', 'sexual misconduct', etc.)\n"
-    "If a category has no data, return an empty array for it."
-)
+QUI_TAM_RANKING_PROMPT = """You are a qui tam whistleblower investigator analyzing healthcare provider records to identify potential False Claims Act violations that could result in successful qui tam lawsuits.
 
-LEAD_TYPE_CANONICAL_MAP = {
-    "financial flow": {
-        "financial flow",
-        "financial flows",
-        "financial transaction",
-        "money trail",
-        "money movement",
-        "money laundering",
-        "overpriced sale",
-        "payment chain",
-    },
-    "foreign influence": {
-        "foreign influence",
-        "foreign interference",
-        "foreign collusion",
-    },
-    "legal exposure": {"legal exposure", "legal risk", "criminal liability"},
-    "political corruption": {"political corruption", "corruption", "quid pro quo"},
-    "sexual misconduct": {"sexual misconduct", "sexual abuse", "sex trafficking"},
-    "intelligence operation": {
-        "intelligence operation",
-        "intelligence activity",
-        "spycraft",
-        "espionage",
-    },
-    "national security": {"national security", "security breach"},
-    "human trafficking": {
-        "human trafficking",
-        "trafficking",
-        "exploitation",
-    },
-    "cover-up": {"cover-up", "cover up", "obstruction"},
-    "financial fraud": {"financial fraud", "fraud"},
+BACKGROUND: Qui tam cases allow private citizens to sue on behalf of the government for fraud. The government pays 15-30% of recovered funds to whistleblowers. Cases must involve:
+- Fraud against federal programs (Medicare, Medicaid, TRICARE, VA)
+- Provable false claims submitted to the government
+- Substantial financial damages (ideally $1M+)
+- Evidence that can be documented and proven
+
+EVALUATE EACH RECORD FOR QUI TAM POTENTIAL (Score 0-100):
+
+HIGH VALUE INDICATORS (70-100 points):
+- Medicare/Medicaid fraud explicitly mentioned
+- Billing for services not rendered
+- Upcoding (billing for more expensive services than provided)
+- Kickbacks or illegal referrals (Stark Law, Anti-Kickback Statute violations)
+- Off-label marketing of drugs/devices to federal programs
+- False certifications for reimbursement
+- Systematic patterns (not isolated incidents)
+- Large dollar amounts (>$1M in potential damages)
+- Recent violations (within 6 years - statute of limitations)
+- Corporate/institutional fraud (not just individual malpractice)
+
+MEDIUM VALUE INDICATORS (40-69 points):
+- Quality of care issues tied to billing fraud
+- Drug diversion or prescription fraud involving federal programs
+- DME (Durable Medical Equipment) fraud
+- Laboratory billing fraud
+- Home health fraud
+- Ambulance fraud
+- Documentation suggests pattern across multiple patients
+- Evidence of cover-ups or false records
+
+LOW VALUE INDICATORS (0-39 points):
+- Pure malpractice (no fraud component)
+- Private insurance fraud only (not federal programs)
+- Isolated incidents without pattern
+- Old violations (>6 years ago)
+- Administrative errors without fraudulent intent
+- State-only violations
+
+RED FLAGS THAT BOOST SCORE:
+- "Medicare" or "Medicaid" explicitly mentioned
+- Patterns: "repeatedly," "systematic," "routine practice"
+- Financial terms: "unnecessary procedures," "phantom billing," "kickbacks"
+- Multiple patients affected (class action potential)
+- Whistleblower already exists (inside employee mentioned)
+- Government investigation already started
+- Large healthcare system or chain (deeper pockets)
+
+OUTPUT FORMAT:
+{
+    "headline": "One sentence summary of the qui tam opportunity",
+    "qui_tam_score": 0-100,
+    "fraud_type": "Primary type: upcoding, kickbacks, phantom billing, unnecessary procedures, etc.",
+    "federal_programs_involved": ["Medicare Part A/B/D", "Medicaid", "TRICARE", "VA", etc.],
+    "estimated_damages": "Best estimate of government losses (if calculable from record)",
+    "statute_violations": ["False Claims Act", "Anti-Kickback Statute", "Stark Law", etc.],
+    "evidence_strength": "Strong/Medium/Weak - based on documentation in record",
+    "key_facts": ["List 3-5 specific facts that support qui tam case"],
+    "implicated_entities": ["Provider names", "Facilities", "Organizations"],
+    "time_period": "When fraud occurred (critical for statute of limitations)",
+    "patient_volume": "Approximate number of patients/claims affected",
+    "next_steps": "What additional evidence would strengthen this case",
+    "qui_tam_viability": "High/Medium/Low - overall assessment of case potential",
+    "whistleblower_notes": "Key info a potential relator would need to know"
 }
 
-AGENCY_CANONICAL_MAP = {
-    "NSA": {"nsa", "national security agency"},
-    "CIA": {"cia", "central intelligence agency"},
-    "FBI": {"fbi", "federal bureau of investigation"},
-    "DOJ": {"doj", "department of justice", "u.s. department of justice"},
-    "DHS": {"dhs", "department of homeland security"},
-    "ODNI": {"odni", "office of the director of national intelligence"},
-    "State Department": {"state department", "u.s. department of state", "dos"},
-    "Treasury": {"treasury", "u.s. treasury", "department of the treasury"},
-    "IRS": {"irs", "internal revenue service"},
-    "SEC": {"sec", "securities and exchange commission"},
-    "House Oversight Committee": {
-        "house oversight committee",
-        "house oversight",
-        "house committee on oversight",
-    },
-    "Senate Judiciary Committee": {"senate judiciary committee", "senate judiciary"},
-    "Congress": {"congress", "u.s. congress"},
-    "FSB": {"fsb", "federal security service"},
-    "GRU": {"gru", "main directorate"},
-    "GCHQ": {"gchq", "government communications headquarters"},
-    "MI6": {"mi6", "secret intelligence service", "sis"},
-    "MI5": {"mi5"},
-    "Mossad": {"mossad"},
-    "Interpol": {"interpol"},
-    "NYPD": {"nypd", "new york police department"},
+CRITICAL: Only score high (70+) if there's clear evidence of:
+1. Federal program involvement (Medicare/Medicaid/TRICARE/VA)
+2. Fraudulent claims (not just bad medicine)
+3. Pattern or systematic practice (not isolated error)
+4. Recent enough to sue (within 6 years)
+5. Substantial damages (preferably >$500k)
+
+Be conservative - a bad qui tam case wastes years and costs millions. Only flag genuine opportunities.
+
+Now analyze this record for qui tam potential:
+"""
+
+DEFAULT_SYSTEM_PROMPT = QUI_TAM_RANKING_PROMPT
+
+
+# Canonical mappings for fraud types
+FRAUD_TYPE_CANONICAL_MAP = {
+    "upcoding": {"upcoding", "up-coding", "code inflation", "billing inflation"},
+    "phantom billing": {"phantom billing", "billing for services not rendered", "ghost billing"},
+    "kickbacks": {"kickbacks", "illegal referrals", "stark law violation", "anti-kickback"},
+    "unnecessary procedures": {"unnecessary procedures", "overtreatment", "unneeded services"},
+    "false certification": {"false certification", "certification fraud"},
+    "off-label marketing": {"off-label marketing", "off label", "unapproved use"},
+}
+
+# Canonical mappings for federal programs
+PROGRAM_CANONICAL_MAP = {
+    "Medicare": {"medicare", "medicare part a", "medicare part b", "medicare part d", "medicare advantage"},
+    "Medicaid": {"medicaid", "medi-cal", "masshealth"},
+    "TRICARE": {"tricare", "tri-care"},
+    "VA": {"va", "veterans affairs", "veterans administration", "department of veterans affairs"},
 }
 
 
@@ -154,7 +149,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Call a local OpenAI-compatible server (e.g. gpt-oss-120b) to extract "
-            "useful information and rank each CSV row."
+            "qui tam potential from medical provider records."
         )
     )
     parser.add_argument(
@@ -165,19 +160,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path("data") / "EPS_FILES_20K_NOV2026.csv",
+        default=Path("data/processed/combined_qui_tam_data.jsonl"),
         help="Path to the source CSV with 'filename' and 'text' columns.",
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("data") / "epstein_ranked.csv",
+        default=Path("data/results/qui_tam_ranked.csv"),
         help="Path to write the ranked CSV results.",
     )
     parser.add_argument(
         "--json-output",
         type=Path,
-        default=Path("data") / "epstein_ranked.jsonl",
+        default=Path("data/results/qui_tam_ranked.jsonl"),
         help="Path to append newline-delimited JSON records for each row.",
     )
     parser.add_argument(
@@ -230,7 +225,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint",
         type=Path,
-        default=Path("data") / ".epstein_checkpoint",
+        default=Path("data/.qui_tam_checkpoint"),
         help="Plain-text file storing processed filenames (used with --resume).",
     )
     parser.add_argument(
@@ -254,7 +249,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--chunk-manifest",
         type=Path,
-        default=Path("data") / "chunks.json",
+        default=Path("data/chunks.json"),
         help="Manifest JSON file listing generated chunks (used by the viewer).",
     )
     parser.add_argument(
@@ -348,7 +343,7 @@ def load_system_prompt(args: argparse.Namespace) -> Tuple[str, str]:
     prompt_file = args.prompt_file
     if not prompt_file:
         # Try default prompt file location
-        default_prompt_file = Path("prompts") / "default_system_prompt.txt"
+        default_prompt_file = Path("prompts") / "qui_tam_system_prompt.txt"
         if default_prompt_file.exists():
             prompt_file = default_prompt_file
         else:
@@ -389,9 +384,9 @@ def call_model(
             {
                 "role": "user",
                 "content": (
-                    "Analyze the following document and respond with the JSON schema "
+                    "Analyze the following medical provider record and respond with the JSON schema "
                     "described in the system prompt.\n"
-                    f"Filename: {filename}\n"
+                    f"Record ID: {filename}\n"
                     "---------\n"
                     f"{text.strip()}\n"
                     "---------"
@@ -513,11 +508,12 @@ def canonicalize_from_map(value: str, mapping: Dict[str, Set[str]], *, title_cas
     return cleaned
 
 
-def normalize_lead_types(values: List[str]) -> List[str]:
+def normalize_fraud_types(values: List[str]) -> List[str]:
+    """Normalize fraud type values."""
     normalized: List[str] = []
     seen: Set[str] = set()
     for value in values:
-        canonical = canonicalize_from_map(value, LEAD_TYPE_CANONICAL_MAP, title_case=False)
+        canonical = canonicalize_from_map(value, FRAUD_TYPE_CANONICAL_MAP, title_case=False)
         if not canonical:
             continue
         canonical = canonical.lower()
@@ -527,11 +523,12 @@ def normalize_lead_types(values: List[str]) -> List[str]:
     return normalized
 
 
-def normalize_agencies(values: List[str]) -> List[str]:
+def normalize_programs(values: List[str]) -> List[str]:
+    """Normalize federal program names."""
     normalized: List[str] = []
     seen: Set[str] = set()
     for value in values:
-        canonical = canonicalize_from_map(value, AGENCY_CANONICAL_MAP, upper_case=False)
+        canonical = canonicalize_from_map(value, PROGRAM_CANONICAL_MAP, upper_case=False)
         if not canonical:
             continue
         canonical = canonical.strip()
@@ -727,7 +724,7 @@ class OutputRouter:
         self._close_chunk()
         self.current_chunk = chunk_bounds
         chunk_start, chunk_end = chunk_bounds
-        base = f"epstein_ranked_{chunk_start:05d}_{chunk_end:05d}"
+        base = f"qui_tam_ranked_{chunk_start:05d}_{chunk_end:05d}"
         json_path = self.chunk_dir / f"{base}.jsonl"
         json_exists = json_path.exists()
         if json_exists and not self.args.resume and not self.args.overwrite_output:
@@ -869,15 +866,15 @@ def rebuild_manifest(chunk_dir: Path, manifest_path: Path) -> None:
     """Scan chunk directory and rebuild the manifest file."""
     import re
 
-    # Pattern to match chunk files: epstein_ranked_XXXXX_YYYYY.jsonl
-    pattern = re.compile(r"epstein_ranked_(\d{5})_(\d{5})\.jsonl")
+    # Pattern to match chunk files: qui_tam_ranked_XXXXX_YYYYY.jsonl
+    pattern = re.compile(r"qui_tam_ranked_(\d{5})_(\d{5})\.jsonl")
 
     chunks = []
     if not chunk_dir.exists():
         print(f"Chunk directory not found: {chunk_dir}")
         return
 
-    for file_path in sorted(chunk_dir.glob("epstein_ranked_*.jsonl")):
+    for file_path in sorted(chunk_dir.glob("qui_tam_ranked_*.jsonl")):
         match = pattern.match(file_path.name)
         if not match:
             print(f"Skipping non-matching file: {file_path.name}")
@@ -911,10 +908,9 @@ def rebuild_manifest(chunk_dir: Path, manifest_path: Path) -> None:
                 total_processed += sum(1 for _ in f)
 
     # Try to get total dataset rows from the source CSV
-    # Look for common CSV filenames in data/ directory
     csv_candidates = [
-        Path("data/EPS_FILES_20K_NOV2026.csv"),
-        Path("data") / "epstein_files.csv",
+        Path("data/processed/combined_qui_tam_data.jsonl"),
+        Path("data") / "medical_records.csv",
     ]
     total_dataset_rows = None
     for csv_path in csv_candidates:
@@ -971,7 +967,7 @@ def main() -> None:
     system_prompt, prompt_source = load_system_prompt(args)
 
     if not args.input.exists():
-        sys.exit(f"Input CSV not found: {args.input}")
+        sys.exit(f"Input file not found: {args.input}")
     if args.start_row < 1:
         sys.exit("--start-row must be >= 1")
     if args.end_row is not None and args.end_row < args.start_row:
@@ -1001,17 +997,18 @@ def main() -> None:
     if args.checkpoint:
         args.checkpoint.parent.mkdir(parents=True, exist_ok=True)
 
+    # Updated fieldnames for qui tam
     fieldnames = [
         "filename",
         "source_row_index",
         "headline",
-        "importance_score",
+        "qui_tam_score",
         "reason",
-        "key_insights",
-        "tags",
-        "power_mentions",
-        "agency_involvement",
-        "lead_types",
+        "key_facts",
+        "statute_violations",
+        "implicated_actors",
+        "federal_programs_involved",
+        "fraud_type",
     ]
     if args.include_action_items:
         fieldnames.append("action_items")
@@ -1024,7 +1021,7 @@ def main() -> None:
     for extra_json in args.known_json:
         completed_filenames |= load_jsonl_filenames(Path(extra_json))
     if completed_filenames:
-        print(f"Skipping {len(completed_filenames)} pre-processed files.")
+        print(f"Skipping {len(completed_filenames)} pre-processed records.")
 
     workload_stats = calculate_workload(
         args.input,
@@ -1109,15 +1106,18 @@ def main() -> None:
                 print(f"  ! Failed to analyze {filename}: {exc}", file=sys.stderr)
                 continue
 
-            key_insights = normalize_text_list(ensure_list(result.get("key_insights")))
-            tags = normalize_text_list(ensure_list(result.get("tags")))
-            power_mentions = normalize_text_list(
-                ensure_list(result.get("power_mentions")), strip_descriptor=True
+            # Updated field names for qui tam
+            key_facts = normalize_text_list(ensure_list(result.get("key_facts")))
+            statute_violations = normalize_text_list(ensure_list(result.get("statute_violations")))
+            implicated_actors = normalize_text_list(
+                ensure_list(result.get("implicated_entities")), strip_descriptor=True  # Note: uses implicated_entities from JSON
             )
-            agency_involvement = normalize_agencies(
-                normalize_text_list(ensure_list(result.get("agency_involvement")), strip_descriptor=True)
+            federal_programs_involved = normalize_programs(
+                normalize_text_list(ensure_list(result.get("federal_programs_involved")), strip_descriptor=True)
             )
-            lead_types = normalize_lead_types(ensure_list(result.get("lead_types")))
+            # fraud_type is singular
+            fraud_type = result.get("fraud_type", "Unknown")
+            
             action_items = (
                 normalize_text_list(ensure_list(result.get("action_items")))
                 if args.include_action_items
@@ -1128,13 +1128,13 @@ def main() -> None:
                 "filename": filename,
                 "source_row_index": idx,
                 "headline": result.get("headline", ""),
-                "importance_score": result.get("importance_score", ""),
+                "qui_tam_score": result.get("qui_tam_score", ""),
                 "reason": result.get("reason", ""),
-                "key_insights": "; ".join(key_insights),
-                "tags": "; ".join(tags),
-                "power_mentions": "; ".join(power_mentions),
-                "agency_involvement": "; ".join(agency_involvement),
-                "lead_types": "; ".join(lead_types),
+                "key_facts": "; ".join(key_facts),
+                "statute_violations": "; ".join(statute_violations),
+                "implicated_actors": "; ".join(implicated_actors),
+                "federal_programs_involved": "; ".join(federal_programs_involved),
+                "fraud_type": fraud_type,
             }
             if args.include_action_items:
                 csv_row["action_items"] = "; ".join(action_items)
@@ -1142,13 +1142,13 @@ def main() -> None:
             json_record: Dict[str, Any] = {
                 "filename": filename,
                 "headline": result.get("headline", ""),
-                "importance_score": result.get("importance_score", ""),
+                "qui_tam_score": result.get("qui_tam_score", ""),
                 "reason": result.get("reason", ""),
-                "key_insights": key_insights,
-                "tags": tags,
-                "power_mentions": power_mentions,
-                "agency_involvement": agency_involvement,
-                "lead_types": lead_types,
+                "key_facts": key_facts,
+                "statute_violations": statute_violations,
+                "implicated_actors": implicated_actors,
+                "federal_programs_involved": federal_programs_involved,
+                "fraud_type": fraud_type,
                 "metadata": {
                     "source_row_index": idx,
                     "original_row": row,

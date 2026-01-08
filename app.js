@@ -1,18 +1,16 @@
+// Medical Provider Risk Database - Frontend Application
+// Updated for qui tam medical fraud data
+
 import { POWER_ALIASES } from "./power_aliases.js";
 
-const DATA_URL = "/data/epstein_ranked.jsonl";
+// FIXED: Update file paths to match your output
+const DATA_URL = "/data/results/qui_tam_ranked.jsonl";
 const CHUNK_MANIFEST_URL = "/data/chunks.json";
 const DEFAULT_CHUNK_SIZE = 1000;
-const POWER_ALIAS_MAP = {
-  "barack obama": ["barack obama", "obama", "barack", "president obama"],
-  "donald trump": ["donald trump", "trump", "donald j trump", "president trump"],
-  "joe biden": ["joe biden", "joseph biden", "president biden"],
-  "bill clinton": ["bill clinton", "william clinton", "william j clinton", "president clinton"],
-  "bill gates": ["bill gates", "william gates", "william h gates", "gates"],
-  "hillary clinton": ["hillary clinton", "hillary rodham clinton"],
-  "jeffrey epstein": ["jeffrey epstein", "jeff epstein", "epstein"],
-  "elon musk": ["elon musk", "elon r musk", "musk"],
-};
+
+// Since you're not using chunking (chunk-size=0), these paths won't be used,
+// but keeping them for future compatibility
+const CHUNK_DIR = "/contrib";
 
 const elements = {
   scoreFilter: document.getElementById("scoreFilter"),
@@ -53,7 +51,7 @@ const state = {
   filtered: [],
   lastUpdated: null,
   manifestMetadata: null,
-  gridOptions: null,
+  gridApi: null,  // FIXED: Store grid API directly
   leadChart: null,
   scoreChart: null,
   powerChart: null,
@@ -70,12 +68,234 @@ const state = {
   filtersEnabled: false,
 };
 
+// Power alias functions remain the same
 const powerAliasLookup = buildPowerAliasLookup(POWER_ALIASES);
 const canonicalPowerList = buildCanonicalPowerList(powerAliasLookup);
 const powerKeywordMap = buildPowerKeywordMap(POWER_ALIASES, powerAliasLookup);
 const canonicalAliasKeyMap = buildCanonicalAliasKeyMap(POWER_ALIASES);
 
-function resetLoadingState(title = "Loading Epstein Files…", subtitle = "Preparing data") {
+function buildPowerAliasLookup(aliasMap) {
+  const lookup = new Map();
+  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
+    const canonicalKey = cleanPowerAlias(canonical);
+    if (canonicalKey && !lookup.has(canonicalKey)) {
+      lookup.set(canonicalKey, canonical);
+    }
+    (aliases || []).forEach((alias) => {
+      const key = cleanPowerAlias(alias);
+      if (!key) return;
+      if (!lookup.has(key)) {
+        lookup.set(key, canonical);
+      }
+    });
+  });
+  return lookup;
+}
+
+function buildCanonicalPowerList(lookup) {
+  const list = [];
+  const seen = new Set();
+  lookup.forEach((canonical) => {
+    const clean = cleanPowerAlias(canonical);
+    if (!clean || seen.has(clean)) return;
+    seen.add(clean);
+    list.push({ canonical, clean });
+  });
+  return list;
+}
+
+function buildPowerKeywordMap(aliasMap) {
+  const keywordMap = new Map();
+  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
+    const cleanCanonical = cleanPowerAlias(canonical);
+    if (!cleanCanonical) return;
+    const keywords = new Set();
+    keywords.add(cleanCanonical);
+    cleanCanonical.split(" ").forEach((token) => keywords.add(token));
+    (aliases || []).forEach((alias) => {
+      const cleanAlias = cleanPowerAlias(alias);
+      if (!cleanAlias) return;
+      keywords.add(cleanAlias);
+      cleanAlias.split(" ").forEach((token) => keywords.add(token));
+    });
+    keywordMap.set(canonical, Array.from(keywords));
+  });
+  return keywordMap;
+}
+
+function buildCanonicalAliasKeyMap(aliasMap) {
+  const map = new Map();
+  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
+    const canonicalKey = cleanPowerAlias(canonical);
+    if (!canonicalKey) return;
+    const keys = new Set();
+    keys.add(canonicalKey);
+    (aliases || []).forEach((alias) => {
+      const key = cleanPowerAlias(alias);
+      if (key) keys.add(key);
+    });
+    map.set(canonical, keys);
+  });
+  return map;
+}
+
+function canonicalizePowerSelection(value) {
+  const candidates = generatePowerAliasCandidates(value);
+  for (const key of candidates.keys) {
+    const canonical = powerAliasLookup.get(key);
+    if (canonical) return canonical;
+  }
+  const fallback = findCanonicalByToken(candidates.bestKey);
+  return fallback || value;
+}
+
+function aliasKeysForCanonical(canonical) {
+  const canonicalKey = cleanPowerAlias(canonical);
+  if (!canonicalKey) return new Set();
+  if (canonicalAliasKeyMap.has(canonical)) {
+    return new Set(canonicalAliasKeyMap.get(canonical));
+  }
+  return new Set([canonicalKey]);
+}
+
+function cleanPowerAlias(name) {
+  if (!name) return "";
+  return String(name)
+    .toLowerCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizePowerMentions(values) {
+  const normalized = [];
+  const seen = new Set();
+  (values || []).forEach((originalName) => {
+    const candidates = generatePowerAliasCandidates(originalName);
+    let canonical = null;
+    for (const key of candidates.keys) {
+      canonical = powerAliasLookup.get(key);
+      if (canonical) break;
+    }
+    if (!canonical) {
+      const tokenFallback = findCanonicalByToken(candidates.bestKey);
+      if (tokenFallback) canonical = tokenFallback;
+    }
+    if (!canonical) canonical = originalName;
+    const display = typeof canonical === "string" ? canonical : originalName;
+    const displayKey = cleanPowerAlias(display);
+    if (displayKey && !seen.has(displayKey)) {
+      seen.add(displayKey);
+      normalized.push(display);
+    }
+  });
+  return normalized;
+}
+
+function expandPowerSelection(values) {
+  const canonicalKeys = new Set();
+  const aliasKeys = new Set();
+  (values || []).forEach((value) => {
+    const selectedCanonical = canonicalizePowerSelection(value);
+    const canonicalKey = cleanPowerAlias(selectedCanonical);
+    if (!canonicalKey) return;
+    canonicalKeys.add(canonicalKey);
+    aliasKeysForCanonical(selectedCanonical).forEach((key) => aliasKeys.add(key));
+  });
+  return { canonicalKeys, aliasKeys };
+}
+
+function matchesPowerSelection(name, selection) {
+  const canonical = canonicalizePowerSelection(name);
+  const canonicalKey = cleanPowerAlias(canonical);
+  if (!canonicalKey || !selection || selection.aliasKeys.size === 0) return false;
+  if (selection.aliasKeys.has(canonicalKey)) return true;
+  const rowAliasKeys = aliasKeysForCanonical(canonical);
+  return Array.from(rowAliasKeys).some((key) => selection.aliasKeys.has(key));
+}
+
+function generatePowerAliasCandidates(name) {
+  const result = { keys: [], bestKey: "" };
+  if (!name) return result;
+  const candidates = [];
+  const trimmed = String(name).trim();
+  candidates.push(trimmed);
+  const flipped = flipCommaName(trimmed);
+  if (flipped) candidates.push(flipped);
+  for (const candidate of candidates) {
+    const key = cleanPowerAlias(candidate);
+    if (key) {
+      result.keys.push(key);
+      if (!result.bestKey) result.bestKey = key;
+    }
+  }
+  return result;
+}
+
+function flipCommaName(name) {
+  if (!name || !name.includes(",")) return null;
+  const [last, rest] = name.split(",", 2).map((part) => part.trim());
+  if (!last || !rest) return null;
+  const lastIsSingleWord = /^[A-Za-z'.-]+$/.test(last);
+  const restWordCount = rest.split(/\s+/).filter(Boolean).length;
+  if (!lastIsSingleWord || restWordCount === 0 || restWordCount > 3) {
+    return null;
+  }
+  return `${rest} ${last}`.trim();
+}
+
+function findCanonicalByToken(key) {
+  if (!key || key.length < 3) return null;
+  const matches = canonicalPowerList.filter((item) => {
+    const words = item.clean.split(" ");
+    return words.includes(key);
+  });
+  if (matches.length === 1) return matches[0].canonical;
+  return null;
+}
+
+// FIXED: Update normalizeRow to handle correct field names
+function normalizeRow(row) {
+  const qui_tam = Number(row.qui_tam_score ?? 0);
+  const arrays = (value) => (Array.isArray(value) ? value : []);
+  
+  const rawActors = arrays(row.implicated_actors)
+    .map((p) => (typeof p === "string" ? p.trim() : String(p ?? "").trim()))
+    .filter(Boolean);
+  const normalizedActors = normalizePowerMentions(rawActors);
+  
+  const normalized = {
+    filename: row.filename,
+    source_row_index: row.metadata?.source_row_index ?? null,
+    headline: row.headline || row.metadata?.original_row?.filename || "Untitled Provider",
+    qui_tam_score: Number.isFinite(qui_tam) ? qui_tam : 0,
+    reason: row.reason || "",
+    key_facts: arrays(row.key_facts),
+    statute_violations: arrays(row.statute_violations),
+    implicated_actors_raw: rawActors,
+    implicated_actors: normalizedActors.length > 0 ? normalizedActors : rawActors,
+    federal_programs_involved: arrays(row.federal_programs_involved),
+    fraud_type: row.fraud_type || "Unknown",
+    metadata: row.metadata || {},
+    original_text: row.metadata?.original_row?.text || "",
+  };
+  
+  normalized.search_blob = [
+    normalized.headline,
+    normalized.reason,
+    normalized.key_facts.join(" "),
+    normalized.statute_violations.join(" "),
+    normalized.implicated_actors.join(" "),
+    normalized.fraud_type,
+    normalized.original_text,
+  ]
+    .join(" ")
+    .toLowerCase();
+    
+  return normalized;
+}
+
+function resetLoadingState(title = "Loading Medical Records…", subtitle = "Preparing data") {
   state.powerDisplayNames = {};
   state.loading.loadedChunks = 0;
   state.loading.totalChunks = 0;
@@ -165,15 +385,15 @@ function getGridColumnDefs() {
   const isMobile = isMobileView();
   return [
     {
-      headerName: "Score",
-      field: "importance_score",
+      headerName: "Risk",
+      field: "qui_tam_score",
       width: isMobile ? 65 : 80,
       minWidth: isMobile ? 65 : 80,
       maxWidth: isMobile ? 65 : 100,
       filter: "agNumberColumnFilter",
       cellClass: "score-cell",
       pinned: isMobile ? "left" : null,
-      tooltipValueGetter: (params) => `Score: ${params.value ?? 0}`,
+      tooltipValueGetter: (params) => `Risk Score: ${params.value ?? 0}`,
     },
     {
       headerName: "Headline",
@@ -181,10 +401,10 @@ function getGridColumnDefs() {
       flex: isMobile ? 1 : 6,
       minWidth: isMobile ? 200 : 400,
       cellRenderer: (params) => {
-        const headline = params.value || "Untitled lead";
+        const headline = params.value || "Untitled Provider";
         return `<strong class="cell-text">${headline}</strong>`;
       },
-      tooltipValueGetter: (params) => params.data?.headline || "Untitled lead",
+      tooltipValueGetter: (params) => params.data?.headline || "Untitled Provider",
     },
     {
       headerName: "File",
@@ -196,48 +416,50 @@ function getGridColumnDefs() {
       tooltipValueGetter: (params) => params.data?.filename || "",
     },
     {
-      headerName: "Power Mentions",
-      field: "power_mentions",
+      headerName: "Providers",
+      field: "implicated_actors",
       flex: 2,
       minWidth: 180,
       hide: isMobile,
       cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-      tooltipValueGetter: (params) => (params.data?.power_mentions || []).join(", "),
+      tooltipValueGetter: (params) => (params.data?.implicated_actors || []).join(", "),
     },
     {
-      headerName: "Lead Types",
-      field: "lead_types",
+      headerName: "Fraud Type",
+      field: "fraud_type",
       flex: 1.2,
       minWidth: 150,
       hide: isMobile,
-      cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-      tooltipValueGetter: (params) => (params.data?.lead_types || []).join(", "),
+      cellRenderer: (params) => `<span class="cell-text">${params.value || ""}</span>`,
+      tooltipValueGetter: (params) => params.data?.fraud_type || "",
     },
     {
-      headerName: "Agencies",
-      field: "agency_involvement",
+      headerName: "Federal Programs",
+      field: "federal_programs_involved",
       flex: 1.2,
       minWidth: 140,
       hide: isMobile,
       cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-      tooltipValueGetter: (params) => (params.data?.agency_involvement || []).join(", "),
+      tooltipValueGetter: (params) => (params.data?.federal_programs_involved || []).join(", "),
     },
     {
-      headerName: "Tags",
-      field: "tags",
+      headerName: "Violations",
+      field: "statute_violations",
       flex: 1.2,
       minWidth: 140,
       hide: isMobile,
       cellRenderer: (params) => `<span class="cell-text">${(params.value || []).join(", ")}</span>`,
-      tooltipValueGetter: (params) => (params.data?.tags || []).join(", "),
+      tooltipValueGetter: (params) => (params.data?.statute_violations || []).join(", "),
     },
   ];
 }
 
+// FIXED: Use new AG Grid v31+ API
 function initGrid() {
   const gridElement = document.getElementById("grid");
   const isMobile = isMobileView();
-  state.gridOptions = {
+  
+  const gridOptions = {
     columnDefs: getGridColumnDefs(),
     defaultColDef: {
       resizable: true,
@@ -253,11 +475,13 @@ function initGrid() {
     animateRows: true,
     pagination: true,
     paginationPageSize: isMobile ? 15 : 25,
+    paginationPageSizeSelector: [15, 25, 50, 100],  // FIXED: Added selector
     rowHeight: isMobile ? 50 : 58,
     onGridReady: (params) => {
-      params.api.setRowData(state.filtered);
-      params.columnApi.applyColumnState({
-        state: [{ colId: "importance_score", sort: "desc" }],
+      // FIXED: Use new API methods
+      params.api.setGridOption('rowData', state.filtered);
+      params.api.applyColumnState({
+        state: [{ colId: "qui_tam_score", sort: "desc" }],
         defaultState: { sort: null },
       });
       const topRow = params.api.getDisplayedRowAtIndex(0)?.data;
@@ -272,7 +496,8 @@ function initGrid() {
     getRowId: (params) => params.data.filename,
   };
 
-  new agGrid.Grid(gridElement, state.gridOptions);
+  // FIXED: Use new createGrid API
+  state.gridApi = agGrid.createGrid(gridElement, gridOptions);
 }
 
 function parseJsonl(text) {
@@ -291,240 +516,17 @@ function parseJsonl(text) {
     .filter(Boolean);
 }
 
-function buildPowerAliasLookup(aliasMap) {
-  const lookup = new Map();
-  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
-    const canonicalKey = cleanPowerAlias(canonical);
-    if (canonicalKey && !lookup.has(canonicalKey)) {
-      lookup.set(canonicalKey, canonical);
-    }
-    (aliases || []).forEach((alias) => {
-      const key = cleanPowerAlias(alias);
-      if (!key) return;
-      if (!lookup.has(key)) {
-        lookup.set(key, canonical);
-      }
-    });
-  });
-  return lookup;
-}
-
-function buildCanonicalPowerList(lookup) {
-  const list = [];
-  const seen = new Set();
-  lookup.forEach((canonical) => {
-    const clean = cleanPowerAlias(canonical);
-    if (!clean || seen.has(clean)) return;
-    seen.add(clean);
-    list.push({ canonical, clean });
-  });
-  return list;
-}
-
-function buildPowerKeywordMap(aliasMap) {
-  const keywordMap = new Map();
-  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
-    const cleanCanonical = cleanPowerAlias(canonical);
-    if (!cleanCanonical) return;
-    const keywords = new Set();
-    keywords.add(cleanCanonical);
-    cleanCanonical.split(" ").forEach((token) => keywords.add(token));
-    (aliases || []).forEach((alias) => {
-      const cleanAlias = cleanPowerAlias(alias);
-      if (!cleanAlias) return;
-      keywords.add(cleanAlias);
-      cleanAlias.split(" ").forEach((token) => keywords.add(token));
-    });
-    keywordMap.set(canonical, Array.from(keywords));
-  });
-  return keywordMap;
-}
-
-function buildCanonicalAliasKeyMap(aliasMap) {
-  const map = new Map();
-  Object.entries(aliasMap || {}).forEach(([canonical, aliases]) => {
-    const canonicalKey = cleanPowerAlias(canonical);
-    if (!canonicalKey) return;
-    const keys = new Set();
-    keys.add(canonicalKey);
-    (aliases || []).forEach((alias) => {
-      const key = cleanPowerAlias(alias);
-      if (key) {
-        keys.add(key);
-      }
-    });
-    map.set(canonical, keys);
-  });
-  return map;
-}
-
-function canonicalizePowerSelection(value) {
-  const candidates = generatePowerAliasCandidates(value);
-  for (const key of candidates.keys) {
-    const canonical = powerAliasLookup.get(key);
-    if (canonical) return canonical;
-  }
-  const fallback = findCanonicalByToken(candidates.bestKey);
-  return fallback || value;
-}
-
-function aliasKeysForCanonical(canonical) {
-  const canonicalKey = cleanPowerAlias(canonical);
-  if (!canonicalKey) return new Set();
-
-  if (canonicalAliasKeyMap.has(canonical)) {
-    return new Set(canonicalAliasKeyMap.get(canonical));
-  }
-  return new Set([canonicalKey]);
-}
-
-function cleanPowerAlias(name) {
-  if (!name) return "";
-  return String(name)
-    .toLowerCase()
-    .replace(/[–—]/g, "-")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizePowerMentions(values) {
-  const normalized = [];
-  const seen = new Set();
-  (values || []).forEach((originalName) => {
-    const candidates = generatePowerAliasCandidates(originalName);
-    let canonical = null;
-    for (const key of candidates.keys) {
-      canonical = powerAliasLookup.get(key);
-      if (canonical) break;
-    }
-    if (!canonical) {
-      // Fallback: try token match on the best key
-      const tokenFallback = findCanonicalByToken(candidates.bestKey);
-      if (tokenFallback) {
-        canonical = tokenFallback;
-      }
-    }
-    if (!canonical) {
-      canonical = originalName;
-    }
-    const display = typeof canonical === "string" ? canonical : originalName;
-    const displayKey = cleanPowerAlias(display);
-    if (displayKey && !seen.has(displayKey)) {
-      seen.add(displayKey);
-      normalized.push(display);
-    }
-  });
-  return normalized;
-}
-
-function expandPowerSelection(values) {
-  const canonicalKeys = new Set();
-  const aliasKeys = new Set();
-  (values || []).forEach((value) => {
-    const selectedCanonical = canonicalizePowerSelection(value);
-    const canonicalKey = cleanPowerAlias(selectedCanonical);
-    if (!canonicalKey) return;
-    canonicalKeys.add(canonicalKey);
-    aliasKeysForCanonical(selectedCanonical).forEach((key) => aliasKeys.add(key));
-  });
-  return { canonicalKeys, aliasKeys };
-}
-
-function matchesPowerSelection(name, selection) {
-  const canonical = canonicalizePowerSelection(name);
-  const canonicalKey = cleanPowerAlias(canonical);
-  if (!canonicalKey || !selection || selection.aliasKeys.size === 0) return false;
-  if (selection.aliasKeys.has(canonicalKey)) return true;
-  const rowAliasKeys = aliasKeysForCanonical(canonical);
-  return Array.from(rowAliasKeys).some((key) => selection.aliasKeys.has(key));
-}
-
-function generatePowerAliasCandidates(name) {
-  const result = { keys: [], bestKey: "" };
-  if (!name) return result;
-  const candidates = [];
-  const trimmed = String(name).trim();
-  candidates.push(trimmed);
-  const flipped = flipCommaName(trimmed);
-  if (flipped) candidates.push(flipped);
-  for (const candidate of candidates) {
-    const key = cleanPowerAlias(candidate);
-    if (key) {
-      result.keys.push(key);
-      if (!result.bestKey) {
-        result.bestKey = key;
-      }
-    }
-  }
-  return result;
-}
-
-function flipCommaName(name) {
-  if (!name || !name.includes(",")) return null;
-  const [last, rest] = name.split(",", 2).map((part) => part.trim());
-  if (!last || !rest) return null;
-  // Only flip simple personal-name patterns to avoid mangling organizations.
-  const lastIsSingleWord = /^[A-Za-z'.-]+$/.test(last);
-  const restWordCount = rest.split(/\s+/).filter(Boolean).length;
-  if (!lastIsSingleWord || restWordCount === 0 || restWordCount > 3) {
-    return null;
-  }
-  return `${rest} ${last}`.trim();
-}
-
-function findCanonicalByToken(key) {
-  if (!key || key.length < 3) return null;
-  const matches = canonicalPowerList.filter((item) => {
-    const words = item.clean.split(" ");
-    return words.includes(key);
-  });
-  if (matches.length === 1) {
-    return matches[0].canonical;
-  }
-  return null;
-}
-
-function normalizeRow(row) {
-  const importance = Number(row.importance_score ?? 0);
-  const arrays = (value) => (Array.isArray(value) ? value : []);
-  const rawPowers = arrays(row.power_mentions)
-    .map((p) => (typeof p === "string" ? p.trim() : String(p ?? "").trim()))
-    .filter(Boolean);
-  const normalizedPowers = normalizePowerMentions(rawPowers);
-  const normalized = {
-    filename: row.filename,
-    source_row_index: row.metadata?.source_row_index ?? null,
-    headline: row.headline || row.metadata?.original_row?.filename || "Untitled lead",
-    importance_score: Number.isFinite(importance) ? importance : 0,
-    reason: row.reason || "",
-    key_insights: arrays(row.key_insights),
-    tags: arrays(row.tags),
-    power_mentions_raw: rawPowers,
-    power_mentions: normalizedPowers.length > 0 ? normalizedPowers : rawPowers,
-    agency_involvement: arrays(row.agency_involvement),
-    lead_types: arrays(row.lead_types),
-    metadata: row.metadata || {},
-    original_text: row.metadata?.original_row?.text || "",
-  };
-  normalized.search_blob = [
-    normalized.headline,
-    normalized.reason,
-    normalized.key_insights.join(" "),
-    normalized.tags.join(" "),
-    normalized.power_mentions.join(" "),
-    normalized.lead_types.join(" "),
-    normalized.original_text,
-  ]
-    .join(" ")
-    .toLowerCase();
-  return normalized;
-}
-
 function populateFilters(data, preserveSelection = false) {
   const prevLead = preserveSelection ? getSelectedValues(state.leadChoices) : [];
   const prevPower = preserveSelection ? getSelectedValues(state.powerChoices) : [];
-  const leadCounts = buildCountMap(data, "lead_types");
-  const powerCounts = buildCountMap(data, "power_mentions");
+  
+  const leadCounts = new Map();
+  data.forEach(row => {
+    const fraudType = row.fraud_type || "Unknown";
+    leadCounts.set(fraudType, (leadCounts.get(fraudType) || 0) + 1);
+  });
+  
+  const powerCounts = buildCountMap(data, "implicated_actors");
 
   const sortedLeads = sortValuesByCount(Array.from(leadCounts.keys()), leadCounts);
   const sortedPowers = sortValuesByCount(Array.from(powerCounts.keys()), powerCounts);
@@ -548,12 +550,12 @@ function setChoiceOptions(
   countMap = null,
   baseCountMap = null
 ) {
-  if (!choiceInstance) {
-    return;
-  }
+  if (!choiceInstance) return;
+  
   const selectedSet = new Set(
     previouslySelected.length > 0 ? previouslySelected : getSelectedValues(choiceInstance)
   );
+  
   const options = values.map((value) => {
     const customProps = {};
     if (keywordMap) {
@@ -574,70 +576,75 @@ function setChoiceOptions(
       selected: selectedSet.has(value),
     };
   });
+  
   refreshChoices(choiceInstance, options, Array.from(selectedSet));
 }
 
 function getSelectedValues(choiceInstance) {
   if (!choiceInstance) return [];
   const value = choiceInstance.getValue(true);
-  if (Array.isArray(value)) {
-    return value;
-  }
-  if (value) {
-    return [value];
-  }
+  if (Array.isArray(value)) return value;
+  if (value) return [value];
   return [];
 }
 
 function applyFilters(options = {}) {
   const force = options.force || false;
   if (!state.filtersEnabled && !force) return;
+  
   const minScore = Number(elements.scoreFilter.value) || 0;
   elements.scoreValue.textContent = minScore.toString();
+  
   const leadSelected = new Set(getSelectedValues(state.leadChoices));
   const powerSelectedRaw = getSelectedValues(state.powerChoices);
   const powerSelection = expandPowerSelection(powerSelectedRaw);
   const limit = Number(elements.limitInput.value) || null;
   const term = elements.searchInput.value.trim().toLowerCase();
 
-  let filtered = state.raw.filter((row) => row.importance_score >= minScore);
+  let filtered = state.raw.filter((row) => row.qui_tam_score >= minScore);
+  
   if (leadSelected.size > 0) {
-    filtered = filtered.filter((row) => row.lead_types.some((lead) => leadSelected.has(lead)));
+    filtered = filtered.filter((row) => leadSelected.has(row.fraud_type));
   }
+  
   if (powerSelection.aliasKeys.size > 0) {
     filtered = filtered.filter((row) =>
-      row.power_mentions.some((name) => matchesPowerSelection(name, powerSelection))
+      row.implicated_actors.some((name) => matchesPowerSelection(name, powerSelection))
     );
   }
+  
   if (term) {
     filtered = filtered.filter((row) => row.search_blob.includes(term));
   }
+  
   if (limit && limit > 0) {
     filtered = filtered.slice(0, limit);
   }
-  filtered.sort((a, b) => b.importance_score - a.importance_score);
+  
+  filtered.sort((a, b) => b.qui_tam_score - a.qui_tam_score);
 
   state.filtered = filtered;
   updateChoiceOrdering(filtered, leadSelected, powerSelectedRaw);
-  if (state.gridOptions?.api) {
-    const api = state.gridOptions.api;
-    const columnApi = state.gridOptions.columnApi;
-    api.setRowData(filtered);
-    columnApi.applyColumnState({
-      state: [{ colId: "importance_score", sort: "desc" }],
+  
+  // FIXED: Use new AG Grid API
+  if (state.gridApi) {
+    state.gridApi.setGridOption('rowData', filtered);
+    state.gridApi.applyColumnState({
+      state: [{ colId: "qui_tam_score", sort: "desc" }],
       defaultState: { sort: null },
     });
+    
     let targetRow = null;
     if (state.activeRowId) {
-      const rowNode = api.getRowNode(state.activeRowId);
+      const rowNode = state.gridApi.getRowNode(state.activeRowId);
       if (rowNode?.data) {
         targetRow = rowNode.data;
-        api.ensureNodeVisible(rowNode);
+        state.gridApi.ensureNodeVisible(rowNode);
       }
     }
     if (!targetRow && filtered.length > 0) {
       targetRow = filtered[0];
-      api.ensureIndexVisible(0);
+      state.gridApi.ensureIndexVisible(0);
     }
     targetRow ? renderDetail(targetRow) : clearDetail();
   } else {
@@ -647,6 +654,7 @@ function applyFilters(options = {}) {
       clearDetail();
     }
   }
+  
   updateSummary();
   updateCharts();
 }
@@ -656,20 +664,23 @@ function updateSummary() {
   const average =
     count === 0
       ? 0
-      : state.filtered.reduce((sum, row) => sum + row.importance_score, 0) / count;
-  const leadCounts = aggregateCounts(state.filtered, "lead_types");
-  const topLead = leadCounts.length ? leadCounts[0].label : "None";
+      : state.filtered.reduce((sum, row) => sum + row.qui_tam_score, 0) / count;
+  
+  const fraudCounts = new Map();
+  state.filtered.forEach(row => {
+    const type = row.fraud_type || "Unknown";
+    fraudCounts.set(type, (fraudCounts.get(type) || 0) + 1);
+  });
+  const sortedFraud = Array.from(fraudCounts.entries()).sort((a, b) => b[1] - a[1]);
+  const topLead = sortedFraud.length ? sortedFraud[0][0] : "None";
 
-  // Display count with total info if available
   const totalLoaded = state.raw.length;
   if (state.manifestMetadata && state.manifestMetadata.total_dataset_rows) {
     const totalDataset = state.manifestMetadata.total_dataset_rows;
     if (typeof totalDataset === 'number') {
       if (count === totalLoaded) {
-        // No filters applied
         elements.countStat.textContent = `${count.toLocaleString()} of ${totalDataset.toLocaleString()} loaded`;
       } else {
-        // Filters applied
         elements.countStat.textContent = `${count.toLocaleString()} of ${totalLoaded.toLocaleString()} loaded (${totalDataset.toLocaleString()} total)`;
       }
     } else {
@@ -685,7 +696,6 @@ function updateSummary() {
     ? state.lastUpdated.toLocaleTimeString()
     : "–";
 
-  // Update processed count in the notice
   if (elements.processedCount) {
     elements.processedCount.textContent = totalLoaded.toLocaleString();
   }
@@ -694,7 +704,7 @@ function updateSummary() {
 function aggregateCounts(rows, field) {
   const counter = new Map();
   rows.forEach((row) => {
-    row[field].forEach((value) => {
+    (row[field] || []).forEach((value) => {
       counter.set(value, (counter.get(value) || 0) + 1);
     });
   });
@@ -745,10 +755,21 @@ function refreshChoices(choiceInstance, options, selectedValues = []) {
 }
 
 function updateChoiceOrdering(filteredRows, leadSelectedSet, powerSelectedRaw) {
-  const leadCountsAll = buildCountMap(state.raw, "lead_types");
-  const powerCountsAll = buildCountMap(state.raw, "power_mentions");
-  const leadCountsFiltered = buildCountMap(filteredRows, "lead_types");
-  const powerCountsFiltered = buildCountMap(filteredRows, "power_mentions");
+  // Build counts for both fraud_type (singular) and implicated_actors (array)
+  const leadCountsAll = new Map();
+  state.raw.forEach(row => {
+    const type = row.fraud_type || "Unknown";
+    leadCountsAll.set(type, (leadCountsAll.get(type) || 0) + 1);
+  });
+  
+  const leadCountsFiltered = new Map();
+  filteredRows.forEach(row => {
+    const type = row.fraud_type || "Unknown";
+    leadCountsFiltered.set(type, (leadCountsFiltered.get(type) || 0) + 1);
+  });
+  
+  const powerCountsAll = buildCountMap(state.raw, "implicated_actors");
+  const powerCountsFiltered = buildCountMap(filteredRows, "implicated_actors");
 
   const sortedLeads = sortValuesByCount(
     Array.from(leadCountsAll.keys()),
@@ -781,9 +802,19 @@ function updateChoiceOrdering(filteredRows, leadSelectedSet, powerSelectedRaw) {
 
 function updateLeadChart() {
   const ctx = document.getElementById("leadChart").getContext("2d");
-  const topLeadTypes = aggregateCounts(state.filtered, "lead_types").slice(0, 10);
-  const labels = topLeadTypes.map((item) => item.label);
-  const values = topLeadTypes.map((item) => item.value);
+  
+  const fraudCounts = new Map();
+  state.filtered.forEach(row => {
+    const type = row.fraud_type || "Unknown";
+    fraudCounts.set(type, (fraudCounts.get(type) || 0) + 1);
+  });
+  const topTypes = Array.from(fraudCounts.entries())
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+  
+  const labels = topTypes.map((item) => item.label);
+  const values = topTypes.map((item) => item.value);
 
   if (state.leadChart) {
     state.leadChart.destroy();
@@ -795,7 +826,7 @@ function updateLeadChart() {
       labels,
       datasets: [
         {
-          label: "Lead count",
+          label: "Fraud cases",
           data: values,
           backgroundColor: "#5ad0ff",
         },
@@ -823,7 +854,7 @@ function updateScoreChart() {
   const ctx = document.getElementById("scoreChart").getContext("2d");
   const buckets = Array(10).fill(0);
   state.filtered.forEach((row) => {
-    const index = Math.min(9, Math.floor(row.importance_score / 10));
+    const index = Math.min(9, Math.floor(row.qui_tam_score / 10));
     buckets[index] += 1;
   });
   const labels = buckets.map((_, idx) => `${idx * 10}-${idx * 10 + 9}`);
@@ -839,7 +870,7 @@ function updateScoreChart() {
       labels,
       datasets: [
         {
-          label: "Rows",
+          label: "Providers",
           data: buckets,
           borderColor: "#ffb347",
           backgroundColor: "rgba(255, 179, 71, 0.25)",
@@ -867,7 +898,7 @@ function updateScoreChart() {
 
 function updatePowerChart() {
   const ctx = document.getElementById("powerChart").getContext("2d");
-  const topPower = aggregateCounts(state.filtered, "power_mentions").slice(0, 8);
+  const topPower = aggregateCounts(state.filtered, "implicated_actors").slice(0, 8);
   const labels = topPower.map((item) => item.label);
   const values = topPower.map((item) => item.value);
 
@@ -881,7 +912,7 @@ function updatePowerChart() {
       labels,
       datasets: [
         {
-          label: "Mentions",
+          label: "Cases",
           data: values,
           backgroundColor: "rgba(255, 99, 132, 0.65)",
         },
@@ -907,7 +938,7 @@ function updatePowerChart() {
 
 function updateAgencyChart() {
   const ctx = document.getElementById("agencyChart").getContext("2d");
-  const topAgencies = aggregateCounts(state.filtered, "agency_involvement").slice(0, 8);
+  const topAgencies = aggregateCounts(state.filtered, "federal_programs_involved").slice(0, 8);
   const labels = topAgencies.map((item) => item.label);
   const values = topAgencies.map((item) => item.value);
 
@@ -921,7 +952,7 @@ function updateAgencyChart() {
       labels,
       datasets: [
         {
-          label: "Mentions",
+          label: "Programs",
           data: values,
           backgroundColor: "rgba(153, 102, 255, 0.7)",
         },
@@ -945,11 +976,14 @@ function updateAgencyChart() {
   });
 }
 
+// FIXED: Update loadData to use correct file path
 async function loadData() {
   const loadId = Date.now();
   state.currentLoadId = loadId;
-  resetLoadingState("Loading Epstein Files…", "Fetching chunk manifest");
+  resetLoadingState("Loading Medical Records…", "Fetching data");
+  
   try {
+    // Try manifest first (for chunked mode)
     const manifest = await fetchManifest();
     if (manifest && manifest.chunks && manifest.chunks.length > 0) {
       await loadChunks(manifest, loadId);
@@ -957,18 +991,10 @@ async function loadData() {
       return;
     }
   } catch (err) {
-    console.warn("Chunk manifest unavailable, falling back to epstein_ranked.jsonl.", err);
+    console.warn("Chunk manifest unavailable, trying single file.", err);
   }
 
-  try {
-    await loadSequentialChunks(DEFAULT_CHUNK_SIZE, 500, loadId);
-    finishInitialLoadingUI();
-    setFiltersEnabled(true, { triggerApply: true });
-    return;
-  } catch (seqErr) {
-    console.warn("Sequential chunk scan failed, falling back to single file.", seqErr);
-  }
-
+  // Fallback to single file (your case with chunk-size=0)
   try {
     await loadSingleFile(loadId);
     finishInitialLoadingUI();
@@ -978,7 +1004,8 @@ async function loadData() {
     finishInitialLoadingUI();
     hideInlineLoader();
     alert(
-      "Unable to load ranked outputs. Ensure contrib/epstein_ranked_*.jsonl files or data/epstein_ranked.jsonl exist."
+      "Unable to load ranked outputs. Ensure data/results/qui_tam_ranked.jsonl exists.\n\n" +
+      "Run: python gpt_ranker.py --chunk-size 0"
     );
   }
 }
@@ -986,17 +1013,12 @@ async function loadData() {
 async function fetchManifest() {
   try {
     const response = await fetch(`${CHUNK_MANIFEST_URL}?t=${Date.now()}`);
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) return null;
     const data = await response.json();
 
-    // Handle both old format (array) and new format (object with metadata)
     if (Array.isArray(data)) {
-      // Old format: just an array of chunks
       return { chunks: data, metadata: null };
     } else if (data.chunks && Array.isArray(data.chunks)) {
-      // New format: object with metadata and chunks
       return { chunks: data.chunks, metadata: data.metadata || null };
     }
 
@@ -1090,57 +1112,10 @@ async function backgroundLoadChunks(chunks, loadId, concurrency = 8) {
   }
 }
 
-async function loadSequentialChunks(chunkSize = DEFAULT_CHUNK_SIZE, maxChunks = 500, loadId = state.currentLoadId) {
-  const rows = [];
-  let start = 1;
-  let attempts = 0;
-  let misses = 0;
-  state.manifestMetadata = null;
-  state.loading.totalChunks = maxChunks;
-  state.loading.loadedChunks = 0;
-  while (attempts < maxChunks && misses < 5) {
-    if (loadId !== state.currentLoadId) {
-      return;
-    }
-    const end = start + chunkSize - 1;
-    const path = `/contrib/epstein_ranked_${String(start).padStart(5, "0")}_${String(
-      end
-    ).padStart(5, "0")}.jsonl`;
-    attempts += 1;
-    try {
-      const response = await fetch(`${path}?t=${Date.now()}`);
-      if (!response.ok) {
-        misses += 1;
-        start += chunkSize;
-        state.loading.loadedChunks += 1;
-        updateLoadingProgress(state.loading.loadedChunks, state.loading.totalChunks, "Scanning local chunks…");
-        continue;
-      }
-      const text = await response.text();
-      rows.push(...parseJsonl(text));
-      misses = 0;
-      start += chunkSize;
-      state.loading.loadedChunks += 1;
-      updateLoadingProgress(state.loading.loadedChunks, state.loading.totalChunks, "Scanning local chunks…");
-    } catch (error) {
-      console.warn("Chunk scan error", path, error);
-      misses += 1;
-      start += chunkSize;
-      state.loading.loadedChunks += 1;
-      updateLoadingProgress(state.loading.loadedChunks, state.loading.totalChunks, "Scanning local chunks…");
-    }
-  }
-  if (rows.length === 0) {
-    throw new Error("No sequential chunks readable");
-  }
-  updateLoadingProgress(state.loading.loadedChunks, state.loading.loadedChunks, "Loaded local chunks");
-  await hydrateRows(rows, { append: false });
-}
-
 async function loadSingleFile(loadId = state.currentLoadId) {
   const response = await fetch(`${DATA_URL}?t=${Date.now()}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.status}`);
+    throw new Error(`Failed to fetch data: ${response.status} from ${DATA_URL}`);
   }
   const text = await response.text();
   const parsed = parseJsonl(text);
@@ -1182,15 +1157,12 @@ function resolveChunkPath(path) {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
-  // Remove leading ../ if present
   if (path.startsWith("../")) {
     path = path.substring(3);
   }
-  // Remove leading ./ if present
   if (path.startsWith("./")) {
     path = path.substring(2);
   }
-  // Make absolute if not already
   if (!path.startsWith("/")) {
     return "/" + path;
   }
@@ -1223,12 +1195,10 @@ function wireEvents() {
 function toggleDetailText() {
   const isExpanded = !elements.detailText.classList.contains("hidden");
   if (isExpanded) {
-    // Collapse
     elements.detailText.classList.add("hidden");
     elements.detailTextPreview.classList.remove("hidden");
     elements.detailTextToggle.textContent = "Expand";
   } else {
-    // Expand
     elements.detailText.classList.remove("hidden");
     elements.detailTextPreview.classList.add("hidden");
     elements.detailTextToggle.textContent = "Collapse";
@@ -1266,7 +1236,7 @@ function initChoices() {
   state.leadChoices = new Choices(elements.leadFilter, {
     removeItemButton: true,
     placeholder: true,
-    placeholderValue: "Select leads…",
+    placeholderValue: "Select fraud types…",
     searchPlaceholderValue: "Search…",
     shouldSort: true,
     sorter: frequencySorter,
@@ -1279,10 +1249,11 @@ function initChoices() {
       shouldSort: false,
     },
   });
+  
   state.powerChoices = new Choices(elements.powerFilter, {
     removeItemButton: true,
     placeholder: true,
-    placeholderValue: "Select names…",
+    placeholderValue: "Select providers…",
     searchPlaceholderValue: "Search…",
     shouldSort: true,
     sorter: frequencySorter,
@@ -1295,33 +1266,6 @@ function initChoices() {
       shouldSort: false,
     },
   });
-}
-
-function detailCellRenderer(params) {
-  const data = params.data;
-  const container = document.createElement("div");
-  container.className = "detail-panel";
-  container.innerHTML = `
-    <section>
-      <h3>Reason</h3>
-      <p>${escapeHtml(data.reason || "—")}</p>
-      <h3>Lead Types</h3>
-      <p>${data.lead_types.join(", ") || "—"}</p>
-      <h3>Power Mentions</h3>
-      <p>${data.power_mentions.join(", ") || "—"}</p>
-      <h3>Agencies</h3>
-      <p>${data.agency_involvement.join(", ") || "—"}</p>
-    </section>
-    <section>
-      <h3>Key Insights</h3>
-      <ul>${data.key_insights.map((insight) => `<li>${escapeHtml(insight)}</li>`).join("") || "<li>—</li>"}</ul>
-    </section>
-    <section>
-      <h3>Original Text</h3>
-      <pre>${escapeHtml(data.original_text || "No source text captured.")}</pre>
-    </section>
-  `;
-  return container;
 }
 
 function escapeHtml(str) {
@@ -1335,32 +1279,23 @@ function escapeHtml(str) {
 
 function getHighlightTerms() {
   const terms = [];
-
-  // Add search input term
   const searchTerm = elements.searchInput?.value?.trim();
-  if (searchTerm) {
-    terms.push(searchTerm);
-  }
-
-  // Add selected power mentions
+  if (searchTerm) terms.push(searchTerm);
+  
   const selectedPowers = getSelectedValues(state.powerChoices);
   selectedPowers.forEach(power => {
     if (power) {
       terms.push(power);
-      // Also add individual words from multi-word names
       const words = power.split(/\s+/).filter(w => w.length > 2);
       terms.push(...words);
     }
   });
-
-  // Add selected lead types
+  
   const selectedLeads = getSelectedValues(state.leadChoices);
   selectedLeads.forEach(lead => {
-    if (lead) {
-      terms.push(lead);
-    }
+    if (lead) terms.push(lead);
   });
-
+  
   return terms.filter(Boolean);
 }
 
@@ -1369,25 +1304,19 @@ function highlightText(text, terms) {
     return escapeHtml(text);
   }
 
-  // Escape the text first
   let result = escapeHtml(text);
-
-  // Sort terms by length (longest first) to avoid partial replacements
   const sortedTerms = [...new Set(terms)].sort((a, b) => b.length - a.length);
-
-  // Create a map to store positions and terms
   const matches = [];
 
   sortedTerms.forEach(term => {
-    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escaped, 'gi');
-    let match;
-
     const lowerText = text.toLowerCase();
     const lowerTerm = term.toLowerCase();
     let searchPos = 0;
 
-    while ((match = lowerText.indexOf(lowerTerm, searchPos)) !== -1) {
+    while (true) {
+      const match = lowerText.indexOf(lowerTerm, searchPos);
+      if (match === -1) break;
+      
       matches.push({
         start: match,
         end: match + term.length,
@@ -1397,10 +1326,8 @@ function highlightText(text, terms) {
     }
   });
 
-  // Sort matches by position
   matches.sort((a, b) => a.start - b.start);
 
-  // Remove overlapping matches
   const filteredMatches = [];
   let lastEnd = -1;
   matches.forEach(match => {
@@ -1410,25 +1337,18 @@ function highlightText(text, terms) {
     }
   });
 
-  // Build the highlighted text
-  if (filteredMatches.length === 0) {
-    return result;
-  }
+  if (filteredMatches.length === 0) return result;
 
   let highlighted = '';
   let lastIndex = 0;
 
   filteredMatches.forEach(match => {
-    // Add text before the match
     highlighted += escapeHtml(text.substring(lastIndex, match.start));
-    // Add highlighted match
     highlighted += '<mark class="highlight">' + escapeHtml(match.term) + '</mark>';
     lastIndex = match.end;
   });
 
-  // Add remaining text
   highlighted += escapeHtml(text.substring(lastIndex));
-
   return highlighted;
 }
 
@@ -1437,25 +1357,23 @@ function renderDetail(row, options = {}) {
     clearDetail();
     return;
   }
+  
   state.activeRowId = row.filename || null;
   elements.detailDrawer.classList.remove("hidden");
 
-  // Get terms to highlight
   const highlightTerms = getHighlightTerms();
 
   const headlineText = `${row.headline || row.filename} (${row.filename})`;
   elements.detailTitle.innerHTML = highlightText(headlineText, highlightTerms);
   elements.detailReason.innerHTML = highlightText(row.reason || "—", highlightTerms);
-  elements.detailLeadTypes.innerHTML = highlightText(row.lead_types.join(", ") || "—", highlightTerms);
-  elements.detailPower.innerHTML = highlightText(row.power_mentions.join(", ") || "—", highlightTerms);
-  elements.detailAgencies.innerHTML = highlightText(row.agency_involvement.join(", ") || "—", highlightTerms);
-  elements.detailTags.innerHTML = highlightText(row.tags.join(", ") || "—", highlightTerms);
+  elements.detailLeadTypes.innerHTML = highlightText(row.fraud_type || "—", highlightTerms);
+  elements.detailPower.innerHTML = highlightText(row.implicated_actors.join(", ") || "—", highlightTerms);
+  elements.detailAgencies.innerHTML = highlightText(row.federal_programs_involved.join(", ") || "—", highlightTerms);
+  elements.detailTags.innerHTML = highlightText(row.statute_violations.join(", ") || "—", highlightTerms);
 
-  // Display model if available in metadata
   const model = row.metadata?.config?.model || "—";
   elements.detailModel.textContent = model;
 
-  // Handle original text with collapse/expand
   const originalText = row.original_text || "No source text captured.";
   const wordCount = originalText.split(/\s+/).filter(Boolean).length;
   const snippet = originalText.split(/\s+/).slice(0, 30).join(" ");
@@ -1466,17 +1384,15 @@ function renderDetail(row, options = {}) {
   elements.detailText.innerHTML = highlightedText;
   elements.detailTextPreview.innerHTML = `${highlightedSnippet}... (${wordCount.toLocaleString()} words)`;
 
-  // Reset to collapsed state
   elements.detailText.classList.add("hidden");
   elements.detailTextPreview.classList.remove("hidden");
   elements.detailTextToggle.textContent = "Expand";
 
   elements.detailInsights.innerHTML =
-    row.key_insights.length > 0
-      ? row.key_insights.map((item) => `<li>${highlightText(item, highlightTerms)}</li>`).join("")
+    row.key_facts.length > 0
+      ? row.key_facts.map((item) => `<li>${highlightText(item, highlightTerms)}</li>`).join("")
       : "<li>—</li>";
 
-  // Scroll to detail drawer when user clicks a row
   if (options.scrollToDetail) {
     setTimeout(() => {
       elements.detailDrawer.scrollIntoView({ behavior: "smooth", block: "start" });
