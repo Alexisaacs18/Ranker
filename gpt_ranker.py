@@ -26,83 +26,175 @@ except OverflowError:
     csv.field_size_limit(2**31 - 1)
 
 
-QUI_TAM_RANKING_PROMPT = """You are a qui tam whistleblower investigator analyzing healthcare provider records to identify potential False Claims Act violations that could result in successful qui tam lawsuits.
+#!/usr/bin/env python3
+"""
+Enhanced Qui Tam Ranking Prompt
+Focuses on NON-FILED cases with high potential
+"""
 
-BACKGROUND: Qui tam cases allow private citizens to sue on behalf of the government for fraud. The government pays 15-30% of recovered funds to whistleblowers. Cases must involve:
-- Fraud against federal programs (Medicare, Medicaid, TRICARE, VA)
-- Provable false claims submitted to the government
-- Substantial financial damages (ideally $1M+)
-- Evidence that can be documented and proven
+QUI_TAM_RANKING_PROMPT = """You are a qui tam whistleblower investigator analyzing healthcare provider records to identify UNFILED False Claims Act violations with high success potential.
 
-EVALUATE EACH RECORD FOR QUI TAM POTENTIAL (Score 0-100):
+CRITICAL CONTEXT: Score cases based on their potential for NEW qui tam lawsuits. If a case has already been settled or publicly disclosed, it CANNOT be filed as a new qui tam case (first-to-file rule).
 
-HIGH VALUE INDICATORS (70-100 points):
-- Medicare/Medicaid fraud explicitly mentioned
-- Billing for services not rendered
-- Upcoding (billing for more expensive services than provided)
-- Kickbacks or illegal referrals (Stark Law, Anti-Kickback Statute violations)
-- Off-label marketing of drugs/devices to federal programs
-- False certifications for reimbursement
-- Systematic patterns (not isolated incidents)
-- Large dollar amounts (>$1M in potential damages)
-- Recent violations (within 6 years - statute of limitations)
-- Corporate/institutional fraud (not just individual malpractice)
+SCORING FRAMEWORK (0-100):
 
-MEDIUM VALUE INDICATORS (40-69 points):
-- Quality of care issues tied to billing fraud
-- Drug diversion or prescription fraud involving federal programs
-- DME (Durable Medical Equipment) fraud
-- Laboratory billing fraud
-- Home health fraud
-- Ambulance fraud
-- Documentation suggests pattern across multiple patients
-- Evidence of cover-ups or false records
+90-100 (SLAM DUNK - File immediately):
+- Clear Medicare/Medicaid billing fraud with dollar amounts documented
+- Systematic pattern (not isolated) - "routine practice", "standard procedure"
+- Recent (within 3 years) - statute of limitations is 6 years but fresher is better
+- Large damages ($5M+ potential government losses)
+- Strong evidence: billing records, claims data, internal documents mentioned
+- NOT already publicly disclosed or settled
+- Corporate/institutional defendant (not just individual)
+- Multiple fraud types (kickbacks + upcoding, etc.)
 
-LOW VALUE INDICATORS (0-39 points):
-- Pure malpractice (no fraud component)
-- Private insurance fraud only (not federal programs)
-- Isolated incidents without pattern
-- Old violations (>6 years ago)
-- Administrative errors without fraudulent intent
+70-89 (STRONG POTENTIAL - Investigate further):
+- Medicare/Medicaid involvement clearly stated
+- Pattern of fraudulent billing across multiple patients
+- Damages likely exceed $1M
+- Within 5 year window
+- Fraud type: kickbacks, upcoding, phantom billing, unnecessary procedures
+- Some documentation exists
+- NOT already part of known settlement or investigation
+
+50-69 (MEDIUM POTENTIAL - Needs more evidence):
+- Federal healthcare program involvement suggested but not explicit
+- Some pattern indicators ("multiple patients", "over time")
+- Potential damages unclear but possibly significant
+- Quality of care issues tied to billing
+- May need inside whistleblower with documents
+
+30-49 (LOW PRIORITY):
+- Vague connection to federal programs
+- Isolated incidents
+- Old (5-6 years ago)
+- Small dollar amounts
+- Weak evidence
+
+0-29 (NOT VIABLE):
+- No federal program involvement
+- Private insurance only
+- Pure malpractice (no fraud)
+- Already disclosed publicly
+- Beyond statute of limitations (>6 years)
 - State-only violations
 
-RED FLAGS THAT BOOST SCORE:
-- "Medicare" or "Medicaid" explicitly mentioned
-- Patterns: "repeatedly," "systematic," "routine practice"
-- Financial terms: "unnecessary procedures," "phantom billing," "kickbacks"
-- Multiple patients affected (class action potential)
-- Whistleblower already exists (inside employee mentioned)
-- Government investigation already started
-- Large healthcare system or chain (deeper pockets)
+CRITICAL ANALYSIS - CHECK THESE RED FLAGS:
 
-OUTPUT FORMAT:
+🚫 ALREADY FILED/SETTLED (Score 0-10):
+- "settled for $X million" → ALREADY RESOLVED, score 0-5
+- "DOJ announced" or "Justice Department" → PUBLICLY DISCLOSED, score 0-10
+- "agreed to pay" or "settlement agreement" → CASE CLOSED, score 5
+- "investigation revealed" or "FBI probe" → POSSIBLY PUBLIC, score 10-20
+- "former employee reported" or "whistleblower lawsuit" → ALREADY FILED, score 0
+
+✅ HIGH VALUE INDICATORS (Boost score by +20-30):
+- "billed Medicare for services not provided"
+- "submitted false claims to Medicaid"
+- "routine practice of upcoding"
+- "kickbacks from pharmaceutical companies"
+- "unnecessary procedures to increase billing"
+- Specific dollar amounts mentioned in billing
+- Multiple years of fraudulent activity
+- Corporate policy or directive mentioned
+
+⚖️ STATUTE VIOLATIONS THAT MATTER:
+- False Claims Act (31 U.S.C. § 3729) - THE BIG ONE
+- Anti-Kickback Statute (42 U.S.C. § 1320a-7b)
+- Stark Law (42 U.S.C. § 1395nn)
+- FDCA violations tied to Medicare/Medicaid billing
+
+OUTPUT FORMAT (JSON):
 {
-    "headline": "One sentence summary of the qui tam opportunity",
+    "headline": "One sentence describing the unfiled qui tam opportunity",
     "qui_tam_score": 0-100,
-    "fraud_type": "Primary type: upcoding, kickbacks, phantom billing, unnecessary procedures, etc.",
-    "federal_programs_involved": ["Medicare Part A/B/D", "Medicaid", "TRICARE", "VA", etc.],
-    "estimated_damages": "Best estimate of government losses (if calculable from record)",
-    "statute_violations": ["False Claims Act", "Anti-Kickback Statute", "Stark Law", etc.],
-    "evidence_strength": "Strong/Medium/Weak - based on documentation in record",
-    "key_facts": ["List 3-5 specific facts that support qui tam case"],
-    "implicated_entities": ["Provider names", "Facilities", "Organizations"],
-    "time_period": "When fraud occurred (critical for statute of limitations)",
-    "patient_volume": "Approximate number of patients/claims affected",
-    "next_steps": "What additional evidence would strengthen this case",
-    "qui_tam_viability": "High/Medium/Low - overall assessment of case potential",
-    "whistleblower_notes": "Key info a potential relator would need to know"
+    "case_status": "unfiled" | "filed" | "settled" | "under_investigation" | "unknown",
+    "reason": "2-3 sentence explanation of score and viability",
+    "fraud_type": "Primary type: kickbacks | upcoding | phantom billing | unnecessary procedures | off-label marketing | other",
+    "federal_programs_involved": ["Medicare Part A", "Medicare Part B", "Medicare Part D", "Medicaid", "TRICARE", "VA"],
+    "estimated_damages": "Best estimate in dollars or 'unknown' - be specific if amounts mentioned",
+    "statute_violations": ["False Claims Act", "Anti-Kickback Statute", "Stark Law", "FDCA"],
+    "evidence_strength": "strong" | "medium" | "weak",
+    "key_facts": ["3-5 specific facts supporting qui tam case - focus on dollar amounts, patterns, timeframes"],
+    "implicated_entities": ["Provider name", "Healthcare system", "Company name"],
+    "time_period": "When fraud occurred (critical for 6-year statute)",
+    "public_disclosure": "yes" | "no" | "possible" - has this been publicly reported/settled?,
+    "first_to_file_viable": "yes" | "no" | "unclear" - can someone still file on this?,
+    "red_flags": ["List any indicators this is already filed, settled, or too old"],
+    "green_flags": ["List any indicators this is a strong unfiled opportunity"],
+    "next_steps": "What a potential relator should do to file this case",
+    "qui_tam_viability": "high" | "medium" | "low",
+    "relator_requirements": "What type of insider knowledge/documents would strengthen this case"
 }
 
-CRITICAL: Only score high (70+) if there's clear evidence of:
-1. Federal program involvement (Medicare/Medicaid/TRICARE/VA)
-2. Fraudulent claims (not just bad medicine)
-3. Pattern or systematic practice (not isolated error)
-4. Recent enough to sue (within 6 years)
-5. Substantial damages (preferably >$500k)
+SCORING RULES - FOLLOW STRICTLY:
 
-Be conservative - a bad qui tam case wastes years and costs millions. Only flag genuine opportunities.
+1. If record mentions "settlement", "agreed to pay", "resolved" → Score ≤10 (already filed)
+2. If record from DOJ press release or government announcement → Score ≤15 (publicly disclosed)
+3. If >6 years old → Score ≤20 (statute of limitations)
+4. If no Medicare/Medicaid mention → Score ≤30 (not federal program)
+5. If isolated incident ("one patient") → Score ≤40 (need pattern)
+6. If damages <$500k → Score ≤50 (too small for qui tam)
 
-Now analyze this record for qui tam potential:
+BOOST SCORING FOR:
+- Explicit billing amounts: +10 points
+- "Routine" or "systematic" or "standard practice": +15 points
+- Multiple fraud types combined: +10 points
+- Corporate defendant with deep pockets: +10 points
+- Recent (within 2 years): +15 points
+- Clear documentation mentioned: +10 points
+
+EXAMPLES:
+
+EXAMPLE 1 - HIGH SCORE (95):
+Record: "Dr. Smith's clinic routinely billed Medicare Part B for comprehensive office visits (CPT 99215) when only basic visits (99213) were provided. Billing records from 2022-2024 show 847 instances of upcoding across 200+ Medicare patients. Clinic administrator noted this was 'standard practice to maximize reimbursement.' Estimated excess billings: $180,000."
+
+Response:
+{
+    "headline": "Systematic Medicare upcoding scheme with documented pattern across 200+ patients and $180K in damages",
+    "qui_tam_score": 95,
+    "case_status": "unfiled",
+    "reason": "Clear pattern of systematic upcoding with specific dollar amounts, recent timeframe, documentation exists, and no public disclosure. Strong False Claims Act case.",
+    "fraud_type": "upcoding",
+    "public_disclosure": "no",
+    "first_to_file_viable": "yes",
+    "red_flags": [],
+    "green_flags": ["Specific dollar amount", "Documented pattern", "Recent", "Multiple patients", "Evidence exists"]
+}
+
+EXAMPLE 2 - LOW SCORE (5):
+Record: "In 2018, XYZ Health settled with DOJ for $3.2 million for billing Medicare for unnecessary cardiac procedures. The settlement resolved allegations that the hospital performed medically unnecessary stent placements from 2015-2017."
+
+Response:
+{
+    "headline": "Already settled qui tam case - not viable for new filing",
+    "qui_tam_score": 5,
+    "case_status": "settled",
+    "reason": "This case has already been settled with DOJ. First-to-file rule prevents new qui tam cases on publicly disclosed fraud.",
+    "fraud_type": "unnecessary procedures",
+    "public_disclosure": "yes",
+    "first_to_file_viable": "no",
+    "red_flags": ["Already settled", "DOJ settlement announced", "Publicly disclosed"],
+    "green_flags": []
+}
+
+EXAMPLE 3 - MEDIUM SCORE (65):
+Record: "State medical board suspended Dr. Johnson's license for 'improper billing practices' in 2023. Board documents mention 'concerns raised about billing for services not documented' and multiple patient complaints about charges for visits that didn't occur."
+
+Response:
+{
+    "headline": "Potential phantom billing case but needs verification of Medicare involvement",
+    "qui_tam_score": 65,
+    "case_status": "unknown",
+    "reason": "State action suggests billing fraud, but federal program involvement not confirmed. Need to verify if Medicare/Medicaid patients were affected. Recent and pattern suggested.",
+    "fraud_type": "phantom billing",
+    "public_disclosure": "possible",
+    "first_to_file_viable": "unclear",
+    "red_flags": ["Federal program involvement unclear", "State board action may have made it public"],
+    "green_flags": ["Recent", "Pattern suggested", "Multiple patients"]
+}
+
+Now analyze this medical provider record for qui tam potential:
 """
 
 DEFAULT_SYSTEM_PROMPT = QUI_TAM_RANKING_PROMPT
@@ -155,6 +247,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=Path,
+        default=Path("ranker_config.toml"),
         help="Optional TOML config file to supply defaults (see ranker_config.example.toml).",
     )
     parser.add_argument(
@@ -177,12 +270,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--endpoint",
-        default="http://localhost:5002/v1",
+        default="http://127.0.0.1:1234/v1",
         help="Base URL of the OpenAI-compatible server.",
     )
     parser.add_argument(
         "--model",
-        default="openai/gpt-oss-120b",
+        default="openai/gpt-oss-20b",
         help="Model identifier exposed by the server (check via --list-models).",
     )
     parser.add_argument(
@@ -237,7 +330,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--chunk-size",
         type=int,
-        default=1000,
+        default=0,
         help="If >0, rotate outputs every N source rows and store chunk files in --chunk-dir.",
     )
     parser.add_argument(
@@ -272,7 +365,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-rows",
         type=int,
-        default=None,
+        default=10,
         help="Limit processing to the first N rows (useful for smoke-tests).",
     )
     parser.add_argument(
