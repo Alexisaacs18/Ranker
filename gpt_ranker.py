@@ -365,7 +365,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-rows",
         type=int,
-        default=10,
+        default=100,
         help="Limit processing to the first N rows (useful for smoke-tests).",
     )
     parser.add_argument(

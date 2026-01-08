@@ -21,6 +21,7 @@ from pathlib import Path
 import re
 from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
+import sys
 
 # ============================================
 # CONFIGURATION
@@ -235,6 +236,161 @@ def scrape_open_payments_high_prescribers():
     except Exception as e:
         print(f"❌ Error: {e}")
         return []
+
+#!/usr/bin/env python3
+"""
+Add this function to your unfiled_qui_tam_scraper.py
+
+Place it AFTER the FAERS function and BEFORE the LEIE function
+"""
+
+# ============================================
+# NEW: MEDICARE PART D PRESCRIBER DATA
+# ============================================
+
+def scrape_medicare_part_d_high_prescribers():
+    """
+    Medicare Part D Prescriber Data - WORKING API
+    Strategy: High prescribers + Open Payments = kickback leads
+    """
+    print("\n" + "="*60)
+    print("5. Medicare Part D High Prescribers (KICKBACK LEADS)")
+    print("="*60)
+    
+    # WORKING API URL (Jan 2025)
+    api_url = "https://data.cms.gov/data-api/v1/dataset/9552739e-3d05-4c1b-8eff-ecabf391e2e5/data"
+    
+    records = []
+    
+    try:
+        # Query for top prescribers by total drug cost
+        params = {
+            'size': 1000,  # Get top 1000 prescribers
+            'offset': 0,
+            'sort': 'Tot_Drug_Cst:desc'  # Sort by total cost
+        }
+        
+        print("Querying high-cost Medicare Part D prescribers...")
+        print(f"API: {api_url}")
+        
+        response = requests.get(api_url, params=params, headers=HEADERS, timeout=60)
+        response.raise_for_status()
+        
+        data = response.json()
+        
+        print(f"✅ Retrieved {len(data)} prescriber records")
+        
+        # Analyze for fraud patterns
+        for idx, prescriber in enumerate(data):
+            try:
+                # Get key fields
+                npi = prescriber.get('Prscrbr_NPI', '')
+                first_name = prescriber.get('Prscrbr_First_Name', '')
+                last_name = prescriber.get('Prscrbr_Last_Name', '')
+                specialty = prescriber.get('Prscrbr_Type', '')
+                state = prescriber.get('Prscrbr_State_Abrvtn', '')
+                
+                # Financial data
+                total_cost = float(prescriber.get('Tot_Drug_Cst', 0))
+                total_claims = int(prescriber.get('Tot_Clms', 0))
+                beneficiary_count = int(prescriber.get('Tot_Benes', 0))
+                
+                # Calculate fraud indicators
+                fraud_score = 50  # Base score for high prescriber
+                fraud_indicators = []
+                
+                # INDICATOR 1: Very high total cost
+                if total_cost >= 5000000:  # $5M+
+                    fraud_score += 35
+                    fraud_indicators.append(f'Very high Medicare spending: ${total_cost/1000000:.1f}M')
+                elif total_cost >= 2000000:  # $2M+
+                    fraud_score += 25
+                    fraud_indicators.append(f'High Medicare spending: ${total_cost/1000000:.1f}M')
+                
+                # INDICATOR 2: High cost per beneficiary
+                if beneficiary_count > 0:
+                    cost_per_bene = total_cost / beneficiary_count
+                    if cost_per_bene >= 15000:  # $15k+ per patient
+                        fraud_score += 20
+                        fraud_indicators.append(f'Very high cost per patient: ${cost_per_bene:,.0f}/patient')
+                    elif cost_per_bene >= 10000:  # $10k+ per patient
+                        fraud_score += 15
+                        fraud_indicators.append(f'High cost per patient: ${cost_per_bene:,.0f}/patient')
+                
+                # INDICATOR 3: High claims volume
+                if total_claims >= 10000:
+                    fraud_score += 15
+                    fraud_indicators.append(f'Very high claim volume: {total_claims:,} claims')
+                elif total_claims >= 5000:
+                    fraud_score += 10
+                    fraud_indicators.append(f'High claim volume: {total_claims:,} claims')
+                
+                # INDICATOR 4: High beneficiary count (possible mill)
+                if beneficiary_count >= 2000:
+                    fraud_score += 10
+                    fraud_indicators.append(f'Very high patient volume: {beneficiary_count:,} patients')
+                
+                # Only include high-value targets (score 70+ OR cost $2M+)
+                if fraud_score >= 70 or total_cost >= 2000000:
+                    provider_name = f"{first_name} {last_name}".strip()
+                    
+                    record = {
+                        "id": f"partd_{idx}",
+                        "provider_name": provider_name,
+                        "npi": npi,
+                        "specialty": specialty,
+                        "state": state,
+                        "total_drug_cost": total_cost,
+                        "total_claims": total_claims,
+                        "beneficiary_count": beneficiary_count,
+                        "cost_per_beneficiary": round(cost_per_bene, 2) if beneficiary_count > 0 else 0,
+                        "fraud_indicators": fraud_indicators,
+                        "fraud_potential_score": fraud_score,
+                        "case_status": "unfiled",
+                        "next_steps": f"1. Cross-reference NPI {npi} with Open Payments; 2. Download detailed drug-level data for this prescriber; 3. Compare to specialty averages",
+                        "source": "Medicare Part D"
+                    }
+                    records.append(record)
+                    
+                    # Show first 10
+                    if len(records) <= 10:
+                        print(f"  🎯 {provider_name} ({specialty}) - ${total_cost/1000000:.1f}M - Score: {fraud_score}")
+                
+            except Exception as e:
+                continue
+        
+        output_file = DATA_DIR / "medicare_part_d_high_prescribers.json"
+        with open(output_file, 'w') as f:
+            json.dump(records, f, indent=2)
+        
+        print(f"\n✅ Found {len(records)} high-value prescribers")
+        
+        if records:
+            total_spending = sum(r['total_drug_cost'] for r in records)
+            avg_spending = total_spending / len(records)
+            print(f"   Total spending: ${total_spending/1000000:.1f}M")
+            print(f"   Average: ${avg_spending/1000000:.1f}M per prescriber")
+            print(f"   Highest: ${max(r['total_drug_cost'] for r in records)/1000000:.1f}M")
+        
+        return records
+        
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        print("\nAPI failed. Alternative:")
+        print("1. Go to: https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers")
+        print("2. Download CSV manually")
+        print("3. Save as: data/raw/medicare_part_d_prescribers.csv")
+        return []
+
+
+# ADD THIS TO YOUR combine_for_ranker() function:
+# In the source_files list, add:
+#     "medicare_part_d_high_prescribers.json",
+
+# ADD THIS TO YOUR main() function:
+# After the Device Fraud section, add:
+#     results['Part D High Prescribers'] = scrape_medicare_part_d_high_prescribers()
+#     time.sleep(2)
 
 
 # ============================================
@@ -555,81 +711,188 @@ def scrape_cms_leie_recent():
 def combine_for_ranker():
     """
     Combine all sources into JSONL for ranker
+    OPTIMIZED for large CSV files with progress tracking
     """
     print("\n" + "="*60)
     print("Combining Data for Ranker")
     print("="*60)
     
     combined_records = []
-    source_files = [
-        "fda_warning_letters_unfiled.json",
-        "open_payments_kickback_potential.json",
-        "faers_offlabel_potential.json",
-        "device_recalls_fraud_potential.json",
-        "cms_leie_recent_unfiled.json"
-    ]
     
-    for source_file in source_files:
-        file_path = DATA_DIR / source_file
-        if not file_path.exists():
-            continue
+    # Get ALL .json and .csv files
+    print(f"Scanning directory: {DATA_DIR}")
+    json_files = list(DATA_DIR.glob("*.json"))
+    csv_files = list(DATA_DIR.glob("*.csv"))
+    
+    all_files = json_files + csv_files
+    
+    print(f"Found {len(json_files)} JSON files and {len(csv_files)} CSV files")
+    print(f"Total: {len(all_files)} files to process")
+    
+    if not all_files:
+        print("⚠️  No JSON or CSV files found in data/raw!")
+        return None
+    
+    # ============================================
+    # PROCESS JSON FILES
+    # ============================================
+    for file_path in json_files:
+        print(f"  Loading JSON: {file_path.name}")
         
         try:
             with open(file_path, 'r') as f:
                 records = json.load(f)
             
+            if not isinstance(records, list):
+                records = [records]
+            
             for record in records:
-                # Format as text for ranker
                 text_parts = []
                 
-                text_parts.append(f"SOURCE: {record.get('source', 'Unknown')}")
+                text_parts.append(f"SOURCE: {record.get('source', file_path.stem)}")
                 text_parts.append(f"CASE STATUS: {record.get('case_status', 'unknown')}")
                 text_parts.append(f"FRAUD POTENTIAL SCORE: {record.get('fraud_potential_score', 0)}")
                 text_parts.append("")
                 
-                # Add fraud indicators prominently
                 if 'fraud_indicators' in record and record['fraud_indicators']:
                     text_parts.append("FRAUD INDICATORS:")
                     for indicator in record['fraud_indicators']:
                         text_parts.append(f"  - {indicator}")
                     text_parts.append("")
                 
-                # Add all other fields
                 for key, value in record.items():
                     if key not in ['id', 'source', 'case_status', 'fraud_potential_score', 'fraud_indicators']:
                         if isinstance(value, list):
-                            if value:  # Only if list is not empty
+                            if value:
                                 text_parts.append(f"{key.upper().replace('_', ' ')}: {', '.join(str(v) for v in value[:10])}")
                         else:
                             text_parts.append(f"{key.upper().replace('_', ' ')}: {value}")
                 
                 combined_records.append({
-                    "source": record.get('source'),
-                    "filename": record.get('id'),
+                    "source": record.get('source', file_path.stem),
+                    "filename": record.get('id', f"{file_path.stem}_{len(combined_records)}"),
                     "text": "\n".join(text_parts),
                     "metadata": record
                 })
+            
+            print(f"    ✅ Loaded {len(records)} records from {file_path.name}")
         
         except Exception as e:
-            print(f"⚠️  Error loading {source_file}: {e}")
+            print(f"    ⚠️  Error loading {file_path.name}: {e}")
     
-    # Save as JSONL
+    # ============================================
+    # PROCESS CSV FILES - OPTIMIZED
+    # ============================================
+    for file_path in csv_files:
+        print(f"  Loading CSV: {file_path.name}")
+        
+        # Check file size
+        file_size_mb = file_path.stat().st_size / (1024 * 1024)
+        print(f"    File size: {file_size_mb:.1f} MB")
+        
+        try:
+            # Set limits based on file size
+            if file_size_mb > 100:  # Very large files
+                max_rows = 1000
+                print(f"    ⚠️  Large file detected, limiting to {max_rows:,} rows")
+            elif file_size_mb > 50:  # Large files
+                max_rows = 5000
+                print(f"    ⚠️  Limiting to {max_rows:,} rows")
+            else:  # Normal files
+                max_rows = 10000
+            
+            row_count = 0
+            processed_count = 0
+            
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                # First, count total rows quickly
+                print(f"    Counting rows...", end='', flush=True)
+                total_rows = sum(1 for _ in f) - 1  # Subtract header
+                print(f" {total_rows:,} rows found")
+                
+                # Reset file pointer
+                f.seek(0)
+                
+                reader = csv.DictReader(f)
+                
+                print(f"    Processing (max {max_rows:,})...", end='', flush=True)
+                
+                for idx, row in enumerate(reader):
+                    if idx >= max_rows:
+                        break
+                    
+                    row_count += 1
+                    
+                    # Progress indicator every 100 rows
+                    if row_count % 100 == 0:
+                        print(f"\r    Processing row {row_count:,}/{min(max_rows, total_rows):,}...", end='', flush=True)
+                    
+                    # Skip rows with no useful data
+                    non_empty_values = [v for v in row.values() if v and str(v).strip()]
+                    if len(non_empty_values) < 3:  # Must have at least 3 non-empty fields
+                        continue
+                    
+                    # Format CSV row as text (SIMPLIFIED for speed)
+                    text_parts = [
+                        f"SOURCE: {file_path.stem}",
+                        f"FILE TYPE: CSV",
+                        f"ROW NUMBER: {idx + 1}",
+                        ""
+                    ]
+                    
+                    # Add only the most important columns (first 20 non-empty)
+                    added = 0
+                    for key, value in row.items():
+                        if value and str(value).strip() and added < 20:
+                            clean_key = key.strip().upper().replace('_', ' ')
+                            clean_value = str(value).strip()
+                            if len(clean_value) > 200:  # Shorter truncation
+                                clean_value = clean_value[:200] + "..."
+                            text_parts.append(f"{clean_key}: {clean_value}")
+                            added += 1
+                    
+                    combined_records.append({
+                        "source": file_path.stem,
+                        "filename": f"{file_path.stem}_row_{idx}",
+                        "text": "\n".join(text_parts),
+                        "metadata": {
+                            "file_type": "csv",
+                            "source_file": file_path.name,
+                            "row_number": idx + 1
+                        }
+                    })
+                    processed_count += 1
+            
+            print(f"\r    ✅ Loaded {processed_count:,} rows from {file_path.name}")
+        
+        except Exception as e:
+            print(f"\n    ⚠️  Error loading {file_path.name}: {e}")
+    
+    # ============================================
+    # SAVE COMBINED DATA
+    # ============================================
     output_dir = DATA_DIR.parent / "processed"
     output_dir.mkdir(exist_ok=True)
     output_file = output_dir / "combined_medical_fraud_data.jsonl"
     
+    print(f"\nWriting {len(combined_records):,} records to JSONL...")
     with open(output_file, 'w') as f:
-        for record in combined_records:
+        for i, record in enumerate(combined_records):
+            if i % 1000 == 0 and i > 0:
+                print(f"  Written {i:,}/{len(combined_records):,}...", end='\r', flush=True)
             f.write(json.dumps(record) + '\n')
     
-    print(f"✅ Combined {len(combined_records)} records")
+    print(f"\n✅ Combined {len(combined_records):,} records from {len(all_files)} files")
+    print(f"   - JSON files: {len(json_files)}")
+    print(f"   - CSV files: {len(csv_files)}")
     print(f"   Output: {output_file}")
+    print(f"   File size: {output_file.stat().st_size / (1024*1024):.1f} MB")
     
     # Show sample
     if combined_records:
-        print("\nSample record:")
+        print("\nSample record (first):")
         print("-" * 60)
-        print(combined_records[0]['text'][:600])
+        print(combined_records[0]['text'][:400])
         print("...")
     
     return output_file
