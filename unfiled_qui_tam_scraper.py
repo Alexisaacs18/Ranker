@@ -81,28 +81,18 @@ def scrape_fda_warning_letters():
                 
                 # Look for qui tam indicators
                 qui_tam_indicators = []
-                fraud_score = 0
-                
+
                 # Check for Medicare/Medicaid mentions
                 if 'medicare' in content.lower() or 'medicaid' in content.lower():
                     qui_tam_indicators.append('Federal healthcare program mentioned')
-                    fraud_score += 30
-                
+
                 # Check for fraud-related violations
-                fraud_keywords = {
-                    'off-label': 20,
-                    'misleading': 15,
-                    'false claim': 25,
-                    'kickback': 30,
-                    'promotional': 10,
-                    'unapproved use': 20,
-                    'misbranding': 10
-                }
-                
-                for keyword, points in fraud_keywords.items():
+                fraud_keywords = ['off-label', 'misleading', 'false claim', 'kickback',
+                                'promotional', 'unapproved use', 'misbranding']
+
+                for keyword in fraud_keywords:
                     if keyword in content.lower():
                         qui_tam_indicators.append(f'Violation: {keyword}')
-                        fraud_score += points
                 
                 # Extract company name
                 company_match = re.search(r'([A-Z][A-Za-z\s&.,]+(?:Inc|LLC|Corp|Co|Pharma|Laboratories))', content)
@@ -111,9 +101,9 @@ def scrape_fda_warning_letters():
                 # Extract drug/device names
                 drug_pattern = r'\b([A-Z][a-z]+(?:mab|nib|pril|olol|statin|mycin))\b'
                 drugs = list(set(re.findall(drug_pattern, content)))
-                
-                # Only include if has qui tam potential (fraud_score > 15)
-                if fraud_score >= 15:
+
+                # Include if has qui tam indicators
+                if qui_tam_indicators:
                     record = {
                         "id": f"fda_warn_{idx}",
                         "company": company,
@@ -121,7 +111,6 @@ def scrape_fda_warning_letters():
                         "date": pub_date,
                         "drugs_mentioned": drugs[:5],  # Top 5
                         "qui_tam_indicators": qui_tam_indicators,
-                        "fraud_potential_score": fraud_score,
                         "violation_summary": description[:300],
                         "letter_content": content[:2000],
                         "url": link,
@@ -129,7 +118,7 @@ def scrape_fda_warning_letters():
                         "source": "FDA Warning Letters"
                     }
                     records.append(record)
-                    print(f"  ✅ {company} - Score: {fraud_score}")
+                    print(f"  ✅ {company}")
                     
             except Exception as e:
                 print(f"  ⚠️  Error: {e}")
@@ -194,19 +183,15 @@ def scrape_open_payments_high_prescribers():
                 
                 # Calculate fraud indicators
                 fraud_indicators = []
-                fraud_score = 40  # Base score for high payment
-                
+
                 # Suspicious payment types
                 suspicious_natures = ['Consulting Fee', 'Compensation for services other than consulting', 'Honoraria', 'Travel and Lodging']
                 if any(s.lower() in nature.lower() for s in suspicious_natures):
                     fraud_indicators.append(f'Suspicious payment type: {nature}')
-                    fraud_score += 15
-                
-                # Multiple payments boost score
-                # (In reality, would query for this physician's total)
+
+                # Multiple payments indicator
                 if amount > 100000:
                     fraud_indicators.append('Very high single payment (>$100k)')
-                    fraud_score += 20
                 
                 record = {
                     "id": f"kickback_{idx}",
@@ -219,7 +204,6 @@ def scrape_open_payments_high_prescribers():
                     "payment_date": result.get('Date_of_Payment', ''),
                     "product_name": result.get('Name_of_Associated_Covered_Drug_or_Biological1', ''),
                     "fraud_indicators": fraud_indicators,
-                    "fraud_potential_score": fraud_score,
                     "case_status": "unfiled",
                     "next_steps": "Cross-reference with Medicare prescribing data to establish pattern",
                     "source": "CMS Open Payments"
@@ -296,42 +280,34 @@ def scrape_medicare_part_d_high_prescribers():
                 beneficiary_count = int(prescriber.get('Tot_Benes', 0))
                 
                 # Calculate fraud indicators
-                fraud_score = 50  # Base score for high prescriber
                 fraud_indicators = []
-                
+
                 # INDICATOR 1: Very high total cost
                 if total_cost >= 5000000:  # $5M+
-                    fraud_score += 35
                     fraud_indicators.append(f'Very high Medicare spending: ${total_cost/1000000:.1f}M')
                 elif total_cost >= 2000000:  # $2M+
-                    fraud_score += 25
                     fraud_indicators.append(f'High Medicare spending: ${total_cost/1000000:.1f}M')
-                
+
                 # INDICATOR 2: High cost per beneficiary
                 if beneficiary_count > 0:
                     cost_per_bene = total_cost / beneficiary_count
                     if cost_per_bene >= 15000:  # $15k+ per patient
-                        fraud_score += 20
                         fraud_indicators.append(f'Very high cost per patient: ${cost_per_bene:,.0f}/patient')
                     elif cost_per_bene >= 10000:  # $10k+ per patient
-                        fraud_score += 15
                         fraud_indicators.append(f'High cost per patient: ${cost_per_bene:,.0f}/patient')
-                
+
                 # INDICATOR 3: High claims volume
                 if total_claims >= 10000:
-                    fraud_score += 15
                     fraud_indicators.append(f'Very high claim volume: {total_claims:,} claims')
                 elif total_claims >= 5000:
-                    fraud_score += 10
                     fraud_indicators.append(f'High claim volume: {total_claims:,} claims')
-                
+
                 # INDICATOR 4: High beneficiary count (possible mill)
                 if beneficiary_count >= 2000:
-                    fraud_score += 10
                     fraud_indicators.append(f'Very high patient volume: {beneficiary_count:,} patients')
-                
-                # Only include high-value targets (score 70+ OR cost $2M+)
-                if fraud_score >= 70 or total_cost >= 2000000:
+
+                # Include high-value targets (cost $2M+)
+                if total_cost >= 2000000:
                     provider_name = f"{first_name} {last_name}".strip()
                     
                     record = {
@@ -345,16 +321,15 @@ def scrape_medicare_part_d_high_prescribers():
                         "beneficiary_count": beneficiary_count,
                         "cost_per_beneficiary": round(cost_per_bene, 2) if beneficiary_count > 0 else 0,
                         "fraud_indicators": fraud_indicators,
-                        "fraud_potential_score": fraud_score,
                         "case_status": "unfiled",
                         "next_steps": f"1. Cross-reference NPI {npi} with Open Payments; 2. Download detailed drug-level data for this prescriber; 3. Compare to specialty averages",
                         "source": "Medicare Part D"
                     }
                     records.append(record)
-                    
+
                     # Show first 10
                     if len(records) <= 10:
-                        print(f"  🎯 {provider_name} ({specialty}) - ${total_cost/1000000:.1f}M - Score: {fraud_score}")
+                        print(f"  🎯 {provider_name} ({specialty}) - ${total_cost/1000000:.1f}M")
                 
             except Exception as e:
                 continue
@@ -458,23 +433,19 @@ def scrape_faers_medicare_overlap():
         
         # Create records for drugs with high adverse event rates
         for idx, (drug_name, data) in enumerate(sorted(drug_events.items(), key=lambda x: x[1]['count'], reverse=True)[:100]):
-            
+
             if data['count'] >= 5:  # At least 5 events
-                fraud_score = 30  # Base score
                 fraud_indicators = []
-                
-                # More events = higher score
+
+                # Event volume indicator
                 if data['count'] >= 20:
-                    fraud_score += 30
                     fraud_indicators.append(f"High adverse event volume: {data['count']} reports")
                 elif data['count'] >= 10:
-                    fraud_score += 20
                     fraud_indicators.append(f"Moderate adverse event volume: {data['count']} reports")
-                
+
                 # Diverse indications = potential off-label use
                 unique_indications = len(set(data['indications']))
                 if unique_indications >= 5:
-                    fraud_score += 25
                     fraud_indicators.append(f"Multiple indications ({unique_indications}) suggesting off-label use")
                 
                 record = {
@@ -484,7 +455,6 @@ def scrape_faers_medicare_overlap():
                     "serious_outcomes": list(set(data['serious_outcomes']))[:10],
                     "indication_diversity": unique_indications,
                     "fraud_indicators": fraud_indicators,
-                    "fraud_potential_score": fraud_score,
                     "case_status": "unfiled",
                     "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
                     "source": "FDA FAERS"
@@ -542,44 +512,32 @@ def scrape_device_recalls_medicare():
             firm = recall.get('recalling_firm', '')
             recall_date = recall.get('recall_initiation_date', '')
             
-            # Score based on severity and reason
-            fraud_score = 0
+            # Collect fraud indicators based on severity and reason
             fraud_indicators = []
-            
+
             if classification == 'Class I':
-                fraud_score += 40
                 fraud_indicators.append('Class I recall (most serious)')
             elif classification == 'Class II':
-                fraud_score += 25
                 fraud_indicators.append('Class II recall (serious)')
-            
+
             # Look for fraud-relevant reasons
-            fraud_keywords = {
-                'defect': 15,
-                'malfunction': 15,
-                'failure': 15,
-                'adverse': 20,
-                'death': 30,
-                'injury': 25
-            }
-            
+            fraud_keywords = ['defect', 'malfunction', 'failure', 'adverse', 'death', 'injury']
+
             reason_lower = reason.lower()
-            for keyword, points in fraud_keywords.items():
+            for keyword in fraud_keywords:
                 if keyword in reason_lower:
-                    fraud_score += points
                     fraud_indicators.append(f'Serious issue: {keyword}')
                     break  # Only add once
-            
+
             # Check if recent (more likely still being billed)
             try:
                 recall_year = int(recall_date[:4]) if recall_date else 2020
                 if recall_year >= 2022:
-                    fraud_score += 20
                     fraud_indicators.append('Recent recall (likely still being billed)')
             except:
                 pass
-            
-            if fraud_score >= 40:  # Threshold for qui tam potential
+
+            if fraud_indicators:  # Include if has indicators
                 record = {
                     "id": f"recall_{idx}",
                     "product_description": product,
@@ -588,7 +546,6 @@ def scrape_device_recalls_medicare():
                     "recalling_firm": firm,
                     "recall_date": recall_date,
                     "fraud_indicators": fraud_indicators,
-                    "fraud_potential_score": fraud_score,
                     "case_status": "unfiled",
                     "next_steps": "Check Medicare claims data for continued billing of recalled device",
                     "source": "FDA Device Recalls"
@@ -657,20 +614,16 @@ def scrape_cms_leie_recent():
                             provider_name = f"{row.get('FIRSTNAME', '')} {row.get('LASTNAME', '')}".strip()
                             if not provider_name:
                                 provider_name = row.get('BUSNAME', 'Unknown')
-                            
-                            # Calculate fraud score
-                            fraud_score = 50  # Base for recent fraud exclusion
+
+                            # Collect fraud indicators
                             fraud_indicators = ['Recent exclusion (unfiled qui tam opportunity)']
-                            
-                            # Boost score for specific fraud types
+
+                            # Identify specific fraud types
                             if 'false claim' in excltype:
-                                fraud_score += 25
                                 fraud_indicators.append('False Claims Act violation')
                             if 'kickback' in excltype:
-                                fraud_score += 25
                                 fraud_indicators.append('Kickback violation')
                             if 'medicare' in excltype or 'medicaid' in excltype:
-                                fraud_score += 20
                                 fraud_indicators.append('Federal healthcare program fraud')
                             
                             record = {
@@ -683,7 +636,6 @@ def scrape_cms_leie_recent():
                                 "specialty": row.get('SPECIALTY', ''),
                                 "npi": row.get('NPI', ''),
                                 "fraud_indicators": fraud_indicators,
-                                "fraud_potential_score": fraud_score,
                                 "case_status": "unfiled",
                                 "next_steps": "Investigate if qui tam case already filed; if not, potential opportunity",
                                 "source": "CMS LEIE"
@@ -751,7 +703,6 @@ def combine_for_ranker():
                 
                 text_parts.append(f"SOURCE: {record.get('source', file_path.stem)}")
                 text_parts.append(f"CASE STATUS: {record.get('case_status', 'unknown')}")
-                text_parts.append(f"FRAUD POTENTIAL SCORE: {record.get('fraud_potential_score', 0)}")
                 text_parts.append("")
                 
                 if 'fraud_indicators' in record and record['fraud_indicators']:
@@ -761,7 +712,7 @@ def combine_for_ranker():
                     text_parts.append("")
                 
                 for key, value in record.items():
-                    if key not in ['id', 'source', 'case_status', 'fraud_potential_score', 'fraud_indicators']:
+                    if key not in ['id', 'source', 'case_status', 'fraud_indicators']:
                         if isinstance(value, list):
                             if value:
                                 text_parts.append(f"{key.upper().replace('_', ' ')}: {', '.join(str(v) for v in value[:10])}")

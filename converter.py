@@ -18,61 +18,34 @@ except OverflowError:
     csv.field_size_limit(2**31 - 1)
 
 
-def get_fraud_score(record: Dict[str, Any]) -> Optional[int]:
-    """Extract fraud score from record, checking both top level and metadata."""
-    # Check top level first
-    if 'fraud_potential_score' in record:
-        try:
-            return int(record['fraud_potential_score'])
-        except (ValueError, TypeError):
-            pass
-    
-    # Check metadata
-    metadata = record.get('metadata', {})
-    if isinstance(metadata, dict) and 'fraud_potential_score' in metadata:
-        try:
-            return int(metadata['fraud_potential_score'])
-        except (ValueError, TypeError):
-            pass
-    
-    # No score found - return None to include it (don't filter out)
-    return None
+# Removed fraud score filtering - all scoring now done by gpt_ranker.py
 
 
-def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True, min_score: int = 50) -> tuple:
-    """Convert JSONL to CSV format for ranker, filtering by fraud score.
-    
+def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True) -> int:
+    """Convert JSONL to CSV format for ranker.
+
     Returns:
-        tuple: (records_converted, records_skipped)
+        int: number of records converted
     """
     if not jsonl_path.exists():
         raise FileNotFoundError(f"Input file not found: {jsonl_path}")
-    
+
     records_converted = 0
-    records_skipped = 0
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with jsonl_path.open('r', encoding='utf-8') as infile, \
          csv_path.open('w', newline='', encoding='utf-8') as outfile:
-        
+
         writer = csv.DictWriter(outfile, fieldnames=['filename', 'text'])
         writer.writeheader()
-        
+
         for line_num, line in enumerate(infile, start=1):
             line = line.strip()
             if not line:
                 continue
-                
+
             try:
                 record = json.loads(line)
-                
-                # FILTER BY FRAUD SCORE
-                fraud_score = get_fraud_score(record)
-                if fraud_score is not None and fraud_score < min_score:
-                    records_skipped += 1
-                    if verbose and records_skipped % 100 == 0:
-                        print(f"  Skipped {records_skipped} low-score records (< {min_score})...", flush=True)
-                    continue
                 
                 # Get filename
                 filename = record.get('filename') or record.get('id', f'record_{line_num}')
@@ -84,22 +57,22 @@ def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True, min_sco
                     'filename': filename,
                     'text': text
                 })
-                
+
                 records_converted += 1
-                
-                if verbose and records_converted % 50 == 0:
+
+                if verbose and records_converted % 100 == 0:
                     print(f"  Converted {records_converted} records...", flush=True)
-                    
+
             except json.JSONDecodeError as e:
-                print(f"Warning: Skipping invalid JSON on line {line_num}: {e}", 
+                print(f"Warning: Skipping invalid JSON on line {line_num}: {e}",
                       file=sys.stderr)
                 continue
             except Exception as e:
-                print(f"Warning: Error processing line {line_num}: {e}", 
+                print(f"Warning: Error processing line {line_num}: {e}",
                       file=sys.stderr)
                 continue
-    
-    return records_converted, records_skipped
+
+    return records_converted
 
 
 def format_record_as_text(record: Dict[str, Any]) -> str:
@@ -123,12 +96,7 @@ def format_record_as_text(record: Dict[str, Any]) -> str:
     case_status = metadata.get('case_status') or record.get('case_status')
     if case_status:
         lines.append(f"CASE STATUS: {case_status}")
-    
-    # Add fraud score if present
-    fraud_score = metadata.get('fraud_potential_score') or record.get('fraud_potential_score')
-    if fraud_score:
-        lines.append(f"FRAUD POTENTIAL SCORE: {fraud_score}")
-    
+
     lines.append("")
     
     # Add fraud indicators prominently
@@ -379,26 +347,19 @@ def main():
         help='Output CSV file'
     )
     parser.add_argument(
-        '--min-score',
-        type=int,
-        default=50,
-        help='Minimum fraud potential score to include (default: 0)'
-    )
-    parser.add_argument(
         '--quiet',
         action='store_true',
         help='Suppress progress messages'
     )
     
     args = parser.parse_args()
-    
+
     print(f"Converting {args.input} to {args.output}...")
-    print(f"Filtering: Only including records with fraud_potential_score >= {args.min_score}")
-    
+    print("Note: All scoring will be done by gpt_ranker.py")
+
     try:
-        count, skipped = jsonl_to_csv(args.input, args.output, verbose=not args.quiet, min_score=args.min_score)
+        count = jsonl_to_csv(args.input, args.output, verbose=not args.quiet)
         print(f"\n✅ Successfully converted {count} records")
-        print(f"   Skipped {skipped} records with score < {args.min_score}")
         print(f"   Output: {args.output}")
         print(f"\nNext step:")
         print(f"   python gpt_ranker.py --chunk-size 0 --max-rows 10")
