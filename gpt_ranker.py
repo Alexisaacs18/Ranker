@@ -9,6 +9,8 @@ import json
 import re
 import sys
 import time
+import re
+from typing import Optional
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
@@ -253,7 +255,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path("data/processed/combined_qui_tam_data.jsonl"),
+        default=Path("data/processed/combined_qui_tam_data.csv"),
         help="Path to the source CSV with 'filename' and 'text' columns.",
     )
     parser.add_argument(
@@ -365,8 +367,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-rows",
         type=int,
-        default=100,
+        default=50,
         help="Limit processing to the first N rows (useful for smoke-tests).",
+    )
+    parser.add_argument(
+        "--min-score",
+        type=int,
+        default=50,
+        help="Skip records with existing fraud_potential_score below this threshold (0 to disable).",
     )
     parser.add_argument(
         "--sleep",
@@ -421,6 +429,30 @@ def parse_args() -> argparse.Namespace:
         args.config = config_path
         apply_config_defaults(parser, args)
     return args
+
+def extract_fraud_score_from_text(text: str) -> Optional[int]:
+    """Extract fraud potential score from the CSV text field."""
+    match = re.search(r'FRAUD POTENTIAL SCORE:\s*(\d+)', text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def should_skip_row(row: dict, min_score: int = 50) -> tuple:
+    """
+    Check if a row should be skipped based on existing fraud score.
+    
+    Returns:
+        tuple: (should_skip: bool, fraud_score: Optional[int])
+    """
+    text = row.get('text', '')
+    fraud_score = extract_fraud_score_from_text(text)
+    
+    # If there's a score and it's below minimum, skip it
+    if fraud_score is not None and fraud_score < min_score:
+        return (True, fraud_score)
+    
+    return (False, fraud_score)
 
 
 def load_system_prompt(args: argparse.Namespace) -> Tuple[str, str]:
@@ -1134,6 +1166,8 @@ def main() -> None:
         f"Processing {target_total} new rows within {range_desc} "
         f"(skipping {already_done} already completed, total considered {total_candidates})."
     )
+    if args.min_score > 0:
+        print(f"Post-filtering enabled: Skipping GPT results with score < {args.min_score}")
 
     output_router = OutputRouter(args, fieldnames)
 
@@ -1195,6 +1229,13 @@ def main() -> None:
                     reasoning_effort=args.reasoning_effort,
                     config_metadata=config_metadata,
                 )
+                
+                # Filter based on GPT's NEW score (not the old scraper score)
+                new_score = result.get("qui_tam_score", 0)
+                if args.min_score > 0 and new_score < args.min_score:
+                    print(f"  → Skipping {filename}: GPT score {new_score} < {args.min_score}", flush=True)
+                    continue
+                    
             except Exception as exc:  # noqa: BLE001
                 print(f"  ! Failed to analyze {filename}: {exc}", file=sys.stderr)
                 continue
@@ -1203,12 +1244,11 @@ def main() -> None:
             key_facts = normalize_text_list(ensure_list(result.get("key_facts")))
             statute_violations = normalize_text_list(ensure_list(result.get("statute_violations")))
             implicated_actors = normalize_text_list(
-                ensure_list(result.get("implicated_entities")), strip_descriptor=True  # Note: uses implicated_entities from JSON
+                ensure_list(result.get("implicated_entities")), strip_descriptor=True
             )
             federal_programs_involved = normalize_programs(
                 normalize_text_list(ensure_list(result.get("federal_programs_involved")), strip_descriptor=True)
             )
-            # fraud_type is singular
             fraud_type = result.get("fraud_type", "Unknown")
             
             action_items = (
@@ -1261,6 +1301,7 @@ def main() -> None:
             processed += 1
             if args.sleep:
                 time.sleep(args.sleep)
+                
     finally:
         if checkpoint_handle:
             checkpoint_handle.close()
