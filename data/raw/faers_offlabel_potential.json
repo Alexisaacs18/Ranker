@@ -1,0 +1,1140 @@
+[
+  {
+    "id": "offlabel_0",
+    "drug_name": "Unknown",
+    "adverse_event_count": 703,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "Unknown",
+      "5",
+      "6",
+      "4"
+    ],
+    "indication_diversity": 139,
+    "fraud_indicators": [
+      "High adverse event volume: 703 reports",
+      "Multiple indications (139) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_1",
+    "drug_name": "LIPITOR",
+    "adverse_event_count": 64,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "Unknown",
+      "6",
+      "4"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [
+      "High adverse event volume: 64 reports"
+    ],
+    "fraud_potential_score": 60,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_2",
+    "drug_name": "JAKAFI",
+    "adverse_event_count": 50,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 5,
+    "fraud_indicators": [
+      "High adverse event volume: 50 reports",
+      "Multiple indications (5) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_3",
+    "drug_name": "HUMIRA",
+    "adverse_event_count": 31,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 10,
+    "fraud_indicators": [
+      "High adverse event volume: 31 reports",
+      "Multiple indications (10) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_4",
+    "drug_name": "LETAIRIS",
+    "adverse_event_count": 28,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 12,
+    "fraud_indicators": [
+      "High adverse event volume: 28 reports",
+      "Multiple indications (12) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_5",
+    "drug_name": "DEPAKOTE ER",
+    "adverse_event_count": 24,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 11,
+    "fraud_indicators": [
+      "High adverse event volume: 24 reports",
+      "Multiple indications (11) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_6",
+    "drug_name": "OMNISCAN",
+    "adverse_event_count": 22,
+    "serious_outcomes": [
+      "5",
+      "3"
+    ],
+    "indication_diversity": 13,
+    "fraud_indicators": [
+      "High adverse event volume: 22 reports",
+      "Multiple indications (13) suggesting off-label use"
+    ],
+    "fraud_potential_score": 85,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_7",
+    "drug_name": "PREDNISONE",
+    "adverse_event_count": 18,
+    "serious_outcomes": [
+      "1",
+      "3",
+      "5",
+      "6",
+      "4"
+    ],
+    "indication_diversity": 7,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 18 reports",
+      "Multiple indications (7) suggesting off-label use"
+    ],
+    "fraud_potential_score": 75,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_8",
+    "drug_name": "AMAZON BASIC CARE ACETAMINOPHEN",
+    "adverse_event_count": 17,
+    "serious_outcomes": [
+      "5",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 17 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_9",
+    "drug_name": "MIRENA",
+    "adverse_event_count": 16,
+    "serious_outcomes": [
+      "Unknown",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 16 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_10",
+    "drug_name": "GOOD NEIGHBOR PHARMACY OMEPRAZOLE",
+    "adverse_event_count": 15,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6",
+      "4"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 15 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_11",
+    "drug_name": "PREDNISOLONE",
+    "adverse_event_count": 15,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 8,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 15 reports",
+      "Multiple indications (8) suggesting off-label use"
+    ],
+    "fraud_potential_score": 75,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_12",
+    "drug_name": "BAYER GENUINE ASPIRIN",
+    "adverse_event_count": 15,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6",
+      "4"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 15 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_13",
+    "drug_name": "REVLIMID",
+    "adverse_event_count": 14,
+    "serious_outcomes": [
+      "5",
+      "2",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 14 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_14",
+    "drug_name": "RITUXAN",
+    "adverse_event_count": 14,
+    "serious_outcomes": [
+      "5",
+      "6"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 14 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_15",
+    "drug_name": "METHOTREXATE",
+    "adverse_event_count": 13,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 8,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 13 reports",
+      "Multiple indications (8) suggesting off-label use"
+    ],
+    "fraud_potential_score": 75,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_16",
+    "drug_name": "GILENYA",
+    "adverse_event_count": 13,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 13 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_17",
+    "drug_name": "ETOPOSIDE",
+    "adverse_event_count": 13,
+    "serious_outcomes": [
+      "5"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 13 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_18",
+    "drug_name": "NIGHTIME SLEEP AID",
+    "adverse_event_count": 13,
+    "serious_outcomes": [
+      "5"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 13 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_19",
+    "drug_name": "LISINOPRIL",
+    "adverse_event_count": 11,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 11 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_20",
+    "drug_name": "SANDOSTATIN LAR DEPOT",
+    "adverse_event_count": 11,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 11 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_21",
+    "drug_name": "CLOZARIL",
+    "adverse_event_count": 11,
+    "serious_outcomes": [
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 11 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_22",
+    "drug_name": "ALLOPURINOL",
+    "adverse_event_count": 10,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 10 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_23",
+    "drug_name": "PRADAXA",
+    "adverse_event_count": 10,
+    "serious_outcomes": [
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [
+      "Moderate adverse event volume: 10 reports"
+    ],
+    "fraud_potential_score": 50,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_24",
+    "drug_name": "CYCLOPHOSPHAMIDE",
+    "adverse_event_count": 9,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 6,
+    "fraud_indicators": [
+      "Multiple indications (6) suggesting off-label use"
+    ],
+    "fraud_potential_score": 55,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_25",
+    "drug_name": "FUROSEMIDE",
+    "adverse_event_count": 9,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_26",
+    "drug_name": "PLAVIX",
+    "adverse_event_count": 9,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_27",
+    "drug_name": "VENTRIXYL",
+    "adverse_event_count": 9,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_28",
+    "drug_name": "LYRICA",
+    "adverse_event_count": 8,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_29",
+    "drug_name": "LORAZEPAM",
+    "adverse_event_count": 8,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_30",
+    "drug_name": "METFORMIN HYDROCHLORIDE",
+    "adverse_event_count": 8,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_31",
+    "drug_name": "LASIX",
+    "adverse_event_count": 8,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_32",
+    "drug_name": "AUBAGIO",
+    "adverse_event_count": 7,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_33",
+    "drug_name": "SIMVASTATIN",
+    "adverse_event_count": 7,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_34",
+    "drug_name": "EFFEXOR XR",
+    "adverse_event_count": 7,
+    "serious_outcomes": [
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_35",
+    "drug_name": "IBUPROFEN",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "Unknown",
+      "6",
+      "2",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_36",
+    "drug_name": "CLONAZEPAM",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_37",
+    "drug_name": "CEFTRIAXONE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_38",
+    "drug_name": "METRONIDAZOLE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_39",
+    "drug_name": "DEXAMETHASONE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_40",
+    "drug_name": "ABRAXANE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_41",
+    "drug_name": "SDAMLO",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_42",
+    "drug_name": "BISOPROLOL",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_43",
+    "drug_name": "REBIF",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_44",
+    "drug_name": "EXJADE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "5",
+      "6"
+    ],
+    "indication_diversity": 5,
+    "fraud_indicators": [
+      "Multiple indications (5) suggesting off-label use"
+    ],
+    "fraud_potential_score": 55,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_45",
+    "drug_name": "OXYCODONE HYDROCHLORIDE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_46",
+    "drug_name": "PANTOPRAZOLE SODIUM",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_47",
+    "drug_name": "LEVOTHYROXINE",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_48",
+    "drug_name": "AMPYRA",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_49",
+    "drug_name": "TEGRETOL",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_50",
+    "drug_name": "7030 CALCIUM PREMIUM",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_51",
+    "drug_name": "ONFI",
+    "adverse_event_count": 6,
+    "serious_outcomes": [
+      "5",
+      "6"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_52",
+    "drug_name": "VITAMIN D",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_53",
+    "drug_name": "POTASSIUM CHLORIDE",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 3,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_54",
+    "drug_name": "RANITIDINE",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_55",
+    "drug_name": "JANUVIA",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_56",
+    "drug_name": "CITALOPRAM",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_57",
+    "drug_name": "BASIC CARE LANSOPRAZOLE",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_58",
+    "drug_name": "DIOVAN",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 0,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_59",
+    "drug_name": "METOPROLOL",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "6",
+      "2",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_60",
+    "drug_name": "NEURONTIN",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ],
+    "indication_diversity": 4,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_61",
+    "drug_name": "PROZAC",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "5",
+      "6",
+      "1"
+    ],
+    "indication_diversity": 2,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_62",
+    "drug_name": "YAZ",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "Unknown",
+      "2",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  },
+  {
+    "id": "offlabel_63",
+    "drug_name": "SOLIRIS",
+    "adverse_event_count": 5,
+    "serious_outcomes": [
+      "Unknown",
+      "6",
+      "3",
+      "1"
+    ],
+    "indication_diversity": 1,
+    "fraud_indicators": [],
+    "fraud_potential_score": 30,
+    "case_status": "unfiled",
+    "next_steps": "Verify Medicare coverage and prescribing patterns for off-label use",
+    "source": "FDA FAERS"
+  }
+]

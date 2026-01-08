@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """
-Convert JSONL medical fraud data to CSV format for GPT ranker
-
-The ranker expects CSV with 'filename' and 'text' columns.
-This script converts the JSONL output from the medical fraud scraper.
+IMPROVED Convert JSONL to CSV
+Properly handles FAERS, fraud indicators, and pre-formatted text
 """
 
 import json
@@ -12,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Any
 
-# Fix CSV field size limit for large text fields
+# Fix CSV field size limit
 try:
     csv.field_size_limit(sys.maxsize)
 except OverflowError:
@@ -20,23 +18,11 @@ except OverflowError:
 
 
 def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True) -> int:
-    """
-    Convert JSONL file to CSV format expected by ranker.
-    
-    Args:
-        jsonl_path: Path to input JSONL file
-        csv_path: Path to output CSV file
-        verbose: Print progress messages
-        
-    Returns:
-        Number of records converted
-    """
+    """Convert JSONL to CSV format for ranker."""
     if not jsonl_path.exists():
         raise FileNotFoundError(f"Input file not found: {jsonl_path}")
     
     records_converted = 0
-    
-    # Create output directory if needed
     csv_path.parent.mkdir(parents=True, exist_ok=True)
     
     with jsonl_path.open('r', encoding='utf-8') as infile, \
@@ -53,10 +39,10 @@ def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True) -> int:
             try:
                 record = json.loads(line)
                 
-                # Generate filename from record ID
-                filename = record.get('id', f'record_{line_num}')
+                # Get filename
+                filename = record.get('filename') or record.get('id', f'record_{line_num}')
                 
-                # Build text from record data
+                # Get or build text
                 text = format_record_as_text(record)
                 
                 writer.writerow({
@@ -82,97 +68,125 @@ def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True) -> int:
 
 
 def format_record_as_text(record: Dict[str, Any]) -> str:
-    """
-    Format a JSON record as readable text for analysis.
+    """Format record as text for analysis."""
     
-    This creates a narrative text that the GPT ranker can analyze for
-    qui tam potential.
-    """
-    lines = []
+    # PRIORITY 1: Check if record already has pre-formatted 'text' field
+    if 'text' in record and isinstance(record['text'], str) and len(record['text']) > 50:
+        return record['text']
     
-    # Try to get source from metadata field first, then top-level
+    # PRIORITY 2: Build text from metadata
     metadata = record.get('metadata', {})
-    if isinstance(metadata, dict):
-        source = metadata.get('source', record.get('source', 'Unknown Source'))
+    if isinstance(metadata, dict) and metadata:
+        source = metadata.get('source', record.get('source', 'Unknown'))
     else:
-        source = record.get('source', 'Unknown Source')
+        source = record.get('source', 'Unknown')
     
+    lines = []
     lines.append(f"SOURCE: {source}")
+    
+    # Add case status if present
+    case_status = metadata.get('case_status') or record.get('case_status')
+    if case_status:
+        lines.append(f"CASE STATUS: {case_status}")
+    
+    # Add fraud score if present
+    fraud_score = metadata.get('fraud_potential_score') or record.get('fraud_potential_score')
+    if fraud_score:
+        lines.append(f"FRAUD POTENTIAL SCORE: {fraud_score}")
+    
     lines.append("")
     
-    # Format based on source type
-    if source == "CMS LEIE":
+    # Add fraud indicators prominently
+    fraud_indicators = metadata.get('fraud_indicators') or record.get('fraud_indicators')
+    if fraud_indicators and isinstance(fraud_indicators, list):
+        lines.append("FRAUD INDICATORS:")
+        for indicator in fraud_indicators:
+            lines.append(f"  - {indicator}")
+        lines.append("")
+    
+    # Format based on source
+    if source == "FDA FAERS":
+        lines.extend(format_faers_record(metadata if metadata else record))
+    elif source == "CMS LEIE":
         lines.extend(format_leie_record(metadata if metadata else record))
-    elif source == "DOJ":
-        lines.extend(format_doj_record(metadata if metadata else record))
     elif source == "CMS Open Payments":
         lines.extend(format_open_payments_record(metadata if metadata else record))
     elif source == "FDA Warning Letters":
         lines.extend(format_fda_warning_record(metadata if metadata else record))
-    elif source == "FDA Devices":
-        lines.extend(format_fda_device_record(metadata if metadata else record))
-    elif source == "FDA Device Recalls":
-        lines.extend(format_device_recall_record(metadata if metadata else record))
-    elif source == "ClinicalTrials.gov":
-        lines.extend(format_clinical_trial_record(metadata if metadata else record))
-    elif source == "SEC EDGAR":
-        lines.extend(format_sec_record(metadata if metadata else record))
-    elif source == "FDA FAERS":
-        lines.extend(format_faers_record(metadata if metadata else record))
+    elif source == "DOJ":
+        lines.extend(format_doj_record(metadata if metadata else record))
     else:
-        # Generic format for unknown sources
-        # Use the 'text' field if it exists (from scraper output)
-        if 'text' in record and isinstance(record['text'], str):
-            lines.append(record['text'])
-        else:
-            lines.extend(format_generic_record(metadata if metadata else record))
+        lines.extend(format_generic_record(metadata if metadata else record))
+    
+    # Add next steps if present
+    next_steps = metadata.get('next_steps') or record.get('next_steps')
+    if next_steps:
+        lines.append("")
+        lines.append(f"RESEARCH NEXT STEPS: {next_steps}")
     
     return "\n".join(lines)
+
+
+def format_faers_record(record: Dict[str, Any]) -> list:
+    """Format FDA FAERS adverse event record."""
+    lines = []
+    
+    drug_name = record.get('drug_name', 'Unknown')
+    lines.append(f"DRUG NAME: {drug_name}")
+    
+    event_count = record.get('adverse_event_count', 0)
+    lines.append(f"ADVERSE EVENT COUNT: {event_count} reports")
+    
+    # Serious outcomes
+    outcomes = record.get('serious_outcomes', [])
+    if outcomes:
+        unique_outcomes = list(set(outcomes))[:10]  # Limit to 10
+        lines.append(f"SERIOUS OUTCOMES: {', '.join(str(o) for o in unique_outcomes)}")
+    
+    # Indication diversity
+    indication_diversity = record.get('indication_diversity', 0)
+    if indication_diversity:
+        lines.append(f"NUMBER OF DIFFERENT INDICATIONS: {indication_diversity}")
+        if indication_diversity >= 10:
+            lines.append(f"  ⚠️  High indication diversity suggests potential off-label marketing")
+    
+    # Add analysis
+    lines.append("")
+    lines.append("QUI TAM ANALYSIS:")
+    if event_count >= 100:
+        lines.append(f"  - High volume of adverse events ({event_count}) indicates widespread use")
+    if indication_diversity >= 10:
+        lines.append(f"  - {indication_diversity} different indications suggests off-label promotion")
+        lines.append(f"  - If Medicare/Medicaid covered these off-label uses → False Claims Act violation")
+    
+    return lines
 
 
 def format_leie_record(record: Dict[str, Any]) -> list:
     """Format CMS LEIE exclusion record."""
     lines = []
     
-    # Provider info
-    first_name = record.get('first_name', '')
-    last_name = record.get('last_name', '')
-    business = record.get('business_name', '')
+    provider_name = record.get('provider_name', '')
+    if provider_name:
+        lines.append(f"PROVIDER: {provider_name}")
     
-    if first_name or last_name:
-        lines.append(f"PROVIDER: {first_name} {last_name}".strip())
+    business = record.get('business_name', '')
     if business:
         lines.append(f"BUSINESS: {business}")
     
-    # Exclusion details
     lines.append(f"EXCLUSION TYPE: {record.get('exclusion_type', 'Unknown')}")
     lines.append(f"EXCLUSION DATE: {record.get('exclusion_date', 'Unknown')}")
+    
+    exclusion_year = record.get('exclusion_year')
+    if exclusion_year:
+        lines.append(f"EXCLUSION YEAR: {exclusion_year}")
+    
     lines.append(f"STATE: {record.get('state', 'Unknown')}")
     lines.append(f"SPECIALTY: {record.get('specialty', 'Unknown')}")
-    lines.append(f"NPI: {record.get('npi', 'Unknown')}")
     
-    return lines
-
-
-def format_doj_record(record: Dict[str, Any]) -> list:
-    """Format DOJ press release/settlement record."""
-    lines = []
-    
-    lines.append(f"TITLE: {record.get('title', 'Untitled')}")
-    lines.append(f"DATE: {record.get('date', 'Unknown')}")
-    lines.append(f"SETTLEMENT AMOUNT: {record.get('settlement_amount', 'Unknown')}")
-    lines.append("")
-    lines.append("CASE DETAILS:")
-    
-    content = record.get('content', '')
-    # Limit content to first 2000 characters for ranker
-    if len(content) > 2000:
-        content = content[:2000] + "..."
-    lines.append(content)
-    
-    if record.get('url'):
-        lines.append("")
-        lines.append(f"URL: {record['url']}")
+    npi = record.get('npi', '')
+    if npi:
+        lines.append(f"NPI: {npi}")
     
     return lines
 
@@ -181,13 +195,43 @@ def format_open_payments_record(record: Dict[str, Any]) -> list:
     """Format CMS Open Payments record."""
     lines = []
     
-    lines.append(f"PHYSICIAN: {record.get('physician_name', 'Unknown')}")
-    lines.append(f"SPECIALTY: {record.get('physician_specialty', 'Unknown')}")
-    lines.append(f"PAYMENT AMOUNT: ${record.get('amount', 0):,.2f}")
-    lines.append(f"PAYMENT TYPE: {record.get('payment_nature', 'Unknown')}")
-    lines.append(f"FROM COMPANY: {record.get('submitting_entity', 'Unknown')}")
-    lines.append(f"PAYMENT DATE: {record.get('payment_date', 'Unknown')}")
-    lines.append(f"PRODUCT: {record.get('product_name', 'Unknown')}")
+    physician_name = record.get('physician_name', 'Unknown')
+    lines.append(f"PHYSICIAN: {physician_name}")
+    
+    specialty = record.get('physician_specialty', 'Unknown')
+    lines.append(f"SPECIALTY: {specialty}")
+    
+    npi = record.get('npi', '')
+    if npi:
+        lines.append(f"NPI: {npi}")
+    
+    amount = record.get('payment_amount') or record.get('amount', 0)
+    try:
+        amount_float = float(amount)
+        lines.append(f"PAYMENT AMOUNT: ${amount_float:,.2f}")
+    except:
+        lines.append(f"PAYMENT AMOUNT: {amount}")
+    
+    nature = record.get('payment_nature', 'Unknown')
+    lines.append(f"PAYMENT TYPE: {nature}")
+    
+    company = record.get('paying_company') or record.get('submitting_entity', 'Unknown')
+    lines.append(f"FROM COMPANY: {company}")
+    
+    date = record.get('payment_date', 'Unknown')
+    lines.append(f"PAYMENT DATE: {date}")
+    
+    product = record.get('product_name', 'Unknown')
+    if product and product != 'Unknown':
+        lines.append(f"PRODUCT: {product}")
+    
+    # Add kickback analysis
+    if amount_float >= 50000:
+        lines.append("")
+        lines.append("KICKBACK ANALYSIS:")
+        lines.append(f"  - High-value payment (${amount_float:,.0f}) raises kickback concerns")
+        lines.append(f"  - Cross-reference with Medicare Part D prescribing data for {physician_name}")
+        lines.append(f"  - Check if high prescriber of {company} products")
     
     return lines
 
@@ -196,102 +240,85 @@ def format_fda_warning_record(record: Dict[str, Any]) -> list:
     """Format FDA warning letter record."""
     lines = []
     
-    lines.append(f"TITLE: {record.get('title', 'Untitled')}")
-    lines.append(f"DATE: {record.get('date', 'Unknown')}")
-    lines.append("")
-    lines.append("VIOLATION DETAILS:")
-    lines.append(record.get('description', 'No description available'))
+    title = record.get('title', 'Untitled')
+    lines.append(f"WARNING LETTER: {title}")
     
-    if record.get('url'):
+    date = record.get('date', 'Unknown')
+    lines.append(f"DATE: {date}")
+    
+    url = record.get('url', '')
+    if url:
+        lines.append(f"URL: {url}")
+    
+    # Violation summary
+    violation = record.get('violation_summary', '')
+    if violation:
         lines.append("")
-        lines.append(f"URL: {record['url']}")
+        lines.append("VIOLATION:")
+        lines.append(violation)
     
     return lines
 
 
-def format_fda_device_record(record: Dict[str, Any]) -> list:
-    """Format FDA device clearance record."""
+def format_doj_record(record: Dict[str, Any]) -> list:
+    """Format DOJ settlement record."""
     lines = []
     
-    lines.append(f"DEVICE: {record.get('device_name', 'Unknown')}")
-    lines.append(f"APPLICANT: {record.get('applicant', 'Unknown')}")
-    lines.append(f"DECISION: {record.get('decision_description', 'Unknown')}")
-    lines.append(f"DECISION DATE: {record.get('decision_date', 'Unknown')}")
-    lines.append(f"PRODUCT CODE: {record.get('product_code', 'Unknown')}")
-    lines.append(f"K NUMBER: {record.get('k_number', 'Unknown')}")
+    title = record.get('title', 'Untitled')
+    lines.append(f"CASE: {title}")
     
-    return lines
-
-
-def format_device_recall_record(record: Dict[str, Any]) -> list:
-    """Format FDA device recall record."""
-    lines = []
+    date = record.get('date', 'Unknown')
+    lines.append(f"DATE: {date}")
     
-    lines.append(f"PRODUCT: {record.get('product_description', 'Unknown')}")
-    lines.append(f"RECALL REASON: {record.get('reason_for_recall', 'Unknown')}")
-    lines.append(f"CLASSIFICATION: {record.get('classification', 'Unknown')}")
-    lines.append(f"STATUS: {record.get('recall_status', 'Unknown')}")
-    lines.append(f"RECALLING FIRM: {record.get('recalling_firm', 'Unknown')}")
-    lines.append(f"RECALL DATE: {record.get('recall_date', 'Unknown')}")
+    defendant = record.get('defendant', 'Unknown')
+    lines.append(f"DEFENDANT: {defendant}")
     
-    return lines
-
-
-def format_clinical_trial_record(record: Dict[str, Any]) -> list:
-    """Format ClinicalTrials.gov record."""
-    lines = []
+    settlement = record.get('settlement_amount', 'Unknown')
+    lines.append(f"SETTLEMENT: {settlement}")
     
-    lines.append(f"NCT ID: {record.get('id', 'Unknown')}")
-    lines.append(f"TITLE: {record.get('title', 'Untitled')}")
-    lines.append(f"CONDITION: {record.get('condition', 'Unknown')}")
-    lines.append(f"SPONSOR: {record.get('sponsor', 'Unknown')}")
-    lines.append(f"START DATE: {record.get('start_date', 'Unknown')}")
-    lines.append(f"COMPLETION DATE: {record.get('completion_date', 'Unknown')}")
+    fraud_type = record.get('fraud_type', 'Unknown')
+    lines.append(f"FRAUD TYPE: {fraud_type}")
     
-    return lines
-
-
-def format_sec_record(record: Dict[str, Any]) -> list:
-    """Format SEC EDGAR filing record."""
-    lines = []
+    programs = record.get('federal_programs', [])
+    if programs:
+        lines.append(f"FEDERAL PROGRAMS: {', '.join(programs)}")
     
-    lines.append(f"COMPANY: {record.get('company', 'Unknown')}")
-    lines.append(f"CIK: {record.get('cik', 'Unknown')}")
-    lines.append(f"FORM TYPE: {record.get('form_type', 'Unknown')}")
-    lines.append(f"FILING DATE: {record.get('filing_date', 'Unknown')}")
-    lines.append(f"ACCESSION NUMBER: {record.get('accession_number', 'Unknown')}")
-    
-    if record.get('url'):
-        lines.append(f"URL: {record['url']}")
-    
-    return lines
-
-
-def format_faers_record(record: Dict[str, Any]) -> list:
-    """Format FDA FAERS adverse event record."""
-    lines = []
-    
-    lines.append(f"DRUG: {record.get('drug_name', 'Unknown')}")
-    lines.append(f"ADVERSE REACTION: {record.get('reaction', 'Unknown')}")
-    lines.append(f"SERIOUS: {record.get('serious', 'Unknown')}")
-    lines.append(f"OUTCOME: {record.get('outcome', 'Unknown')}")
-    lines.append(f"REPORT DATE: {record.get('report_date', 'Unknown')}")
+    # Content
+    content = record.get('content', '')
+    if content:
+        lines.append("")
+        lines.append("DETAILS:")
+        if len(content) > 1000:
+            content = content[:1000] + "..."
+        lines.append(content)
     
     return lines
 
 
 def format_generic_record(record: Dict[str, Any]) -> list:
-    """Generic formatter for unknown record types."""
+    """Generic formatter."""
     lines = []
     
-    # Format all non-id, non-source fields
+    # Skip these meta fields
+    skip_fields = {'id', 'source', 'metadata', 'text', 'filename', 'fraud_indicators', 
+                   'case_status', 'fraud_potential_score', 'next_steps'}
+    
     for key, value in record.items():
-        if key in ('id', 'source', 'metadata'):
+        if key in skip_fields or value is None:
             continue
         
-        # Format key nicely
+        # Format key
         formatted_key = key.replace('_', ' ').upper()
-        lines.append(f"{formatted_key}: {value}")
+        
+        # Format value
+        if isinstance(value, list):
+            if value:
+                value_str = ', '.join(str(v) for v in value[:10])
+                lines.append(f"{formatted_key}: {value_str}")
+        elif isinstance(value, dict):
+            continue  # Skip nested dicts
+        else:
+            lines.append(f"{formatted_key}: {value}")
     
     return lines
 
@@ -301,7 +328,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Convert JSONL medical fraud data to CSV format for GPT ranker"
+        description="Convert JSONL medical fraud data to CSV"
     )
     parser.add_argument(
         '--input',
@@ -329,8 +356,8 @@ def main():
         count = jsonl_to_csv(args.input, args.output, verbose=not args.quiet)
         print(f"\n✅ Successfully converted {count} records")
         print(f"   Output: {args.output}")
-        print(f"\nNext step: Run your ranker with:")
-        print(f"   python gpt_ranker.py --input {args.output}")
+        print(f"\nNext step:")
+        print(f"   python gpt_ranker.py --chunk-size 0 --max-rows 10")
         
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
