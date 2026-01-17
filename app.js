@@ -44,6 +44,10 @@ const elements = {
   inlineLoader: document.getElementById("inlineLoader"),
   inlineLoaderText: document.getElementById("inlineLoaderText"),
   processedCount: document.getElementById("processedCount"),
+  scriptOutputModal: document.getElementById("scriptOutputModal"),
+  scriptOutputTitle: document.getElementById("scriptOutputTitle"),
+  scriptOutputClose: document.getElementById("scriptOutputClose"),
+  scriptOutputPre: document.getElementById("scriptOutputPre"),
 };
 
 const state = {
@@ -1179,6 +1183,41 @@ function resetFilters() {
   applyFilters({ force: true });
 }
 
+function runScript(scriptName) {
+  const btn = document.querySelector(`.script-btn[data-script="${scriptName}"]`);
+  if (!btn || !elements.scriptOutputModal || !elements.scriptOutputPre) return;
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Running…";
+  elements.scriptOutputModal.classList.remove("hidden");
+  if (elements.scriptOutputTitle) elements.scriptOutputTitle.textContent = `Output: ${label}`;
+  elements.scriptOutputPre.textContent = "Running…";
+  elements.scriptOutputModal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  fetch(`/api/run/${scriptName}`, { method: "POST" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.ok) {
+        let out = data.stdout || "";
+        if (data.stderr) out += (out ? "\n" : "") + "[stderr]\n" + data.stderr;
+        if (data.returncode !== 0) out += `\n[exit code ${data.returncode}]`;
+        if ((scriptName === "gpt_ranker" || scriptName === "converter") && data.returncode === 0) {
+          out += "\n\n→ Refresh the page to load new results.";
+        }
+        elements.scriptOutputPre.textContent = out || "(no output)";
+      } else {
+        elements.scriptOutputPre.textContent = "Error: " + (data.error || "Unknown error");
+      }
+    })
+    .catch((err) => {
+      elements.scriptOutputPre.textContent = "Request failed: " + (err.message || String(err));
+    })
+    .finally(() => {
+      btn.textContent = label;
+      btn.disabled = false;
+    });
+}
+
 function wireEvents() {
   ["change", "input"].forEach((eventName) => {
     elements.scoreFilter.addEventListener(eventName, applyFilters);
@@ -1190,6 +1229,18 @@ function wireEvents() {
   elements.resetFilters.addEventListener("click", resetFilters);
   elements.detailClose.addEventListener("click", () => clearDetail());
   elements.detailTextToggle.addEventListener("click", toggleDetailText);
+
+  if (elements.scriptOutputClose) {
+    elements.scriptOutputClose.addEventListener("click", () => {
+      elements.scriptOutputModal?.classList.add("hidden");
+    });
+  }
+  document.querySelectorAll(".script-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const s = btn.dataset.script;
+      if (s) runScript(s);
+    });
+  });
 }
 
 function toggleDetailText() {

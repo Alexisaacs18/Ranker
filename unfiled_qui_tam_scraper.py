@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/alexisaacs/Development/catalyst/Ranker/venv/bin/python3
 """
 UNFILED QUI TAM OPPORTUNITY SCRAPER
 Focus: FDA/CMS databases for fraud indicators that haven't been prosecuted yet

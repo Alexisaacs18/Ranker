@@ -373,7 +373,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-score",
         type=int,
-        default=50,
+        default=30,
         help="Skip records with existing fraud_potential_score below this threshold (0 to disable).",
     )
     parser.add_argument(
@@ -438,7 +438,7 @@ def extract_fraud_score_from_text(text: str) -> Optional[int]:
     return None
 
 
-def should_skip_row(row: dict, min_score: int = 50) -> tuple:
+def should_skip_row(row: dict, min_score: int = 30) -> tuple:
     """
     Check if a row should be skipped based on existing fraud score.
     

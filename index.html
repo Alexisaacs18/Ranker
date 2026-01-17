@@ -57,6 +57,26 @@
       </div>
     </header>
 
+    <section class="scripts-panel">
+      <h2>Run Data Pipeline</h2>
+      <p class="scripts-hint">Run Python scripts in order: Test Connection → Scraper → Converter → GPT Ranker. Output appears in the log below.</p>
+      <div class="script-buttons">
+        <button type="button" class="script-btn" data-script="test_connection">Test GPT Connection</button>
+        <button type="button" class="script-btn" data-script="scraper">Run Scraper</button>
+        <button type="button" class="script-btn" data-script="converter">Run Converter</button>
+        <button type="button" class="script-btn" data-script="gpt_ranker">Run GPT Ranker</button>
+      </div>
+      <div id="scriptOutputModal" class="script-output-modal hidden">
+        <div class="script-output-inner">
+          <div class="script-output-header">
+            <h3 id="scriptOutputTitle">Script Output</h3>
+            <button type="button" id="scriptOutputClose" class="script-output-close">Close</button>
+          </div>
+          <pre id="scriptOutputPre"></pre>
+        </div>
+      </div>
+    </section>
+
     <div class="processing-notice">
       <strong>Note:</strong> We are still processing medical board actions. Currently showing <span id="processedCount">—</span> providers.
       <span id="filterWaitNote" class="filter-wait-note hidden">Please wait for data to finish loading before using filters.</span>
@@ -250,6 +270,6 @@ Output JSON with:
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/dist/ag-grid-community.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=2"></script>
   </body>
 </html>
