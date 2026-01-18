@@ -30,176 +30,70 @@ except OverflowError:
 
 #!/usr/bin/env python3
 """
-Enhanced Qui Tam Ranking Prompt
-Focuses on NON-FILED cases with high potential
+Scientific Fraud Ranking Prompt
+Focuses on Research Misconduct and False Claims Act liability from falsified scientific research
 """
 
-QUI_TAM_RANKING_PROMPT = """You are a qui tam whistleblower investigator analyzing healthcare provider records to identify UNFILED False Claims Act violations with high success potential.
+SCIENTIFIC_FRAUD_RANKING_PROMPT = """You are a forensic data analyst and expert in research integrity. Your goal is to analyze scientific abstracts and full-text articles to identify potential Research Misconduct that could lead to False Claims Act (FCA) liability.
 
-CRITICAL CONTEXT: Score cases based on their potential for NEW qui tam lawsuits. If a case has already been settled or publicly disclosed, it CANNOT be filed as a new qui tam case (first-to-file rule).
+CRITICAL CONTEXT:
+Government funding (NIH, CDC, DoD) obtained via falsified research is a violation of the False Claims Act (e.g., Duke University $112M settlement).
+FDA approval obtained via falsified clinical trial data leads to false claims when Medicare pays for the drug.
 
 SCORING FRAMEWORK (0-100):
 
-90-100 (SLAM DUNK - File immediately):
-- Clear Medicare/Medicaid billing fraud with dollar amounts documented
-- Systematic pattern (not isolated) - "routine practice", "standard procedure"
-- Recent (within 3 years) - statute of limitations is 6 years but fresher is better
-- Large damages ($5M+ potential government losses)
-- Strong evidence: billing records, claims data, internal documents mentioned
-- NOT already publicly disclosed or settled
-- Corporate/institutional defendant (not just individual)
-- Multiple fraud types (kickbacks + upcoding, etc.)
+90-100 (HIGH PROBABILITY OF MISCONDUCT):
+- Official "Retraction Notice" citing data fabrication or falsification.
+- "Expression of Concern" regarding image manipulation (Western blots, histology).
+- "Impossible statistics" explicitly noted (e.g., standard deviations are identical across different groups).
+- Funding source is US Gov (NIH/NSF) AND data is flagged as unreliable.
+- Author has history of retractions (check "Papermill" indicators).
 
-70-89 (STRONG POTENTIAL - Investigate further):
-- Medicare/Medicaid involvement clearly stated
-- Pattern of fraudulent billing across multiple patients
-- Damages likely exceed $1M
-- Within 5 year window
-- Fraud type: kickbacks, upcoding, phantom billing, unnecessary procedures
-- Some documentation exists
-- NOT already part of known settlement or investigation
+70-89 (STRONG SUSPICION - "The Duke Pattern"):
+- Discrepancies between "Methods" and "Results" (e.g., endpoint switching).
+- Study sponsored by Pharma company with UNDISCLOSED conflicts of interest.
+- Results are "too good to be true" (100% cure rate in fatal disease).
+- "Seeding Trial" indicators: Study designed purely to market a drug, not test it (no clear hypothesis, massive enrollment for simple observation).
+- Off-label promotion: Study concludes efficacy for non-approved use based on weak/manipulated data.
 
-50-69 (MEDIUM POTENTIAL - Needs more evidence):
-- Federal healthcare program involvement suggested but not explicit
-- Some pattern indicators ("multiple patients", "over time")
-- Potential damages unclear but possibly significant
-- Quality of care issues tied to billing
-- May need inside whistleblower with documents
+50-69 (REQUIRES SCRUTINY):
+- Massive self-citation by authors.
+- Outlier results compared to all other literature in the field.
+- "Ghost authorship" suspicion (industry writer not credited).
+- Corrections issued for "coding errors" that flip the conclusion from negative to positive.
 
-30-49 (LOW PRIORITY):
-- Vague connection to federal programs
-- Isolated incidents
-- Old (5-6 years ago)
-- Small dollar amounts
-- Weak evidence
+0-49 (NORMAL SCIENCE):
+- Negative results published (honest science).
+- Standard method limitations acknowledged.
+- Proper ethical disclosures.
 
-0-29 (NOT VIABLE):
-- No federal program involvement
-- Private insurance only
-- Pure malpractice (no fraud)
-- Already disclosed publicly
-- Beyond statute of limitations (>6 years)
-- State-only violations
-
-CRITICAL ANALYSIS - CHECK THESE RED FLAGS:
-
-🚫 ALREADY FILED/SETTLED (Score 0-10):
-- "settled for $X million" → ALREADY RESOLVED, score 0-5
-- "DOJ announced" or "Justice Department" → PUBLICLY DISCLOSED, score 0-10
-- "agreed to pay" or "settlement agreement" → CASE CLOSED, score 5
-- "investigation revealed" or "FBI probe" → POSSIBLY PUBLIC, score 10-20
-- "former employee reported" or "whistleblower lawsuit" → ALREADY FILED, score 0
-
-✅ HIGH VALUE INDICATORS (Boost score by +20-30):
-- "billed Medicare for services not provided"
-- "submitted false claims to Medicaid"
-- "routine practice of upcoding"
-- "kickbacks from pharmaceutical companies"
-- "unnecessary procedures to increase billing"
-- Specific dollar amounts mentioned in billing
-- Multiple years of fraudulent activity
-- Corporate policy or directive mentioned
-
-⚖️ STATUTE VIOLATIONS THAT MATTER:
-- False Claims Act (31 U.S.C. § 3729) - THE BIG ONE
-- Anti-Kickback Statute (42 U.S.C. § 1320a-7b)
-- Stark Law (42 U.S.C. § 1395nn)
-- FDCA violations tied to Medicare/Medicaid billing
+CRITICAL KEYWORDS TO HUNT:
+- "Retracted" / "Withdrawn"
+- "Image duplication" / "Photoshop" / "Splicing"
+- "P-hacking" / "Data dredging"
+- "Protocol deviation"
+- "Unblinded" (in a double-blind study)
+- "Post-hoc analysis" (changing the rules after the game is played)
 
 OUTPUT FORMAT (JSON):
 {
-    "headline": "One sentence describing the unfiled qui tam opportunity",
+    "headline": "One sentence summary of the scientific anomaly",
     "qui_tam_score": 0-100,
-    "case_status": "unfiled" | "filed" | "settled" | "under_investigation" | "unknown",
-    "reason": "2-3 sentence explanation of score and viability",
-    "fraud_type": "Primary type: kickbacks | upcoding | phantom billing | unnecessary procedures | off-label marketing | other",
-    "federal_programs_involved": ["Medicare Part A", "Medicare Part B", "Medicare Part D", "Medicaid", "TRICARE", "VA"],
-    "estimated_damages": "Best estimate in dollars or 'unknown' - be specific if amounts mentioned",
-    "statute_violations": ["False Claims Act", "Anti-Kickback Statute", "Stark Law", "FDCA"],
-    "evidence_strength": "strong" | "medium" | "weak",
-    "key_facts": ["3-5 specific facts supporting qui tam case - focus on dollar amounts, patterns, timeframes"],
-    "implicated_entities": ["Provider name", "Healthcare system", "Company name"],
-    "time_period": "When fraud occurred (critical for 6-year statute)",
-    "public_disclosure": "yes" | "no" | "possible" - has this been publicly reported/settled?,
-    "first_to_file_viable": "yes" | "no" | "unclear" - can someone still file on this?,
-    "red_flags": ["List any indicators this is already filed, settled, or too old"],
-    "green_flags": ["List any indicators this is a strong unfiled opportunity"],
-    "next_steps": "What a potential relator should do to file this case",
-    "qui_tam_viability": "high" | "medium" | "low",
-    "relator_requirements": "What type of insider knowledge/documents would strengthen this case"
+    "fraud_vector": "Grant Fraud (NIH)" | "FDA Fraud (Clinical Trial)" | "Off-Label Marketing" | "Kickback (Sham Consulting)",
+    "scientific_red_flags": [
+        "Identical standard deviations (Impossible Data)",
+        "Image reuse across different figures",
+        "Endpoint switching (Outcome reporting bias)"
+    ],
+    "funding_source": "NIH Grant #XYZ" | "Pharma Sponsor" | "Unknown",
+    "potential_damages_theory": "How does this bad science steal tax money? (e.g., 'NIH grant repaid' or 'Medicare paid for useless drug')",
+    "implicated_institutions": ["University Name", "Pharma Company"],
+    "investigation_status": "Retracted" | "Under Investigation" | "Correction Issued" | "Published (Unchallenged)",
+    "next_step": "Download raw data" | "Check RetractionWatch" | "Compare with ClinicalTrials.gov protocol"
 }
-
-SCORING RULES - FOLLOW STRICTLY:
-
-1. If record mentions "settlement", "agreed to pay", "resolved" → Score ≤10 (already filed)
-2. If record from DOJ press release or government announcement → Score ≤15 (publicly disclosed)
-3. If >6 years old → Score ≤20 (statute of limitations)
-4. If no Medicare/Medicaid mention → Score ≤30 (not federal program)
-5. If isolated incident ("one patient") → Score ≤40 (need pattern)
-6. If damages <$500k → Score ≤50 (too small for qui tam)
-
-BOOST SCORING FOR:
-- Explicit billing amounts: +10 points
-- "Routine" or "systematic" or "standard practice": +15 points
-- Multiple fraud types combined: +10 points
-- Corporate defendant with deep pockets: +10 points
-- Recent (within 2 years): +15 points
-- Clear documentation mentioned: +10 points
-
-EXAMPLES:
-
-EXAMPLE 1 - HIGH SCORE (95):
-Record: "Dr. Smith's clinic routinely billed Medicare Part B for comprehensive office visits (CPT 99215) when only basic visits (99213) were provided. Billing records from 2022-2024 show 847 instances of upcoding across 200+ Medicare patients. Clinic administrator noted this was 'standard practice to maximize reimbursement.' Estimated excess billings: $180,000."
-
-Response:
-{
-    "headline": "Systematic Medicare upcoding scheme with documented pattern across 200+ patients and $180K in damages",
-    "qui_tam_score": 95,
-    "case_status": "unfiled",
-    "reason": "Clear pattern of systematic upcoding with specific dollar amounts, recent timeframe, documentation exists, and no public disclosure. Strong False Claims Act case.",
-    "fraud_type": "upcoding",
-    "public_disclosure": "no",
-    "first_to_file_viable": "yes",
-    "red_flags": [],
-    "green_flags": ["Specific dollar amount", "Documented pattern", "Recent", "Multiple patients", "Evidence exists"]
-}
-
-EXAMPLE 2 - LOW SCORE (5):
-Record: "In 2018, XYZ Health settled with DOJ for $3.2 million for billing Medicare for unnecessary cardiac procedures. The settlement resolved allegations that the hospital performed medically unnecessary stent placements from 2015-2017."
-
-Response:
-{
-    "headline": "Already settled qui tam case - not viable for new filing",
-    "qui_tam_score": 5,
-    "case_status": "settled",
-    "reason": "This case has already been settled with DOJ. First-to-file rule prevents new qui tam cases on publicly disclosed fraud.",
-    "fraud_type": "unnecessary procedures",
-    "public_disclosure": "yes",
-    "first_to_file_viable": "no",
-    "red_flags": ["Already settled", "DOJ settlement announced", "Publicly disclosed"],
-    "green_flags": []
-}
-
-EXAMPLE 3 - MEDIUM SCORE (65):
-Record: "State medical board suspended Dr. Johnson's license for 'improper billing practices' in 2023. Board documents mention 'concerns raised about billing for services not documented' and multiple patient complaints about charges for visits that didn't occur."
-
-Response:
-{
-    "headline": "Potential phantom billing case but needs verification of Medicare involvement",
-    "qui_tam_score": 65,
-    "case_status": "unknown",
-    "reason": "State action suggests billing fraud, but federal program involvement not confirmed. Need to verify if Medicare/Medicaid patients were affected. Recent and pattern suggested.",
-    "fraud_type": "phantom billing",
-    "public_disclosure": "possible",
-    "first_to_file_viable": "unclear",
-    "red_flags": ["Federal program involvement unclear", "State board action may have made it public"],
-    "green_flags": ["Recent", "Pattern suggested", "Multiple patients"]
-}
-
-Now analyze this medical provider record for qui tam potential:
 """
 
-DEFAULT_SYSTEM_PROMPT = QUI_TAM_RANKING_PROMPT
+DEFAULT_SYSTEM_PROMPT = SCIENTIFIC_FRAUD_RANKING_PROMPT
 
 
 # Canonical mappings for fraud types
@@ -373,7 +267,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--min-score",
         type=int,
-        default=50,
+        default=20,
         help="Skip records with existing fraud_potential_score below this threshold (0 to disable).",
     )
     parser.add_argument(
@@ -438,7 +332,7 @@ def extract_fraud_score_from_text(text: str) -> Optional[int]:
     return None
 
 
-def should_skip_row(row: dict, min_score: int = 50) -> tuple:
+def should_skip_row(row: dict, min_score: int = 20) -> tuple:
     """
     Check if a row should be skipped based on existing fraud score.
     
@@ -509,9 +403,9 @@ def call_model(
             {
                 "role": "user",
                 "content": (
-                    "Analyze the following medical provider record and respond with the JSON schema "
+                    "Analyze the following scientific article or abstract and respond with the JSON schema "
                     "described in the system prompt.\n"
-                    f"Record ID: {filename}\n"
+                    f"Article ID: {filename}\n"
                     "---------\n"
                     f"{text.strip()}\n"
                     "---------"
@@ -1240,29 +1134,74 @@ def main() -> None:
                 print(f"  ! Failed to analyze {filename}: {exc}", file=sys.stderr)
                 continue
 
-            # Updated field names for qui tam
-            key_facts = normalize_text_list(ensure_list(result.get("key_facts")))
-            statute_violations = normalize_text_list(ensure_list(result.get("statute_violations")))
+            # Map scientific fraud fields to output format
+            # New prompt uses "scientific_red_flags" instead of "key_facts"
+            key_facts = normalize_text_list(ensure_list(
+                result.get("scientific_red_flags") or result.get("key_facts")
+            ))
+            # New prompt doesn't explicitly list statute violations, derive from fraud_vector
+            statute_violations = []
+            fraud_vector = result.get("fraud_vector", "")
+            if fraud_vector:
+                if "NIH" in fraud_vector or "Grant" in fraud_vector:
+                    statute_violations.append("False Claims Act (Grant Fraud)")
+                if "FDA" in fraud_vector or "Clinical Trial" in fraud_vector:
+                    statute_violations.append("False Claims Act (FDA Fraud)")
+                if "Off-Label" in fraud_vector or "Marketing" in fraud_vector:
+                    statute_violations.append("False Claims Act (Off-Label Marketing)")
+                if "Kickback" in fraud_vector:
+                    statute_violations.append("Anti-Kickback Statute")
+            statute_violations = normalize_text_list(
+                statute_violations or ensure_list(result.get("statute_violations"))
+            )
+            # New prompt uses "implicated_institutions" instead of "implicated_entities"
             implicated_actors = normalize_text_list(
-                ensure_list(result.get("implicated_entities")), strip_descriptor=True
+                ensure_list(result.get("implicated_institutions") or result.get("implicated_entities")),
+                strip_descriptor=True
             )
+            # Derive federal programs from funding_source if available
+            federal_programs_involved = []
+            funding_source = result.get("funding_source", "")
+            if funding_source:
+                if "NIH" in funding_source:
+                    federal_programs_involved.append("NIH")
+                if "CDC" in funding_source:
+                    federal_programs_involved.append("CDC")
+                if "DoD" in funding_source or "DOD" in funding_source:
+                    federal_programs_involved.append("DoD")
             federal_programs_involved = normalize_programs(
-                normalize_text_list(ensure_list(result.get("federal_programs_involved")), strip_descriptor=True)
+                federal_programs_involved or normalize_text_list(
+                    ensure_list(result.get("federal_programs_involved")), strip_descriptor=True
+                )
             )
-            fraud_type = result.get("fraud_type", "Unknown")
+            # Use fraud_vector if fraud_type not available
+            fraud_type = result.get("fraud_type") or fraud_vector or "Unknown"
             
+            # New prompt uses "next_step" instead of "action_items"
             action_items = (
-                normalize_text_list(ensure_list(result.get("action_items")))
+                normalize_text_list(ensure_list(
+                    result.get("next_step") or result.get("action_items")
+                ))
                 if args.include_action_items
                 else []
             )
 
+            # Build reason from potential_damages_theory and investigation_status
+            reason_parts = []
+            if result.get("potential_damages_theory"):
+                reason_parts.append(result.get("potential_damages_theory"))
+            if result.get("investigation_status"):
+                reason_parts.append(f"Status: {result.get('investigation_status')}")
+            if result.get("reason"):
+                reason_parts.append(result.get("reason"))
+            reason = " | ".join(reason_parts) if reason_parts else result.get("reason", "")
+            
             csv_row = {
                 "filename": filename,
                 "source_row_index": idx,
                 "headline": result.get("headline", ""),
                 "qui_tam_score": result.get("qui_tam_score", ""),
-                "reason": result.get("reason", ""),
+                "reason": reason,
                 "key_facts": "; ".join(key_facts),
                 "statute_violations": "; ".join(statute_violations),
                 "implicated_actors": "; ".join(implicated_actors),
@@ -1276,7 +1215,7 @@ def main() -> None:
                 "filename": filename,
                 "headline": result.get("headline", ""),
                 "qui_tam_score": result.get("qui_tam_score", ""),
-                "reason": result.get("reason", ""),
+                "reason": reason,
                 "key_facts": key_facts,
                 "statute_violations": statute_violations,
                 "implicated_actors": implicated_actors,
@@ -1286,6 +1225,10 @@ def main() -> None:
                     "source_row_index": idx,
                     "original_row": row,
                     "config": config_metadata,
+                    # Include new fields for reference
+                    "fraud_vector": fraud_vector,
+                    "funding_source": result.get("funding_source", ""),
+                    "investigation_status": result.get("investigation_status", ""),
                 },
             }
             if args.include_action_items:

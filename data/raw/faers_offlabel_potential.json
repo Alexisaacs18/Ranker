@@ -4,13 +4,13 @@
     "drug_name": "Unknown",
     "adverse_event_count": 703,
     "serious_outcomes": [
-      "5",
       "4",
+      "2",
       "1",
       "Unknown",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 139,
     "fraud_indicators": [
@@ -28,9 +28,9 @@
     "adverse_event_count": 64,
     "serious_outcomes": [
       "4",
+      "2",
       "1",
       "Unknown",
-      "2",
       "6"
     ],
     "indication_diversity": 4,
@@ -47,11 +47,11 @@
     "drug_name": "JAKAFI",
     "adverse_event_count": 50,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 5,
     "fraud_indicators": [
@@ -68,11 +68,11 @@
     "drug_name": "HUMIRA",
     "adverse_event_count": 31,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 10,
     "fraud_indicators": [
@@ -89,10 +89,10 @@
     "drug_name": "LETAIRIS",
     "adverse_event_count": 28,
     "serious_outcomes": [
-      "5",
-      "1",
       "3",
-      "6"
+      "6",
+      "1",
+      "5"
     ],
     "indication_diversity": 12,
     "fraud_indicators": [
@@ -109,11 +109,11 @@
     "drug_name": "DEPAKOTE ER",
     "adverse_event_count": 24,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 11,
     "fraud_indicators": [
@@ -130,8 +130,8 @@
     "drug_name": "OMNISCAN",
     "adverse_event_count": 22,
     "serious_outcomes": [
-      "5",
-      "3"
+      "3",
+      "5"
     ],
     "indication_diversity": 13,
     "fraud_indicators": [
@@ -148,11 +148,11 @@
     "drug_name": "PREDNISONE",
     "adverse_event_count": 18,
     "serious_outcomes": [
-      "5",
       "4",
       "1",
       "3",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 7,
     "fraud_indicators": [
@@ -169,10 +169,10 @@
     "drug_name": "AMAZON BASIC CARE ACETAMINOPHEN",
     "adverse_event_count": 17,
     "serious_outcomes": [
+      "3",
       "2",
-      "5",
       "1",
-      "3"
+      "5"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [
@@ -188,9 +188,9 @@
     "drug_name": "MIRENA",
     "adverse_event_count": 16,
     "serious_outcomes": [
+      "3",
       "1",
-      "Unknown",
-      "3"
+      "Unknown"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -206,12 +206,12 @@
     "drug_name": "GOOD NEIGHBOR PHARMACY OMEPRAZOLE",
     "adverse_event_count": 15,
     "serious_outcomes": [
-      "5",
       "4",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [
@@ -227,11 +227,11 @@
     "drug_name": "PREDNISOLONE",
     "adverse_event_count": 15,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 8,
     "fraud_indicators": [
@@ -248,12 +248,12 @@
     "drug_name": "BAYER GENUINE ASPIRIN",
     "adverse_event_count": 15,
     "serious_outcomes": [
-      "5",
       "4",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -270,8 +270,8 @@
     "adverse_event_count": 14,
     "serious_outcomes": [
       "2",
-      "5",
-      "1"
+      "1",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -287,8 +287,8 @@
     "drug_name": "RITUXAN",
     "adverse_event_count": 14,
     "serious_outcomes": [
-      "5",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -304,11 +304,11 @@
     "drug_name": "METHOTREXATE",
     "adverse_event_count": 13,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 8,
     "fraud_indicators": [
@@ -325,11 +325,11 @@
     "drug_name": "GILENYA",
     "adverse_event_count": 13,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -377,10 +377,10 @@
     "drug_name": "LISINOPRIL",
     "adverse_event_count": 11,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [
@@ -396,11 +396,11 @@
     "drug_name": "SANDOSTATIN LAR DEPOT",
     "adverse_event_count": 11,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [
@@ -416,9 +416,9 @@
     "drug_name": "CLOZARIL",
     "adverse_event_count": 11,
     "serious_outcomes": [
-      "1",
       "3",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [
@@ -434,11 +434,11 @@
     "drug_name": "ALLOPURINOL",
     "adverse_event_count": 10,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [
@@ -454,9 +454,9 @@
     "drug_name": "PRADAXA",
     "adverse_event_count": 10,
     "serious_outcomes": [
-      "1",
       "3",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [
@@ -472,11 +472,11 @@
     "drug_name": "CYCLOPHOSPHAMIDE",
     "adverse_event_count": 9,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 6,
     "fraud_indicators": [
@@ -492,10 +492,10 @@
     "drug_name": "FUROSEMIDE",
     "adverse_event_count": 9,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [],
@@ -509,10 +509,10 @@
     "drug_name": "PLAVIX",
     "adverse_event_count": 9,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -526,10 +526,10 @@
     "drug_name": "VENTRIXYL",
     "adverse_event_count": 9,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [],
@@ -543,11 +543,11 @@
     "drug_name": "LYRICA",
     "adverse_event_count": 8,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [],
@@ -561,10 +561,10 @@
     "drug_name": "LORAZEPAM",
     "adverse_event_count": 8,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -578,10 +578,10 @@
     "drug_name": "METFORMIN HYDROCHLORIDE",
     "adverse_event_count": 8,
     "serious_outcomes": [
-      "5",
-      "1",
       "3",
-      "6"
+      "6",
+      "1",
+      "5"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -595,10 +595,10 @@
     "drug_name": "LASIX",
     "adverse_event_count": 8,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -612,10 +612,10 @@
     "drug_name": "AUBAGIO",
     "adverse_event_count": 7,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -629,10 +629,10 @@
     "drug_name": "SIMVASTATIN",
     "adverse_event_count": 7,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -646,9 +646,9 @@
     "drug_name": "EFFEXOR XR",
     "adverse_event_count": 7,
     "serious_outcomes": [
-      "1",
       "3",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -662,10 +662,10 @@
     "drug_name": "IBUPROFEN",
     "adverse_event_count": 6,
     "serious_outcomes": [
+      "6",
       "2",
       "1",
-      "Unknown",
-      "6"
+      "Unknown"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -679,11 +679,11 @@
     "drug_name": "CLONAZEPAM",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -697,8 +697,8 @@
     "drug_name": "CEFTRIAXONE",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "1",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -712,9 +712,9 @@
     "drug_name": "METRONIDAZOLE",
     "adverse_event_count": 6,
     "serious_outcomes": [
+      "6",
       "2",
-      "1",
-      "6"
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -742,11 +742,11 @@
     "drug_name": "ABRAXANE",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [],
@@ -760,10 +760,10 @@
     "drug_name": "SDAMLO",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -777,8 +777,8 @@
     "drug_name": "BISOPROLOL",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "1",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -792,10 +792,10 @@
     "drug_name": "REBIF",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -809,8 +809,8 @@
     "drug_name": "EXJADE",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "5",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 5,
     "fraud_indicators": [
@@ -826,11 +826,11 @@
     "drug_name": "OXYCODONE HYDROCHLORIDE",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -844,9 +844,9 @@
     "drug_name": "PANTOPRAZOLE SODIUM",
     "adverse_event_count": 6,
     "serious_outcomes": [
+      "6",
       "2",
-      "1",
-      "6"
+      "1"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -860,10 +860,10 @@
     "drug_name": "LEVOTHYROXINE",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -877,10 +877,10 @@
     "drug_name": "AMPYRA",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -894,8 +894,8 @@
     "drug_name": "TEGRETOL",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "1",
-      "6"
+      "6",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -909,10 +909,10 @@
     "drug_name": "7030 CALCIUM PREMIUM",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -926,8 +926,8 @@
     "drug_name": "ONFI",
     "adverse_event_count": 6,
     "serious_outcomes": [
-      "5",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -941,9 +941,9 @@
     "drug_name": "VITAMIN D",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
       "3",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -957,10 +957,10 @@
     "drug_name": "POTASSIUM CHLORIDE",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 3,
     "fraud_indicators": [],
@@ -974,9 +974,9 @@
     "drug_name": "RANITIDINE",
     "adverse_event_count": 5,
     "serious_outcomes": [
+      "3",
       "2",
-      "1",
-      "3"
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -990,10 +990,10 @@
     "drug_name": "JANUVIA",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
-      "1",
       "3",
-      "6"
+      "6",
+      "1",
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -1007,10 +1007,10 @@
     "drug_name": "CITALOPRAM",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -1024,10 +1024,10 @@
     "drug_name": "BASIC CARE LANSOPRAZOLE",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
-      "1",
       "3",
-      "6"
+      "6",
+      "1",
+      "5"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],
@@ -1041,10 +1041,10 @@
     "drug_name": "DIOVAN",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
-      "1",
       "3",
-      "6"
+      "6",
+      "1",
+      "5"
     ],
     "indication_diversity": 0,
     "fraud_indicators": [],
@@ -1058,10 +1058,10 @@
     "drug_name": "METOPROLOL",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "2",
-      "1",
       "3",
-      "6"
+      "6",
+      "2",
+      "1"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -1075,11 +1075,11 @@
     "drug_name": "NEURONTIN",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
+      "2",
       "1",
       "3",
-      "2",
-      "6"
+      "6",
+      "5"
     ],
     "indication_diversity": 4,
     "fraud_indicators": [],
@@ -1093,9 +1093,9 @@
     "drug_name": "PROZAC",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "5",
+      "6",
       "1",
-      "6"
+      "5"
     ],
     "indication_diversity": 2,
     "fraud_indicators": [],
@@ -1125,10 +1125,10 @@
     "drug_name": "SOLIRIS",
     "adverse_event_count": 5,
     "serious_outcomes": [
-      "1",
       "3",
+      "6",
       "Unknown",
-      "6"
+      "1"
     ],
     "indication_diversity": 1,
     "fraud_indicators": [],

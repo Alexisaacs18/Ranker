@@ -44,6 +44,18 @@ const elements = {
   inlineLoader: document.getElementById("inlineLoader"),
   inlineLoaderText: document.getElementById("inlineLoaderText"),
   processedCount: document.getElementById("processedCount"),
+  scriptOutputModal: document.getElementById("scriptOutputModal"),
+  scriptOutputTitle: document.getElementById("scriptOutputTitle"),
+  scriptOutputClose: document.getElementById("scriptOutputClose"),
+  scriptOutputStop: document.getElementById("scriptOutputStop"),
+  scriptOutputStopModal: document.getElementById("scriptOutputStopModal"),
+  scriptOutputPre: document.getElementById("scriptOutputPre"),
+  deleteDataBtn: document.getElementById("deleteDataBtn"),
+  websiteUrl: document.getElementById("websiteUrl"),
+  maxPages: document.getElementById("maxPages"),
+  urlPattern: document.getElementById("urlPattern"),
+  linkSelector: document.getElementById("linkSelector"),
+  scrapeWebsiteBtn: document.getElementById("scrapeWebsiteBtn"),
 };
 
 const state = {
@@ -1179,6 +1191,183 @@ function resetFilters() {
   applyFilters({ force: true });
 }
 
+function runScript(scriptName, options = {}) {
+  const btn = options.button || document.querySelector(`.script-btn[data-script="${scriptName}"]`);
+  if (!elements.scriptOutputModal || !elements.scriptOutputPre) return;
+  const label = btn ? btn.textContent : scriptName;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Running…";
+  }
+  elements.scriptOutputModal.classList.remove("hidden");
+  if (elements.scriptOutputTitle) elements.scriptOutputTitle.textContent = `Output: ${label}`;
+  elements.scriptOutputPre.textContent = "Running…";
+  // Enable row Stop button (it's always visible, just disabled)
+  if (elements.scriptOutputStop) {
+    elements.scriptOutputStop.disabled = false;
+  }
+  // Show and enable modal Stop button
+  if (elements.scriptOutputStopModal) {
+    elements.scriptOutputStopModal.classList.remove("hidden");
+    elements.scriptOutputStopModal.disabled = false;
+  }
+  if (elements.deleteDataBtn) elements.deleteDataBtn.disabled = true;
+  elements.scriptOutputModal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  const fetchOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  };
+  if (options.body) {
+    fetchOptions.body = JSON.stringify(options.body);
+  }
+
+  fetch(`/api/run/${scriptName}`, fetchOptions)
+    .then(async (res) => {
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(`Server returned ${res.status} ${res.statusText}. Response: ${text.substring(0, 200)}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (data.ok) {
+        let out = data.stdout || "";
+        if (data.stderr) out += (out ? "\n" : "") + "[stderr]\n" + data.stderr;
+        if (data.returncode !== 0) out += `\n[exit code ${data.returncode}]`;
+        if (data.stopped || data.returncode === -9 || data.returncode === 137) {
+          out += "\n[Stopped by user]";
+        } else if ((scriptName === "gpt_ranker" || scriptName === "converter") && data.returncode === 0) {
+          out += "\n\n→ Refresh the page to load new results.";
+        }
+        elements.scriptOutputPre.textContent = out || "(no output)";
+      } else {
+        elements.scriptOutputPre.textContent = "Error: " + (data.error || "Unknown error");
+      }
+    })
+    .catch((err) => {
+      elements.scriptOutputPre.textContent = "Request failed: " + (err.message || String(err));
+    })
+    .finally(() => {
+      if (btn) {
+        btn.textContent = label;
+        btn.disabled = false;
+      }
+      // Disable row Stop button
+      if (elements.scriptOutputStop) {
+        elements.scriptOutputStop.disabled = true;
+      }
+      // Hide and disable modal Stop button
+      if (elements.scriptOutputStopModal) {
+        elements.scriptOutputStopModal.classList.add("hidden");
+        elements.scriptOutputStopModal.disabled = true;
+      }
+      if (elements.deleteDataBtn) elements.deleteDataBtn.disabled = false;
+    });
+}
+
+function scrapeWebsite() {
+  const url = elements.websiteUrl?.value?.trim();
+  if (!url) {
+    alert("Please enter a website URL");
+    return;
+  }
+  
+  // Validate URL
+  try {
+    new URL(url);
+  } catch {
+    alert("Please enter a valid URL (e.g., https://example.com)");
+    return;
+  }
+  
+  const maxPages = parseInt(elements.maxPages?.value || "10", 10) || 10;
+  const urlPattern = elements.urlPattern?.value?.trim() || null;
+  const linkSelector = elements.linkSelector?.value?.trim() || null;
+  
+  if (elements.scrapeWebsiteBtn) {
+    elements.scrapeWebsiteBtn.disabled = true;
+  }
+  
+  runScript("website_scraper", {
+    button: elements.scrapeWebsiteBtn,
+    body: { 
+      url, 
+      max_pages: maxPages,
+      url_pattern: urlPattern,
+      link_selector: linkSelector
+    }
+  });
+}
+
+function deleteData() {
+  if (!confirm("This will permanently delete all data in the data folder. Continue?")) return;
+  if (elements.deleteDataBtn) elements.deleteDataBtn.disabled = true;
+  fetch("/api/delete-data", { method: "POST" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.ok) {
+        state.raw = [];
+        state.filtered = [];
+        updateSummary();
+        updateCharts();
+        populateFilters([], false);
+        applyFilters({ force: true });
+        alert("Data cleared. Run the pipeline to regenerate.");
+      } else {
+        alert("Error: " + (data.error || "Unknown error"));
+      }
+    })
+    .catch((err) => alert("Request failed: " + (err.message || String(err))))
+    .finally(() => {
+      if (elements.deleteDataBtn) elements.deleteDataBtn.disabled = false;
+    });
+}
+
+function stopScript(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  console.log("stopScript called", { 
+    rowStop: elements.scriptOutputStop, 
+    modalStop: elements.scriptOutputStopModal 
+  });
+  for (const el of [elements.scriptOutputStop, elements.scriptOutputStopModal]) {
+    if (el) el.disabled = true;
+  }
+  if (elements.scriptOutputPre) elements.scriptOutputPre.textContent = "Stopping…";
+  fetch("/api/stop", { method: "POST" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.ok) {
+        if (elements.scriptOutputPre) {
+          const current = elements.scriptOutputPre.textContent;
+          elements.scriptOutputPre.textContent = current + "\n\n[Stop requested - waiting for process to terminate...]";
+        }
+      } else {
+        if (elements.scriptOutputPre) {
+          elements.scriptOutputPre.textContent = "Error stopping: " + (data.error || "Unknown error");
+        }
+      }
+    })
+    .catch((err) => {
+      console.error("Stop request failed:", err);
+      if (elements.scriptOutputPre) {
+        elements.scriptOutputPre.textContent = "Stop request failed: " + (err.message || String(err));
+      }
+    })
+    .finally(() => {
+      // Re-enable after a short delay to allow the process to terminate
+      setTimeout(() => {
+        for (const el of [elements.scriptOutputStop, elements.scriptOutputStopModal]) {
+          if (el) el.disabled = false;
+        }
+      }, 500);
+    });
+}
+
 function wireEvents() {
   ["change", "input"].forEach((eventName) => {
     elements.scoreFilter.addEventListener(eventName, applyFilters);
@@ -1190,6 +1379,40 @@ function wireEvents() {
   elements.resetFilters.addEventListener("click", resetFilters);
   elements.detailClose.addEventListener("click", () => clearDetail());
   elements.detailTextToggle.addEventListener("click", toggleDetailText);
+
+  if (elements.scriptOutputClose) {
+    elements.scriptOutputClose.addEventListener("click", () => {
+      elements.scriptOutputModal?.classList.add("hidden");
+    });
+  }
+  if (elements.scriptOutputStop) {
+    elements.scriptOutputStop.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("Row Stop button clicked");
+      stopScript(e);
+    });
+  }
+  if (elements.scriptOutputStopModal) {
+    elements.scriptOutputStopModal.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("Modal Stop button clicked");
+      stopScript(e);
+    });
+  }
+  if (elements.deleteDataBtn) {
+    elements.deleteDataBtn.addEventListener("click", deleteData);
+  }
+  if (elements.scrapeWebsiteBtn) {
+    elements.scrapeWebsiteBtn.addEventListener("click", scrapeWebsite);
+  }
+  document.querySelectorAll(".script-btn[data-script]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const s = btn.dataset.script;
+      if (s) runScript(s);
+    });
+  });
 }
 
 function toggleDetailText() {
