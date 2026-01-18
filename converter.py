@@ -66,13 +66,13 @@ def jsonl_to_csv(jsonl_path: Path, csv_path: Path, verbose: bool = True, min_sco
             try:
                 record = json.loads(line)
                 
-                # FILTER BY FRAUD SCORE
-                fraud_score = get_fraud_score(record)
-                if fraud_score is not None and fraud_score < min_score:
-                    records_skipped += 1
-                    if verbose and records_skipped % 100 == 0:
-                        print(f"  Skipped {records_skipped} low-score records (< {min_score})...", flush=True)
-                    continue
+                # FILTER BY FRAUD SCORE - COMMENTED OUT
+                # fraud_score = get_fraud_score(record)
+                # if fraud_score is not None and fraud_score < min_score:
+                #     records_skipped += 1
+                #     if verbose and records_skipped % 100 == 0:
+                #         print(f"  Skipped {records_skipped} low-score records (< {min_score})...", flush=True)
+                #     continue
                 
                 # Get filename
                 filename = record.get('filename') or record.get('id', f'record_{line_num}')
@@ -393,12 +393,12 @@ def main():
     args = parser.parse_args()
     
     print(f"Converting {args.input} to {args.output}...")
-    print(f"Filtering: Only including records with fraud_potential_score >= {args.min_score}")
+    # print(f"Filtering: Only including records with fraud_potential_score >= {args.min_score}")  # COMMENTED OUT - NO FILTERING
     
     try:
-        count, skipped = jsonl_to_csv(args.input, args.output, verbose=not args.quiet, min_score=args.min_score)
+        count, skipped = jsonl_to_csv(args.input, args.output, verbose=not args.quiet, min_score=0)  # min_score set to 0 to include all
         print(f"\n✅ Successfully converted {count} records")
-        print(f"   Skipped {skipped} records with score < {args.min_score}")
+        # print(f"   Skipped {skipped} records with score < {args.min_score}")  # COMMENTED OUT - NO FILTERING
         print(f"   Output: {args.output}")
         print(f"\nNext step:")
         print(f"   python gpt_ranker.py --chunk-size 0 --max-rows 10")

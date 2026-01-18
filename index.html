@@ -57,6 +57,60 @@
       </div>
     </header>
 
+    <section class="scripts-panel">
+      <h2>Run Data Pipeline</h2>
+      <p class="scripts-hint">Run Python scripts in order: Test Connection → Scraper → Converter → GPT Ranker. Output appears in the log below.</p>
+      <div class="script-buttons">
+        <button type="button" class="script-btn" data-script="test_connection">Test GPT Connection</button>
+        <button type="button" class="script-btn" data-script="scraper">Run Scraper</button>
+        <button type="button" class="script-btn" data-script="combine_website_scrapes">Combine Website Scrapes</button>
+        <button type="button" class="script-btn" data-script="pubmed_trending">Scrape PubMed Trending</button>
+        <button type="button" class="script-btn" data-script="converter">Run Converter</button>
+        <button type="button" class="script-btn" data-script="gpt_ranker">Run GPT Ranker</button>
+        <button type="button" id="scriptOutputStop" class="script-btn script-btn--stop" disabled>Stop</button>
+        <button type="button" id="deleteDataBtn" class="script-btn script-btn--danger">Delete All Data</button>
+      </div>
+      <div class="website-scraper-panel" style="margin-top: 1.5rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--panel-border); border-radius: 8px;">
+        <h3 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem;">Scrape Website</h3>
+        <p style="margin: 0 0 0.75rem 0; color: var(--muted); font-size: 0.9rem;">Enter a website URL to scrape. The scraped content will be saved in a format the converter can process.</p>
+        <div style="display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label for="websiteUrl" style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted);">Website URL</label>
+            <input type="url" id="websiteUrl" placeholder="https://example.com" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: inherit; font-size: 0.9rem;" />
+          </div>
+          <div style="min-width: 100px;">
+            <label for="maxPages" style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted);">Max Articles</label>
+            <input type="number" id="maxPages" value="10" min="1" max="50" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: inherit; font-size: 0.9rem;" />
+          </div>
+          <button type="button" id="scrapeWebsiteBtn" class="script-btn" style="margin-top: 1.5rem;">Scrape Website</button>
+        </div>
+        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label for="urlPattern" style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted);">URL Pattern (optional)</label>
+            <input type="text" id="urlPattern" placeholder="e.g., /pubmed/ or /article/" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: inherit; font-size: 0.9rem;" />
+            <small style="display: block; margin-top: 0.25rem; font-size: 0.75rem; color: var(--muted);">Match article URLs containing this pattern</small>
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <label for="linkSelector" style="display: block; margin-bottom: 0.25rem; font-size: 0.85rem; color: var(--muted);">CSS Selector (optional)</label>
+            <input type="text" id="linkSelector" placeholder="e.g., a.article-link" style="width: 100%; padding: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: inherit; font-size: 0.9rem;" />
+            <small style="display: block; margin-top: 0.25rem; font-size: 0.75rem; color: var(--muted);">CSS selector for article links</small>
+          </div>
+        </div>
+      </div>
+      <div id="scriptOutputModal" class="script-output-modal hidden">
+        <div class="script-output-inner">
+          <div class="script-output-header">
+            <h3 id="scriptOutputTitle">Script Output</h3>
+            <div class="script-output-actions">
+              <button type="button" id="scriptOutputStopModal" class="script-output-stop hidden">Stop</button>
+              <button type="button" id="scriptOutputClose" class="script-output-close">Close</button>
+            </div>
+          </div>
+          <pre id="scriptOutputPre"></pre>
+        </div>
+      </div>
+    </section>
+
     <div class="processing-notice">
       <strong>Note:</strong> We are still processing medical board actions. Currently showing <span id="processedCount">—</span> providers.
       <span id="filterWaitNote" class="filter-wait-note hidden">Please wait for data to finish loading before using filters.</span>
@@ -250,6 +304,6 @@ Output JSON with:
     <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.1/dist/ag-grid-community.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=2"></script>
   </body>
 </html>
