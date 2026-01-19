@@ -37,6 +37,10 @@ const elements = {
   detailTextPreview: document.getElementById("detailTextPreview"),
   detailTextToggle: document.getElementById("detailTextToggle"),
   detailClose: document.getElementById("detailClose"),
+  detailInvestigateBtn: document.getElementById("detailInvestigateBtn"),
+  detailInvestigationStatus: document.getElementById("detailInvestigationStatus"),
+  detailInvestigationReport: document.getElementById("detailInvestigationReport"),
+  investigationReportContent: document.getElementById("investigationReportContent"),
   loadingOverlay: document.getElementById("loadingOverlay"),
   loadingTitle: document.getElementById("loadingTitle"),
   loadingSubtitle: document.getElementById("loadingSubtitle"),
@@ -76,6 +80,7 @@ const state = {
   },
   currentLoadId: 0,
   activeRowId: null,
+  activeRowIndex: null,  // Store source_row_index for investigation
   powerDisplayNames: {},
   filtersEnabled: false,
 };
@@ -266,9 +271,54 @@ function findCanonicalByToken(key) {
   return null;
 }
 
+// Extract viability score from report text if stored value is missing or suspicious
+function extractViabilityScoreFromReport(reportText, storedScore) {
+  if (!reportText || typeof reportText !== 'string') return storedScore;
+  
+  // Try to extract score from report using the same pattern as Python code
+  // Look for "Viability Score:" followed by a number
+  const patterns = [
+    /Viability\s+Score[^\d]*?:\s*(\d+)/i,  // Flexible: "Viability Score" followed by any chars, then colon, then number
+    /Viability.*?Score.*?(\d+)/i,  // Fallback: "Viability" followed by anything, "Score", then first number
+  ];
+  
+  for (const pattern of patterns) {
+    const match = reportText.match(pattern);
+    if (match) {
+      const extractedScore = parseInt(match[1], 10);
+      if (!isNaN(extractedScore) && extractedScore >= 0 && extractedScore <= 100) {
+        // If stored score is suspiciously low (0-10) but report has a higher score, use report value
+        if (storedScore === null || storedScore === undefined || (storedScore <= 10 && extractedScore > storedScore)) {
+          return extractedScore;
+        }
+        // Otherwise prefer stored score if it exists
+        if (storedScore != null) return storedScore;
+        return extractedScore;
+      }
+    }
+  }
+  
+  return storedScore;
+}
+
 // FIXED: Update normalizeRow to handle correct field names
 function normalizeRow(row) {
   const qui_tam = Number(row.qui_tam_score ?? 0);
+  let investigation_score = row.investigation_viability_score != null ? Number(row.investigation_viability_score) : null;
+  
+  // If we have a report but the stored score seems wrong, try extracting from report text
+  if (row.investigation_report && investigation_score != null) {
+    investigation_score = extractViabilityScoreFromReport(row.investigation_report, investigation_score);
+  } else if (row.investigation_report && investigation_score === null) {
+    // No stored score, try extracting from report
+    investigation_score = extractViabilityScoreFromReport(row.investigation_report, null);
+  }
+  
+  // Use investigation_viability_score if available, otherwise fall back to qui_tam_score
+  const display_score = (investigation_score != null && Number.isFinite(investigation_score)) 
+    ? investigation_score 
+    : (Number.isFinite(qui_tam) ? qui_tam : 0);
+  
   const arrays = (value) => (Array.isArray(value) ? value : []);
   
   const rawActors = arrays(row.implicated_actors)
@@ -280,7 +330,8 @@ function normalizeRow(row) {
     filename: row.filename,
     source_row_index: row.metadata?.source_row_index ?? null,
     headline: row.headline || row.metadata?.original_row?.filename || "Untitled Provider",
-    qui_tam_score: Number.isFinite(qui_tam) ? qui_tam : 0,
+    qui_tam_score: display_score, // Now uses investigation_viability_score when available, falls back to qui_tam_score
+    original_qui_tam_score: Number.isFinite(qui_tam) ? qui_tam : 0, // Keep original for reference
     reason: row.reason || "",
     key_facts: arrays(row.key_facts),
     statute_violations: arrays(row.statute_violations),
@@ -288,6 +339,8 @@ function normalizeRow(row) {
     implicated_actors: normalizedActors.length > 0 ? normalizedActors : rawActors,
     federal_programs_involved: arrays(row.federal_programs_involved),
     fraud_type: row.fraud_type || "Unknown",
+    investigation_viability_score: investigation_score, // Use extracted score (may have been corrected from report)
+    investigation_report: row.investigation_report || null,
     metadata: row.metadata || {},
     original_text: row.metadata?.original_row?.text || "",
   };
@@ -1267,6 +1320,92 @@ function runScript(scriptName, options = {}) {
     });
 }
 
+function runInvestigation(rowIndex) {
+  if (!elements.detailInvestigationStatus || !elements.detailInvestigationReport || !elements.investigationReportContent) {
+    alert("Investigation UI elements not found");
+    return;
+  }
+  
+  // Show status, hide report
+  elements.detailInvestigationStatus.classList.remove("hidden");
+  elements.detailInvestigationReport.classList.add("hidden");
+  elements.detailInvestigationStatus.querySelector("p").textContent = "Investigating lead... This may take 2-5 minutes.";
+  
+  if (elements.detailInvestigateBtn) {
+    elements.detailInvestigateBtn.disabled = true;
+    elements.detailInvestigateBtn.textContent = "Investigating...";
+  }
+  
+  // Call clinical_investigator script
+  fetch("/api/run/clinical_investigator", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ row_index: rowIndex })
+  })
+    .then(async (res) => {
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error(`Server returned ${res.status}. Response: ${text.substring(0, 200)}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (data.ok) {
+        // Extract markdown report from stdout
+        let report = data.stdout || "";
+        
+        // Show stderr if present (for debugging)
+        if (data.stderr) {
+          console.log("Stderr from investigation:", data.stderr);
+          // Append stderr if it contains useful info
+          if (data.stderr.includes("ERROR") || data.stderr.trim().length > 0) {
+            report += "\n\n[Debug Output]\n" + data.stderr;
+          }
+        }
+        
+        // If return code is non-zero, show error
+        if (data.returncode !== 0 && !report.includes("#")) {
+          report = "# Error\n\nScript exited with code " + data.returncode + ".\n\n" + 
+                   (report || "No output generated.") + "\n\n" + 
+                   (data.stderr || "");
+        }
+        
+        // Try to extract just the markdown (skip initial log lines)
+        const lines = report.split("\n");
+        const markdownStart = lines.findIndex(line => line.trim().startsWith("#"));
+        if (markdownStart >= 0) {
+          report = lines.slice(markdownStart).join("\n");
+        }
+        
+        // Display report
+        elements.investigationReportContent.textContent = report || "No report generated. Check console for errors.";
+        elements.detailInvestigationReport.classList.remove("hidden");
+        elements.detailInvestigationStatus.classList.add("hidden");
+        
+        // Scroll to report
+        setTimeout(() => {
+          elements.detailInvestigationReport.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 100);
+      } else {
+        elements.detailInvestigationStatus.querySelector("p").textContent = 
+          "Error: " + (data.error || "Unknown error occurred");
+        throw new Error(data.error || "Investigation failed");
+      }
+    })
+    .catch((err) => {
+      elements.detailInvestigationStatus.querySelector("p").textContent = 
+        "Error: " + (err.message || String(err));
+      console.error("Investigation error:", err);
+    })
+    .finally(() => {
+      if (elements.detailInvestigateBtn) {
+        elements.detailInvestigateBtn.disabled = false;
+        elements.detailInvestigateBtn.textContent = "Run Deep Investigation";
+      }
+    });
+}
+
 function scrapeWebsite() {
   const url = elements.websiteUrl?.value?.trim();
   if (!url) {
@@ -1379,6 +1518,16 @@ function wireEvents() {
   elements.resetFilters.addEventListener("click", resetFilters);
   elements.detailClose.addEventListener("click", () => clearDetail());
   elements.detailTextToggle.addEventListener("click", toggleDetailText);
+  
+  if (elements.detailInvestigateBtn) {
+    elements.detailInvestigateBtn.addEventListener("click", () => {
+      if (state.activeRowIndex === null || state.activeRowIndex === undefined) {
+        alert("No lead selected. Please select a row from the table.");
+        return;
+      }
+      runInvestigation(state.activeRowIndex);
+    });
+  }
 
   if (elements.scriptOutputClose) {
     elements.scriptOutputClose.addEventListener("click", () => {
@@ -1582,6 +1731,7 @@ function renderDetail(row, options = {}) {
   }
   
   state.activeRowId = row.filename || null;
+  state.activeRowIndex = row.source_row_index;  // Store for investigation
   elements.detailDrawer.classList.remove("hidden");
 
   const highlightTerms = getHighlightTerms();
@@ -1616,6 +1766,55 @@ function renderDetail(row, options = {}) {
       ? row.key_facts.map((item) => `<li>${highlightText(item, highlightTerms)}</li>`).join("")
       : "<li>—</li>";
 
+  // Display investigation report if available (from integrated investigation)
+  if (row.investigation_report) {
+    if (elements.investigationReportContent) {
+      elements.investigationReportContent.textContent = row.investigation_report;
+    }
+    if (elements.detailInvestigationReport) {
+      elements.detailInvestigationReport.classList.remove("hidden");
+    }
+    if (elements.detailInvestigationStatus) {
+      elements.detailInvestigationStatus.classList.add("hidden");
+    }
+    if (elements.detailInvestigateBtn) {
+      elements.detailInvestigateBtn.textContent = "Report Available";
+      elements.detailInvestigateBtn.disabled = true;
+      elements.detailInvestigateBtn.title = "Investigation already performed during ranking";
+    }
+    // Show viability score if available
+    if (row.investigation_viability_score !== null && row.investigation_viability_score !== undefined && elements.detailInvestigationReport) {
+      // Remove existing viability score element if present
+      const existingViability = elements.detailInvestigationReport.querySelector('.investigation-viability-score');
+      if (existingViability) {
+        existingViability.remove();
+      }
+      
+      const viabilityText = `Investigation Viability Score: ${row.investigation_viability_score}/100`;
+      const viabilityEl = document.createElement('p');
+      viabilityEl.className = 'investigation-viability-score';
+      viabilityEl.style.marginBottom = '0.75rem';
+      viabilityEl.style.fontWeight = '600';
+      viabilityEl.textContent = viabilityText;
+      if (elements.investigationReportContent) {
+        elements.detailInvestigationReport.insertBefore(viabilityEl, elements.investigationReportContent);
+      }
+    }
+  } else {
+    // No investigation report - hide it and enable button
+    if (elements.detailInvestigationReport) {
+      elements.detailInvestigationReport.classList.add("hidden");
+    }
+    if (elements.detailInvestigationStatus) {
+      elements.detailInvestigationStatus.classList.add("hidden");
+    }
+    if (elements.detailInvestigateBtn) {
+      elements.detailInvestigateBtn.textContent = "Run Deep Investigation";
+      elements.detailInvestigateBtn.disabled = false;
+      elements.detailInvestigateBtn.title = "";
+    }
+  }
+
   if (options.scrollToDetail) {
     setTimeout(() => {
       elements.detailDrawer.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1626,6 +1825,7 @@ function renderDetail(row, options = {}) {
 function clearDetail() {
   elements.detailDrawer.classList.add("hidden");
   state.activeRowId = null;
+  state.activeRowIndex = null;
   elements.detailTitle.innerHTML = "Select a row to inspect full context";
   elements.detailReason.innerHTML = "—";
   elements.detailLeadTypes.innerHTML = "—";
@@ -1639,4 +1839,15 @@ function clearDetail() {
   elements.detailTextPreview.classList.remove("hidden");
   elements.detailTextToggle.textContent = "Expand";
   elements.detailInsights.innerHTML = "";
+  
+  // Clear investigation section
+  if (elements.detailInvestigationStatus) {
+    elements.detailInvestigationStatus.classList.add("hidden");
+  }
+  if (elements.detailInvestigationReport) {
+    elements.detailInvestigationReport.classList.add("hidden");
+  }
+  if (elements.investigationReportContent) {
+    elements.investigationReportContent.textContent = "";
+  }
 }

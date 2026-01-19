@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Combine Website Scrapes and PubMed Trending - Combines all website_scrape_*.jsonl and 
-pubmed_trending_*.jsonl files into combined_medical_fraud_data.jsonl
+Combine Website Scrapes, PubMed Trending, and PubPeer - Combines all website_scrape_*.jsonl, 
+pubmed_trending_*.jsonl, and pubpeer_*.jsonl files into combined_medical_fraud_data.jsonl
 """
 
 import json
@@ -21,12 +21,18 @@ def main():
     # Find all PubMed trending files
     pubmed_trending_files = sorted(DATA_RAW_DIR.glob("pubmed_trending_*.jsonl"))
     
-    # Combine both types
-    all_files = website_scrape_files + pubmed_trending_files
+    # Find all PubPeer files
+    pubpeer_files = sorted(DATA_RAW_DIR.glob("pubpeer_*.jsonl"))
+    
+    # Find all Global Fraud Scraper files (data_SOURCENAME.jsonl)
+    global_fraud_files = sorted(DATA_RAW_DIR.glob("data_*.jsonl"))
+    
+    # Combine all types
+    all_files = website_scrape_files + pubmed_trending_files + pubpeer_files + global_fraud_files
     
     if not all_files:
         print("No scrape files found in data/raw/")
-        print("Expected files matching: website_scrape_*.jsonl or pubmed_trending_*.jsonl")
+        print("Expected files matching: website_scrape_*.jsonl, pubmed_trending_*.jsonl, pubpeer_*.jsonl, or data_*.jsonl")
         sys.exit(1)
     
     print(f"Found {len(all_files)} scrape file(s):")
@@ -37,6 +43,14 @@ def main():
     if pubmed_trending_files:
         print(f"  PubMed trending ({len(pubmed_trending_files)}):")
         for f in pubmed_trending_files:
+            print(f"    - {f.name}")
+    if pubpeer_files:
+        print(f"  PubPeer ({len(pubpeer_files)}):")
+        for f in pubpeer_files:
+            print(f"    - {f.name}")
+    if global_fraud_files:
+        print(f"  Global Fraud Scraper ({len(global_fraud_files)}):")
+        for f in global_fraud_files:
             print(f"    - {f.name}")
     
     combined_records = []

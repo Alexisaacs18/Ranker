@@ -37,12 +37,18 @@ PYTHON_FOR_SCRIPTS = _python_for_scripts()
 # Script name -> (python_file, args_list, timeout_seconds)
 RUNNERS = {
     "test_connection": ("test_connection.py", [], 60),
-    "scraper": ("unfiled_qui_tam_scraper.py", [], 600),
+    "global_fraud_scraper": ("global_fraud_scraper.py", [], 3600),  # 60 minutes for full scrape
+    "etl_loader": ("etl_loader.py", [], 1800),  # 30 minutes for ETL
+    "cross_reference": ("cross_reference_queries.py", [], 60),
+    "pubpeer": ("pubpeer_scraper.py", [], 1800),  # 30 minutes for full scrape
     "combine_website_scrapes": ("combine_website_scrapes.py", [], 60),
     "pubmed_trending": ("pubmed_trending_scraper.py", [], 600),
     "converter": ("converter.py", [], 120),
-    "gpt_ranker": ("gpt_ranker.py", ["--chunk-size", "0", "--max-rows", "100"], 600),
+        "gpt_ranker": ("gpt_ranker.py", ["--chunk-size", "0", "--max-rows", "200"], 600),
+        "gpt_ranker_with_investigation": ("gpt_ranker.py", ["--chunk-size", "0", "--max-rows", "200", "--investigate", "--investigate-min-score", "50"], 600),  # 10 min timeout (investigations now ~2 min each)
     "website_scraper": ("website_scraper.py", [], 300),
+    "clinical_investigator": ("clinical_investigator.py", [], 300),  # 5 minutes for investigation
+    "rerun_low_score_investigations": ("rerun_low_score_investigations.py", [], 3600),  # 60 minutes for batch rerun
 }
 
 app = Flask(__name__)
@@ -109,8 +115,26 @@ def run_script(script):
                 args.append(link_selector)
             if url_pattern:
                 args.append(url_pattern)
+        
+        # Handle row_index parameter for clinical_investigator
+        elif script == "clinical_investigator":
+            try:
+                data = request.get_json() or {}
+            except Exception as e:
+                return jsonify({"ok": False, "error": f"Invalid JSON in request: {str(e)}"}), 400
+            
+            row_index = data.get("row_index")
+            if row_index is None:
+                return jsonify({"ok": False, "error": "row_index is required"}), 400
+            
+            try:
+                row_index = int(row_index)
+            except (ValueError, TypeError):
+                return jsonify({"ok": False, "error": "row_index must be an integer"}), 400
+            
+            args = ["--row-index", str(row_index), "--use-source-index"]  # Search by source_row_index column value
 
-        # Build command - args is already set from RUNNERS or modified for website_scraper
+        # Build command - args is already set from RUNNERS or modified for website_scraper/clinical_investigator
         cmd = [PYTHON_FOR_SCRIPTS, str(py_path)] + args
         
         try:

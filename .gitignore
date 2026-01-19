@@ -7,6 +7,9 @@ venv/
 env/
 .env
 
+# Configuration files with API keys
+config.py
+
 # macOS and editor noise
 .DS_Store
 .idea/

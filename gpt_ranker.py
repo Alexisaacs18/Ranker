@@ -20,6 +20,18 @@ except ModuleNotFoundError:  # pragma: no cover
     import tomli as tomllib  # type: ignore
 
 import requests
+try:
+    import sqlite3
+    SQLITE_AVAILABLE = True
+except ImportError:
+    SQLITE_AVAILABLE = False
+
+# Import investigation functions
+try:
+    from clinical_investigator import investigate_lead
+    INVESTIGATION_AVAILABLE = True
+except ImportError:
+    INVESTIGATION_AVAILABLE = False
 
 
 try:
@@ -28,17 +40,21 @@ except OverflowError:
     csv.field_size_limit(2**31 - 1)
 
 
-#!/usr/bin/env python3
-"""
-Scientific Fraud Ranking Prompt
-Focuses on Research Misconduct and False Claims Act liability from falsified scientific research
-"""
-
+# Scientific Fraud Ranking Prompt - Enhanced with cross-reference analysis
 SCIENTIFIC_FRAUD_RANKING_PROMPT = """You are a forensic data analyst and expert in research integrity. Your goal is to analyze scientific abstracts and full-text articles to identify potential Research Misconduct that could lead to False Claims Act (FCA) liability.
 
 CRITICAL CONTEXT:
 Government funding (NIH, CDC, DoD) obtained via falsified research is a violation of the False Claims Act (e.g., Duke University $112M settlement).
 FDA approval obtained via falsified clinical trial data leads to false claims when Medicare pays for the drug.
+
+CROSS-REFERENCE ANALYSIS:
+When cross-referenced data is provided from the database (NIH grants, retractions, PubPeer discussions, FDA adverse events), use it to find PATTERNS:
+- An author with a retracted paper who received NIH grants = RED FLAG
+- A drug with FDA adverse events but studies claiming safety = RED FLAG  
+- PubPeer discussions about data issues + NIH funding = HIGH RISK
+- Multiple sources pointing to the same researcher/institution = PATTERN OF FRAUD
+
+BOOST scores when cross-references reveal patterns across multiple data sources.
 
 SCORING FRAMEWORK (0-100):
 
@@ -261,14 +277,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-rows",
         type=int,
-        default=50,
+        default=200,
         help="Limit processing to the first N rows (useful for smoke-tests).",
     )
     parser.add_argument(
         "--min-score",
         type=int,
-        default=20,
+        default=50,
         help="Skip records with existing fraud_potential_score below this threshold (0 to disable).",
+    )
+    parser.add_argument(
+        "--cross-reference",
+        action="store_true",
+        default=True,
+        help="Enable cross-referencing with SQLite database (default: True).",
+    )
+    parser.add_argument(
+        "--no-cross-reference",
+        dest="cross_reference",
+        action="store_false",
+        help="Disable cross-referencing with SQLite database.",
+    )
+    parser.add_argument(
+        "--db-path",
+        type=Path,
+        default=Path("data/fraud_data.db"),
+        help="Path to SQLite database for cross-referencing (default: data/fraud_data.db).",
+    )
+    parser.add_argument(
+        "--investigate-min-score",
+        type=int,
+        default=50,
+        help="Minimum qui_tam_score to trigger investigation (default: 50). Investigation is automatically enabled for all leads meeting this threshold.",
     )
     parser.add_argument(
         "--sleep",
@@ -332,7 +372,136 @@ def extract_fraud_score_from_text(text: str) -> Optional[int]:
     return None
 
 
-def should_skip_row(row: dict, min_score: int = 20) -> tuple:
+def query_database_cross_references(text: str, db_path: Optional[Path] = None) -> str:
+    """
+    Query the SQLite database for cross-references related to the current record.
+    Returns a formatted string with related data from other sources.
+    """
+    if not SQLITE_AVAILABLE:
+        return ""
+    
+    if db_path is None:
+        db_path = Path("data/fraud_data.db")
+    
+    if not db_path.exists():
+        return ""
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cross_refs = []
+        text_lower = text.lower()
+        
+        # Extract potential entity names (simple heuristic: capitalized words)
+        # Look for patterns like "Dr. Smith" or "John Smith" or institution names
+        name_pattern = r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b'
+        potential_names = re.findall(name_pattern, text[:2000])  # First 2000 chars to limit
+        
+        # Extract PMIDs
+        pmids = re.findall(r'PMID[:\s]*(\d{8,})|/(\d{8,})/', text)
+        pmid_list = [pmid[0] or pmid[1] for pmid in pmids if pmid[0] or pmid[1]]
+        
+        # Extract DOIs
+        dois = re.findall(r'DOI[:\s]*([^\s,]+)|10\.\d{4,}/[^\s,]+', text)
+        doi_list = [doi[0] if isinstance(doi, tuple) else doi for doi in dois if doi]
+        
+        # Extract drug names (common pattern: drug names often capitalized)
+        # This is a heuristic - could be improved
+        drug_indicators = ['drug', 'medication', 'treatment', 'therapeutic']
+        
+        # 1. Check for matching NIH Grants (by PI name or institution)
+        for name in potential_names[:10]:  # Limit to avoid too many queries
+            if len(name) < 4 or len(name.split()) > 5:  # Skip very short or very long names
+                continue
+            cursor.execute("""
+                SELECT project_num, pi_name, org_name, total_cost
+                FROM nih_grants
+                WHERE pi_name_normalized LIKE ? OR org_name LIKE ?
+                LIMIT 5
+            """, (f"%{name.lower()}%", f"%{name}%"))
+            grants = cursor.fetchall()
+            if grants:
+                cross_refs.append(f"\n[CROSS-REFERENCE: NIH GRANTS]")
+                for grant in grants:
+                    cost_display = f"${grant['total_cost']:,.0f}" if grant['total_cost'] else "Not specified"
+                    cross_refs.append(f"  - Grant {grant['project_num']}: PI={grant['pi_name']}, Org={grant['org_name']}, Amount={cost_display}")
+        
+        # 2. Check for retractions (by PMID or DOI)
+        for pmid in pmid_list[:5]:
+            cursor.execute("""
+                SELECT doi, title, journal
+                FROM retractions
+                WHERE doi LIKE ? OR text_content LIKE ?
+                LIMIT 3
+            """, (f"%{pmid}%", f"%{pmid}%"))
+            retractions = cursor.fetchall()
+            if retractions:
+                cross_refs.append(f"\n[CROSS-REFERENCE: RETRACTIONS] (PMID {pmid})")
+                for ret in retractions:
+                    cross_refs.append(f"  - Retracted: {ret['title'][:80]}... (Journal: {ret['journal']})")
+        
+        for doi in doi_list[:5]:
+            cursor.execute("""
+                SELECT doi, title, journal
+                FROM retractions
+                WHERE doi LIKE ?
+                LIMIT 3
+            """, (f"%{doi}%",))
+            retractions = cursor.fetchall()
+            if retractions:
+                cross_refs.append(f"\n[CROSS-REFERENCE: RETRACTIONS] (DOI {doi})")
+                for ret in retractions:
+                    cross_refs.append(f"  - Retracted: {ret['title'][:80]}...")
+        
+        # 3. Check PubPeer articles (by institution or author name)
+        for name in potential_names[:10]:
+            if len(name) < 4:
+                continue
+            cursor.execute("""
+                SELECT pub_id, title, comment_count, url
+                FROM pubpeer_articles
+                WHERE text_content LIKE ? AND comment_count > 0
+                LIMIT 5
+            """, (f"%{name}%",))
+            pubpeer = cursor.fetchall()
+            if pubpeer:
+                cross_refs.append(f"\n[CROSS-REFERENCE: PUBPEER DISCUSSIONS]")
+                for pp in pubpeer:
+                    cross_refs.append(f"  - PubPeer {pp['pub_id']}: {pp['title'][:60]}... ({pp['comment_count']} comments)")
+        
+        # 4. Check FDA FAERS (by drug name mentions)
+        if any(indicator in text_lower for indicator in drug_indicators):
+            # Extract potential drug names (heuristic)
+            drug_pattern = r'\b([A-Z][a-z]+(?:[a-z]+)?)\s+(?:drug|medication|treatment|therapy)\b'
+            potential_drugs = re.findall(drug_pattern, text[:1000])
+            for drug in potential_drugs[:5]:
+                cursor.execute("""
+                    SELECT report_id, drug, reaction
+                    FROM fda_faers
+                    WHERE drug LIKE ? OR text_content LIKE ?
+                    LIMIT 3
+                """, (f"%{drug}%", f"%{drug}%"))
+                faers = cursor.fetchall()
+                if faers:
+                    cross_refs.append(f"\n[CROSS-REFERENCE: FDA ADVERSE EVENTS] (Drug: {drug})")
+                    for fda in faers:
+                        cross_refs.append(f"  - Report {fda['report_id']}: {fda['drug'][:50]}... → {fda['reaction'][:50]}")
+        
+        conn.close()
+        
+        if cross_refs:
+            return "\n" + "="*80 + "\nCROSS-REFERENCED DATA FROM DATABASE:\n" + "="*80 + "\n".join(cross_refs) + "\n" + "="*80 + "\n"
+        
+    except Exception as e:
+        # If database query fails, silently continue without cross-references
+        pass
+    
+    return ""
+
+
+def should_skip_row(row: dict, min_score: int = 50) -> tuple:
     """
     Check if a row should be skipped based on existing fraud score.
     
@@ -393,8 +562,47 @@ def call_model(
     temperature: float,
     reasoning_effort: Optional[str],
     config_metadata: Optional[Dict[str, Any]] = None,
+    db_path: Optional[Path] = None,
+    enable_cross_reference: bool = True,
 ) -> Dict[str, Any]:
-    """Send the document to the local GPT server and return parsed JSON."""
+    """Send the document to the local GPT server and return parsed JSON.
+    
+    Args:
+        enable_cross_reference: If True, queries database for related records and includes in analysis
+    """
+    # Get cross-reference data if enabled
+    cross_ref_data = ""
+    if enable_cross_reference and db_path:
+        cross_ref_data = query_database_cross_references(text, db_path)
+    
+    # Build user message with cross-reference context
+    user_content_parts = [
+        "Analyze the following scientific article or abstract and respond with the JSON schema ",
+        "described in the system prompt.",
+        "",
+        f"Article ID: {filename}",
+        "--------",
+        text.strip(),
+        "--------"
+    ]
+    
+    if cross_ref_data:
+        user_content_parts.extend([
+            "",
+            "IMPORTANT: The following cross-referenced data was found in the database. ",
+            "Use this information to identify patterns, connections, and red flags across sources:",
+            cross_ref_data,
+            "",
+            "When analyzing, consider:",
+            "- Does the article author appear in NIH grants?",
+            "- Is this article or author mentioned in PubPeer discussions?",
+            "- Are there related retractions or corrections?",
+            "- Do any drugs/treatments have FDA adverse event reports?",
+            "- Are there patterns across multiple data sources that indicate fraud?",
+            "",
+            "Score based on the combination of the article itself AND these cross-references."
+        ])
+    
     payload = {
         "model": model,
         "temperature": temperature,
@@ -402,14 +610,7 @@ def call_model(
             {"role": "system", "content": system_prompt},
             {
                 "role": "user",
-                "content": (
-                    "Analyze the following scientific article or abstract and respond with the JSON schema "
-                    "described in the system prompt.\n"
-                    f"Article ID: {filename}\n"
-                    "---------\n"
-                    f"{text.strip()}\n"
-                    "---------"
-                ),
+                "content": "\n".join(user_content_parts),
             },
         ],
     }
@@ -672,13 +873,14 @@ class OutputRouter:
             self._init_chunk_state()
 
     def _init_single(self) -> None:
-        csv_mode = "a" if self.args.resume and self.args.output.exists() else "w"
+        # Append if files exist, otherwise create new files
+        csv_mode = "a" if self.args.output.exists() else "w"
         self.args.output.parent.mkdir(parents=True, exist_ok=True)
         self.csv_handle = self.args.output.open(csv_mode, newline="", encoding="utf-8")
         self.csv_writer = csv.DictWriter(self.csv_handle, fieldnames=self.fieldnames)
         if csv_mode == "w":
             self.csv_writer.writeheader()
-        json_mode = "a" if self.args.resume and self.args.json_output.exists() else "w"
+        json_mode = "a" if self.args.json_output.exists() else "w"
         self.args.json_output.parent.mkdir(parents=True, exist_ok=True)
         self.json_handle = self.args.json_output.open(json_mode, encoding="utf-8")
 
@@ -991,25 +1193,8 @@ def main() -> None:
         sys.exit("--start-row must be >= 1")
     if args.end_row is not None and args.end_row < args.start_row:
         sys.exit("--end-row must be greater than or equal to --start-row")
-    if args.chunk_size <= 0:
-        if (
-            args.output.exists()
-            and not args.resume
-            and not args.overwrite_output
-        ):
-            sys.exit(
-                f"Output file {args.output} already exists. "
-                "Use --resume to append/skip or --overwrite-output to replace."
-            )
-        if (
-            args.json_output.exists()
-            and not args.resume
-            and not args.overwrite_output
-        ):
-            sys.exit(
-                f"JSON output file {args.json_output} already exists. "
-                "Use --resume to append/skip or --overwrite-output to replace."
-            )
+    # Always allow appending - no need to check for existing files
+    # Files will be automatically appended if they exist
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
@@ -1028,14 +1213,18 @@ def main() -> None:
         "implicated_actors",
         "federal_programs_involved",
         "fraud_type",
+        "investigation_viability_score",
+        "investigation_report",
     ]
     if args.include_action_items:
         fieldnames.append("action_items")
 
     processed = 0
+    # Always load existing filenames to prevent duplicates, regardless of --resume flag
     completed_filenames: Set[str] = set()
-    if args.resume:
+    if args.checkpoint and args.checkpoint.exists():
         completed_filenames |= load_checkpoint(args.checkpoint)
+    if args.json_output.exists():
         completed_filenames |= load_jsonl_filenames(args.json_output)
     for extra_json in args.known_json:
         completed_filenames |= load_jsonl_filenames(Path(extra_json))
@@ -1045,12 +1234,12 @@ def main() -> None:
     workload_stats = calculate_workload(
         args.input,
         max_rows=args.max_rows,
-        completed_filenames=completed_filenames if args.resume else set(),
+        completed_filenames=completed_filenames,  # Always use completed_filenames to prevent duplicates
         start_row=args.start_row,
         end_row=args.end_row,
     )
     total_candidates = workload_stats["total"]
-    already_done = workload_stats["already_done"] if args.resume else 0
+    already_done = workload_stats["already_done"]
     target_total = workload_stats["workload"]
     if target_total <= 0:
         print("No new rows to process. Exiting.")
@@ -1062,6 +1251,12 @@ def main() -> None:
     )
     if args.min_score > 0:
         print(f"Post-filtering enabled: Skipping GPT results with score < {args.min_score}")
+    # Investigation is always enabled for high-scoring leads (score >= 50)
+    if not INVESTIGATION_AVAILABLE:
+        print("WARNING: clinical_investigator module not available.", file=sys.stderr)
+        print("Investigation will be skipped. Ensure clinical_investigator.py is in the same directory.", file=sys.stderr)
+    else:
+        print(f"Investigation enabled: Will automatically investigate leads with score >= {args.investigate_min_score}")
 
     output_router = OutputRouter(args, fieldnames)
 
@@ -1109,6 +1304,10 @@ def main() -> None:
                 args.electric_rate,
             )
             print(f"{progress_prefix} Processing {filename}... {eta_text}", flush=True)
+            
+            # Check if cross-referencing is enabled and database exists
+            if args.cross_reference and args.db_path and args.db_path.exists():
+                print(f"  → Cross-referencing with database: {args.db_path.name}", flush=True)
 
             try:
                 result = call_model(
@@ -1122,6 +1321,8 @@ def main() -> None:
                     temperature=args.temperature,
                     reasoning_effort=args.reasoning_effort,
                     config_metadata=config_metadata,
+                    db_path=args.db_path if args.cross_reference else None,
+                    enable_cross_reference=args.cross_reference,
                 )
                 
                 # Filter based on GPT's NEW score (not the old scraper score)
@@ -1196,6 +1397,41 @@ def main() -> None:
                 reason_parts.append(result.get("reason"))
             reason = " | ".join(reason_parts) if reason_parts else result.get("reason", "")
             
+            # Perform clinical investigation for high-scoring leads (automatically enabled)
+            investigation_report = None
+            investigation_viability_score = None
+            if INVESTIGATION_AVAILABLE and new_score >= args.investigate_min_score:
+                print(f"  → Investigating lead (score {new_score} >= {args.investigate_min_score})...", flush=True)
+                try:
+                    # Extract identifiers from filename and text for better investigation
+                    import re
+                    nct_ids = re.findall(r'NCT\d{8}', filename + " " + text)
+                    pmids = re.findall(r'PMID[:\s]*(\d{8,})|/(\d{8,})/', filename + " " + text)
+                    pmid_list = [pmid[0] or pmid[1] for pmid in pmids if pmid[0] or pmid[1]]
+                    
+                    # Prepare lead data for investigation with original data
+                    lead_data = {
+                        "headline": result.get("headline", ""),
+                        "qui_tam_score": new_score,
+                        "key_facts": "; ".join(key_facts) if key_facts else "",
+                        "fraud_type": fraud_type,
+                        "implicated_actors": "; ".join(implicated_actors) if implicated_actors else "",
+                        "federal_programs_involved": "; ".join(federal_programs_involved) if federal_programs_involved else "",
+                        "reason": reason,
+                        "filename": filename,  # Original filename (may contain NCT ID, PMID, etc.)
+                        "original_text": text[:2000] if text else "",  # First 2000 chars of original text for context
+                        "nct_ids": nct_ids,  # Extracted NCT IDs
+                        "pmids": pmid_list[:5],  # Extracted PMIDs (limit to 5)
+                    }
+                    investigation_result = investigate_lead(lead_data)
+                    investigation_report = investigation_result.get("report", "")
+                    investigation_viability_score = investigation_result.get("viability_score", 0)
+                    print(f"  ✓ Investigation complete. Viability score: {investigation_viability_score}", flush=True)
+                except Exception as exc:
+                    print(f"  ! Investigation failed: {exc}", file=sys.stderr, flush=True)
+                    investigation_report = f"# Investigation Error\n\nInvestigation failed: {str(exc)}"
+                    investigation_viability_score = None
+            
             csv_row = {
                 "filename": filename,
                 "source_row_index": idx,
@@ -1207,6 +1443,8 @@ def main() -> None:
                 "implicated_actors": "; ".join(implicated_actors),
                 "federal_programs_involved": "; ".join(federal_programs_involved),
                 "fraud_type": fraud_type,
+                "investigation_viability_score": investigation_viability_score if investigation_viability_score is not None else "",
+                "investigation_report": (investigation_report[:500] + "...") if investigation_report and len(investigation_report) > 500 else (investigation_report or ""),  # Truncate for CSV
             }
             if args.include_action_items:
                 csv_row["action_items"] = "; ".join(action_items)
@@ -1221,6 +1459,8 @@ def main() -> None:
                 "implicated_actors": implicated_actors,
                 "federal_programs_involved": federal_programs_involved,
                 "fraud_type": fraud_type,
+                "investigation_viability_score": investigation_viability_score,
+                "investigation_report": investigation_report,
                 "metadata": {
                     "source_row_index": idx,
                     "original_row": row,

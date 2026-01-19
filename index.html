@@ -59,14 +59,19 @@
 
     <section class="scripts-panel">
       <h2>Run Data Pipeline</h2>
-      <p class="scripts-hint">Run Python scripts in order: Test Connection → Scraper → Converter → GPT Ranker. Output appears in the log below.</p>
+      <p class="scripts-hint">Run Python scripts in order: Test Connection → Scrapers → Converter → GPT Ranker. Output appears in the log below.</p>
       <div class="script-buttons">
         <button type="button" class="script-btn" data-script="test_connection">Test GPT Connection</button>
-        <button type="button" class="script-btn" data-script="scraper">Run Scraper</button>
+        <button type="button" class="script-btn" data-script="global_fraud_scraper">Global Fraud Scraper</button>
+        <button type="button" class="script-btn" data-script="etl_loader">Load to Database</button>
+        <button type="button" class="script-btn" data-script="cross_reference">Find Red Flags</button>
+        <button type="button" class="script-btn" data-script="pubpeer">Scrape PubPeer</button>
         <button type="button" class="script-btn" data-script="combine_website_scrapes">Combine Website Scrapes</button>
         <button type="button" class="script-btn" data-script="pubmed_trending">Scrape PubMed Trending</button>
         <button type="button" class="script-btn" data-script="converter">Run Converter</button>
         <button type="button" class="script-btn" data-script="gpt_ranker">Run GPT Ranker</button>
+        <button type="button" class="script-btn" data-script="gpt_ranker_with_investigation">Run GPT Ranker + Investigation</button>
+        <button type="button" class="script-btn" data-script="rerun_low_score_investigations">Rerun Low Score Investigations</button>
         <button type="button" id="scriptOutputStop" class="script-btn script-btn--stop" disabled>Stop</button>
         <button type="button" id="deleteDataBtn" class="script-btn script-btn--danger">Delete All Data</button>
       </div>
@@ -206,6 +211,18 @@
           </div>
           <p id="detailTextPreview" class="text-preview">—</p>
           <pre id="detailText" class="text-full hidden">—</pre>
+        </article>
+        <article class="detail-investigation">
+          <div class="detail-investigation-header">
+            <h3>Clinical Investigation</h3>
+            <button id="detailInvestigateBtn" type="button" class="script-btn" style="margin: 0;">Run Deep Investigation</button>
+          </div>
+          <div id="detailInvestigationStatus" class="investigation-status hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px;">
+            <p style="margin: 0; color: var(--muted);">Investigation in progress...</p>
+          </div>
+          <div id="detailInvestigationReport" class="investigation-report hidden" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; max-height: 600px; overflow-y: auto;">
+            <pre id="investigationReportContent" style="white-space: pre-wrap; font-family: inherit; font-size: 0.9rem; line-height: 1.6;"></pre>
+          </div>
         </article>
       </div>
     </section>
