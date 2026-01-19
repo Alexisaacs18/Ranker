@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Rerun clinical investigations for all leads with investigation_viability_score < 50.
-This script reads the ranked CSV, finds all rows with low investigation scores,
+Rerun clinical investigations for all leads with investigation_viability_score = 25.
+This script reads the ranked CSV, finds all rows with scores exactly equal to 25,
 and reruns the investigation using the updated clinical_investigator code.
 """
 
@@ -233,26 +233,24 @@ def main():
     print(f"Loading CSV: {csv_path}")
     rows = load_csv_rows(csv_path)
     
-    # Find rows with low investigation scores (< 50) or missing scores
-    # IMPORTANT: Only process scores that are < 50, NOT scores >= 50
+    # Find rows with investigation scores = 25
+    # IMPORTANT: Only process scores that are exactly 25
     low_score_rows = []
     for idx, row in enumerate(rows):
         investigation_score = row.get('investigation_viability_score', '')
         try:
             score = int(investigation_score) if investigation_score else None
-            # Only include if score is None (missing) or strictly less than 50
-            # Explicitly exclude scores >= 50
-            if score is None:
+            # Only include if score is exactly 25
+            # Skip all other scores or missing scores
+            if score is not None and score == 25:
                 low_score_rows.append((idx, row))
-            elif score < 50:
-                low_score_rows.append((idx, row))
-            # If score >= 50, skip it (do not add to low_score_rows)
+            # If score != 25 or None, skip it
         except (ValueError, TypeError):
-            # If score is not a number, treat as missing/low
-            low_score_rows.append((idx, row))
+            # If score is not a number, skip it
+            continue
     
-    print(f"Found {len(low_score_rows)} rows with investigation_viability_score < 50 or missing")
-    print(f"(Skipping rows with investigation_viability_score >= 50)")
+    print(f"Found {len(low_score_rows)} rows with investigation_viability_score = 25")
+    print(f"(Skipping rows with investigation_viability_score != 25 or missing)")
     
     if not low_score_rows:
         print("No rows to rerun. Exiting.")

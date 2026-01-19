@@ -35,8 +35,14 @@ You will be given a LEAD containing:
 
 ### INVESTIGATION PROTOCOL (Execute in Order):
 
-**CRITICAL FIRST STEP - CHECK FOR RECENT SETTLEMENTS:**
-Before doing anything else, search for recent settlements (2024-2025) using the identifiers provided. If you find a recent settlement, this case is likely NOT viable and should receive a low score (0-40). Recent settlements indicate the case is already resolved.
+**CRITICAL FIRST STEP - CHECK RETRACTION REASON AND SETTLEMENTS:**
+Before doing anything else:
+1. **CHECK RETRACTION REASON:** Search for the retraction notice using PMID/NCT ID. If retraction reason mentions "permissions", "license", "copyright", "licensing fee", "MMSE instrument", "without proper permissions" → IMMEDIATELY score 0 and stop. These are copyright disputes, NOT fraud.
+2. **CHECK FOR RECENT SETTLEMENTS:** Search for recent settlements (2024-2025) using the SPECIFIC identifiers provided (PMID, NCT ID, grant numbers). 
+   - **IF settlement is for THIS SPECIFIC case** (same PMID/NCT ID/grant): Case is already resolved → LOW score (0-40)
+   - **IF settlement is for a DIFFERENT but similar case**: This is a POSITIVE indicator → Shows DOJ is actively pursuing these cases, establishes precedent, INCREASES viability score
+   - **PRECEDENT CASES** (Duke, Dana-Farber, etc.) are STRONG POSITIVE indicators that similar cases are viable
+3. **RECENT FRAUD RETRACTIONS (2024-2026):** If retraction is recent (2024-2026) and cites data fabrication, image manipulation, or missing raw data → These are HIGH VALUE leads. Score 85-95 if fraud gap >3 years and federal programs involved. Do NOT downgrade these.
 
 PHASE 1: THE "KILL" CHECK (Eliminate bad leads early)
 
@@ -53,6 +59,7 @@ CRITICAL: Use the provided identifiers (NCT IDs, PMIDs) from the LEAD DATA to se
 2. If this involves research fraud/retractions:
    - Use PMID or NCT ID if provided to find the specific study.
    - Search for "[NCT ID] retraction" or "PMID [PMID] retraction" to find the exact retraction notice.
+   - **CRITICAL - COPYRIGHT/PERMISSION CHECK:** If the retraction reason mentions "permissions", "license", "copyright", "licensing fee", "MMSE instrument", or similar copyright/intellectual property issues → IMMEDIATELY set Viability Score to 0. These are NOT fraud cases - they are civil copyright disputes and have NO False Claims Act liability.
    - Search for "[Institution] [Researcher Name] retraction lawsuit settlement".
    - IF settled litigation exists > 6 years ago -> STOP. Report as "Legacy Case - Not Viable".
 
@@ -87,10 +94,13 @@ CRITICAL: Use the provided NCT ID or PMID to find specific dates and details.
 
 PHASE 3: FINANCIAL IMPACT & STATUTE VIOLATIONS
 1. Determine Federal Program Impact:
+   - **CRITICAL:** First check the LEAD DATA - it may already contain federal program information (NIH, Medicare, etc.) and grant details. USE THIS INFORMATION.
+   - If lead data mentions NIH grants but no specific amounts: Search for grant numbers, amounts, and duration using the NCT ID, PMID, or researcher names.
    - If NCT ID provided: Search "[NCT ID] NIH grant amount" or "[NCT ID] funding" to find specific grant amounts.
    - If NIH grants involved: Search for grant numbers, amounts, and duration using the NCT ID or researcher names.
    - If Medicare/Medicaid involved: Search for drug sales data or procedure reimbursement using drug names or procedure codes.
    - Use ClinicalTrials.gov data (via NCT ID) to find sponsor information and funding sources.
+   - **DO NOT IGNORE LEAD DATA:** If the lead says "NIH grant money was misappropriated" or mentions federal programs, this is VALID evidence even if you can't find specific grant numbers in searches.
    - Estimate taxpayer cost of the fraud with specific numbers when available.
 
 2. Identify Statute Violations:
@@ -100,11 +110,13 @@ PHASE 3: FINANCIAL IMPACT & STATUTE VIOLATIONS
    - Research Misconduct (if NIH grants involved)
 
 PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
-- **IMMEDIATE CHECK:** Search for recent settlements (2024-2025) - if a settlement JUST happened, this case is likely NOT viable (already resolved).
+- **IMMEDIATE CHECK:** Search for settlements using SPECIFIC identifiers (PMID, NCT ID, grant numbers).
+  - **If settlement is for THIS SPECIFIC case** (same PMID/NCT ID): Case already resolved → LOW score (0-40)
+  - **If settlement is for a DIFFERENT similar case**: POSITIVE indicator → Shows DOJ enforcement, establishes precedent, INCREASES score
 - Search for existing lawsuits, settlements, or ongoing investigations using NCT ID, PMID, or key terms.
-- Check if qui tam cases have already been filed.
+- Check if qui tam cases have already been filed FOR THIS SPECIFIC CASE.
 - Check if statute of limitations may have expired.
-- **IMPORTANT:** If you find a recent settlement (within last 2 years), this should LOWER the viability score significantly, not raise it. Recent settlements indicate the case is already resolved and not available for new qui tam action.
+- **IMPORTANT:** Only downgrade if the settlement is for THIS SPECIFIC case. Precedent cases (Duke, Dana-Farber, etc.) are STRONG POSITIVE indicators that increase viability.
 
 ### OUTPUT FORMAT (Markdown Report):
 
@@ -113,10 +125,11 @@ PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
 ## 1. Executive Summary
 - **Viability Score:** [0-100]
   - **Scoring Guidelines:**
-    - 80-100: High viability - Clear fraud gap >3 years, significant federal program impact, no recent settlements
-    - 60-79: Moderate viability - Fraud gap 1-3 years, some federal impact, no blocking settlements
-    - 40-59: Low viability - Short gap <1 year, limited impact, or recent settlement found
-    - 0-39: Not viable - Recent settlement, statute expired, or insufficient evidence
+    - 85-100: High viability - Clear fraud gap >3 years, significant federal program impact, strong precedent cases, recent retractions (2024-2026) with fraud indicators, no settlement for THIS specific case
+    - 70-84: Moderate-high viability - Fraud gap 1-3 years, some federal impact, precedent cases exist, no settlement for THIS specific case
+    - 50-69: Moderate viability - Fraud gap 1-3 years, limited federal impact, no blocking issues
+    - 40-49: Low viability - Short gap <1 year, limited impact, or settlement found for THIS specific case
+    - 0-39: Not viable - Copyright/permission retractions (score 0), settlement for THIS specific case, statute expired, or insufficient evidence
 - **Conclusion:** (e.g., "High potential for Qui Tam. 4-year gap found between clinical knowledge and regulatory action." OR "Not viable - recent settlement in 2024 resolves this case.")
 - **Recommended Action:** (e.g., "Proceed with qui tam filing" / "Monitor for additional evidence" / "Not viable - recent settlement" / "Not viable - statute expired")
 
@@ -149,10 +162,16 @@ PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
 - **NO HALLUCINATIONS:** If you cannot find a specific date or citation, state "Data Not Found." Do not invent citations.
 - **USE YOUR TOOLS:** You MUST use search results to verify dates and facts. Do not rely on internal memory.
 - **CITE EVERYTHING:** Every factual claim must be supported by a citation from your search results.
-- **SKEPTICISM:** Verify claims independently. Don't assume facts from the lead are accurate without research.
-- **RECENT SETTLEMENTS ARE BAD:** If you find a settlement from 2024-2025, this case is likely NOT viable. Recent settlements mean the case is already resolved. Score accordingly (0-40 range).
+- **USE LEAD DATA:** The lead data contains information from initial analysis. If it mentions federal programs (NIH, Medicare), grant funding, fraud details, or implicated actors, these are VALID and should be incorporated. Do not dismiss this information just because search results don't find specific details.
+- **SKEPTICISM:** Verify claims independently when possible, but DO NOT ignore valid information from the lead data.
+- **COPYRIGHT/PERMISSION RETRACTIONS = ZERO SCORE:** If retraction reason mentions "permissions", "license", "copyright", "licensing fee", "MMSE instrument", "without proper permissions", or similar IP/copyright issues → IMMEDIATELY score 0. These are civil copyright disputes, NOT fraud against the government. No False Claims Act liability exists.
+- **SETTLEMENTS - DISTINGUISH THIS CASE vs PRECEDENT:**
+  - Settlement for THIS SPECIFIC case (same PMID/NCT ID/grant) = Case resolved → Score 0-40
+  - Settlement for DIFFERENT similar case = POSITIVE precedent → INCREASES score (shows DOJ enforcement, establishes viability)
+  - Always check if settlement matches the specific identifiers (PMID, NCT ID) from the lead data
 - **FIND SPECIFIC DATA:** Use NCT IDs and PMIDs to find exact dates, grant amounts, investigator names, and institutions. Don't accept "Data Not Found" without trying multiple search angles.
 - **MULTIPLE SEARCHES:** Try different search terms and angles. If one search doesn't find data, try variations (e.g., "NCT12345678", "ClinicalTrials.gov NCT12345678", "NCT12345678 grant").
+- **NEW FRAUD CASES:** Recent retractions (2024-2026) with clear fraud indicators (data fabrication, image manipulation, missing raw data) are HIGH VALUE leads, especially if they involve federal funding. Score these 85-95 if fraud gap >3 years and federal programs involved.
 """
 
 
@@ -247,7 +266,8 @@ def investigate_lead(lead_data: Dict[str, Any]) -> Dict[str, Any]:
         
         # 2. Search by PMID if available - prioritize key searches
         for pmid in pmids[:1]:  # Limit to 1 PMID for speed
-            searches.append(f"PMID {pmid} retraction notice")
+            searches.append(f"PMID {pmid} retraction notice")  # CRITICAL: Check retraction reason first
+            searches.append(f"PMID {pmid} retraction reason copyright permission license")  # Check for copyright issues
             searches.append(f"PMID {pmid} fraud investigation settlement")
             searches.append(f"PMID {pmid} NIH grant")
             # Targeted site searches
@@ -442,6 +462,12 @@ def call_claude_with_search(lead_data: Dict[str, Any], search_results: list) -> 
     lead_context += f"**Implicated Actors:** {lead_data.get('implicated_actors', 'N/A')}\n\n"
     lead_context += f"**Federal Programs:** {lead_data.get('federal_programs_involved', 'N/A')}\n\n"
     lead_context += f"**Reason:** {lead_data.get('reason', 'N/A')}\n\n"
+    # CRITICAL: Emphasize that lead data information is VALID and should be used
+    lead_context += f"**IMPORTANT:** The lead data above contains information from the initial analysis. If it mentions federal programs (NIH, Medicare, etc.), grant funding, or fraud details, these are VALID and should be incorporated into your analysis. Do not dismiss this information just because search results don't find specific grant numbers.\n\n"
+    lead_context += f"**CRITICAL REMINDERS:**\n"
+    lead_context += f"- If retraction reason mentions 'permissions', 'license', 'copyright', 'MMSE instrument' → Score 0 (copyright dispute, not fraud)\n"
+    lead_context += f"- Recent retractions (2024-2026) with fraud indicators (data fabrication, image manipulation, missing raw data) are HIGH VALUE → Score 85-95 if fraud gap >3 years\n"
+    lead_context += f"- Precedent cases (Duke, Dana-Farber) are POSITIVE indicators, not negative\n\n"
     
     # Include original text excerpt if available (for context)
     original_text = lead_data.get('original_text', '')
