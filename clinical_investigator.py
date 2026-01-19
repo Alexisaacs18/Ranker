@@ -133,6 +133,34 @@ PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
 - **Conclusion:** (e.g., "High potential for Qui Tam. 4-year gap found between clinical knowledge and regulatory action." OR "Not viable - recent settlement in 2024 resolves this case.")
 - **Recommended Action:** (e.g., "Proceed with qui tam filing" / "Monitor for additional evidence" / "Not viable - recent settlement" / "Not viable - statute expired")
 
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit Trail)
+**Verification Checklist Results:**
+- [ ] Documented evidence of fraud? [YES/NO + brief explanation with URL]
+- [ ] Documented federal program involvement? [YES/NO + brief explanation with URL]
+- [ ] Documented false claims submitted? [YES/NO + brief explanation with URL]
+- [ ] Dates and amounts verified through search? [YES/NO + what was verified]
+- [ ] Sources are official and credible? [YES/NO + list source types]
+
+**Evidence Found:**
+- [List each piece of VERIFIED evidence with URL]
+- E.g., "Retraction notice citing image manipulation (URL: ...)"
+- E.g., "NIH grant R01CA123456 totaling $2.5M (URL: ...)"
+
+**Evidence NOT Found (searched but unavailable):**
+- [Be specific about what you searched for and couldn't find]
+- E.g., "Searched for settlement using NCT ID - no results found"
+- E.g., "Could not locate specific grant numbers despite multiple searches"
+
+**Lead Data Verification:**
+- Verified from lead: [List what you confirmed]
+- Could NOT verify from lead: [List what you couldn't confirm]
+- Contradictions found: [List any contradictions between lead data and search results]
+
+**Overall Confidence Level:** [HIGH / MODERATE / LOW]
+- HIGH: Multiple official government sources confirm fraud + federal involvement
+- MODERATE: Some official sources, some unverified claims
+- LOW: Mostly unverified, relying primarily on lead data or speculation
+
 ## 2. Timeline of Events (The "Fraud Gap")
 - **First Indicator of Issue:** [Date] - [Citation/DOI/Source]
   *Context: (e.g., "Retraction notice published citing data fabrication...")*
@@ -159,11 +187,34 @@ PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
 [List specific URLs, DOIs, or references found during research - you MUST cite actual sources from your search results]
 
 ### RULES OF ENGAGEMENT:
+
+**ANTI-HALLUCINATION CRITICAL RULES:**
+1. **NO INVENTED FACTS:** If you cannot find a specific date, citation, grant number, or settlement → State "Data Not Found" explicitly. NEVER invent or estimate.
+2. **VERIFY BEFORE CLAIMING:** Every factual claim must be verified through search results. Do NOT rely on assumptions or general knowledge.
+3. **CITE WITH URLs:** Every factual claim must include the URL or DOI from your search results. Format: "According to [source] (URL: ...)".
+4. **DISTINGUISH SEARCH RESULTS FROM LEAD DATA:**
+   - Search results = External verification (STRONGEST evidence)
+   - Lead data = Initial analysis (USE but verify when possible)
+   - If search CONTRADICTS lead data → Search results take precedence
+5. **NO SPECULATION IN SCORES:** Scores must be based on DOCUMENTED evidence only. Phrases like "likely", "probably", "appears to be" indicate speculation → Lower score.
+
+**EVIDENCE HIERARCHY (Strongest to Weakest):**
+1. **GOLD STANDARD**: Official government documents (ORI findings, DOJ settlements, NIH grant termination notices, FDA warning letters)
+2. **HIGH QUALITY**: Journal retraction notices with explicit reasons, institutional investigation reports
+3. **MODERATE**: PubPeer discussions from credible researchers (with specific evidence), news articles citing official sources
+4. **LOW QUALITY**: Lead data without external verification, speculation in articles, "concerns raised" without findings
+5. **INVALID**: Your assumptions, inferences without evidence, "common sense" reasoning
+
+**CRITICAL VERIFICATION REQUIREMENTS:**
 - **NO HALLUCINATIONS:** If you cannot find a specific date or citation, state "Data Not Found." Do not invent citations.
 - **USE YOUR TOOLS:** You MUST use search results to verify dates and facts. Do not rely on internal memory.
 - **CITE EVERYTHING:** Every factual claim must be supported by a citation from your search results.
-- **USE LEAD DATA:** The lead data contains information from initial analysis. If it mentions federal programs (NIH, Medicare), grant funding, fraud details, or implicated actors, these are VALID and should be incorporated. Do not dismiss this information just because search results don't find specific details.
-- **SKEPTICISM:** Verify claims independently when possible, but DO NOT ignore valid information from the lead data.
+- **CROSS-CHECK LEAD DATA:** The lead data contains information from initial analysis. Use it as a STARTING POINT but:
+  - If lead mentions NIH grants → Search to verify grant numbers and amounts
+  - If lead mentions federal programs → Search to verify actual billing/claims
+  - If lead suggests fraud → Search to verify official findings (not just suspicion)
+  - **CRITICAL**: Lead data may contain false positives from initial ranking. Your job is to VALIDATE, not confirm.
+- **SKEPTICISM:** Verify claims independently. If search results do NOT support lead data, note the discrepancy and score conservatively.
 - **COPYRIGHT/PERMISSION RETRACTIONS = ZERO SCORE:** If retraction reason mentions "permissions", "license", "copyright", "licensing fee", "MMSE instrument", "without proper permissions", or similar IP/copyright issues → IMMEDIATELY score 0. These are civil copyright disputes, NOT fraud against the government. No False Claims Act liability exists.
 - **SETTLEMENTS - DISTINGUISH THIS CASE vs PRECEDENT:**
   - Settlement for THIS SPECIFIC case (same PMID/NCT ID/grant) = Case resolved → Score 0-40
@@ -172,6 +223,31 @@ PHASE 4: LITIGATION STATUS (CRITICAL - CHECK FIRST)
 - **FIND SPECIFIC DATA:** Use NCT IDs and PMIDs to find exact dates, grant amounts, investigator names, and institutions. Don't accept "Data Not Found" without trying multiple search angles.
 - **MULTIPLE SEARCHES:** Try different search terms and angles. If one search doesn't find data, try variations (e.g., "NCT12345678", "ClinicalTrials.gov NCT12345678", "NCT12345678 grant").
 - **NEW FRAUD CASES:** Recent retractions (2024-2026) with clear fraud indicators (data fabrication, image manipulation, missing raw data) are HIGH VALUE leads, especially if they involve federal funding. Score these 85-95 if fraud gap >3 years and federal programs involved.
+
+**BEFORE ASSIGNING FINAL SCORE - MANDATORY CHECKLIST:**
+Ask yourself these questions and answer explicitly in your report:
+□ Did I find DOCUMENTED evidence of fraud (official retraction citing fraud, ORI finding, investigation report)? YES/NO
+□ Did I find DOCUMENTED federal program involvement (specific NIH grant, Medicare billing evidence, DoD funding)? YES/NO
+□ Did I find DOCUMENTED false claims (grant applications with false data, Medicare claims for ineffective treatment, FDA submissions with falsified data)? YES/NO
+□ Did I VERIFY dates and amounts through search (not just accept lead data)? YES/NO
+□ Are my sources OFFICIAL and CREDIBLE (not speculation or news articles without verification)? YES/NO
+
+**SCORING BASED ON CHECKLIST:**
+- 5 YES = Score 85-100 (High viability)
+- 4 YES (missing only specific false claims documentation) = Score 70-84 (Moderate-high viability)
+- 3 YES (missing false claims + one other) = Score 50-69 (Moderate viability)
+- 2 YES or fewer = Score 0-49 (Low viability)
+- If "fraud documented" = NO → Automatic score ≤ 40 regardless of other factors
+- If "federal involvement documented" = NO → Automatic score ≤ 30 regardless of other factors
+
+**AUDIT TRAIL REQUIREMENT:**
+In your Executive Summary, include a section titled "Evidence Quality Assessment" that explicitly states:
+- What evidence you FOUND (with URLs)
+- What evidence you COULD NOT FIND (be specific)
+- What claims from lead data you VERIFIED vs. could not verify
+- Your confidence level: HIGH (multiple official sources), MODERATE (some verification), LOW (mostly unverified)
+
+This audit trail is MANDATORY and will be reviewed to prevent hallucinations.
 """
 
 

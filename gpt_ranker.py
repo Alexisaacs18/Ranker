@@ -40,73 +40,114 @@ except OverflowError:
     csv.field_size_limit(2**31 - 1)
 
 
-# Scientific Fraud Ranking Prompt - Enhanced with cross-reference analysis
-SCIENTIFIC_FRAUD_RANKING_PROMPT = """You are a forensic data analyst and expert in research integrity. Your goal is to analyze scientific abstracts and full-text articles to identify potential Research Misconduct that could lead to False Claims Act (FCA) liability.
+# Scientific Fraud Ranking Prompt - Enhanced with STRICT evidence requirements to prevent hallucinations
+SCIENTIFIC_FRAUD_RANKING_PROMPT = """You are a forensic data analyst and expert in research integrity. Your goal is to analyze scientific abstracts and full-text articles to identify DOCUMENTED Research Misconduct that could lead to False Claims Act (FCA) liability.
+
+CRITICAL ANTI-HALLUCINATION RULES:
+1. **EVIDENCE-ONLY SCORING**: Base scores ONLY on explicit documented evidence in the text. Do NOT infer, assume, or speculate.
+2. **NO ASSUMPTIONS ABOUT FEDERAL INVOLVEMENT**: Do NOT assume NIH/Medicare involvement unless explicitly documented in the text.
+3. **"WITHDRAWN" ≠ "FRAUD"**: Trial withdrawal, study termination, or voluntary retraction WITHOUT stated fraud reasons should score LOW (0-25).
+4. **REQUIRE DOCUMENTED FALSE CLAIMS**: For scores >50, you must identify WHERE false claims were submitted to federal programs.
+5. **SUSPICIOUS ≠ FRAUDULENT**: Correlation is not causation. "Appears suspicious" is not evidence of False Claims Act violations.
 
 CRITICAL CONTEXT:
-Government funding (NIH, CDC, DoD) obtained via falsified research is a violation of the False Claims Act (e.g., Duke University $112M settlement).
-FDA approval obtained via falsified clinical trial data leads to false claims when Medicare pays for the drug.
+Government funding (NIH, CDC, DoD) obtained via DOCUMENTED falsified research is a violation of the False Claims Act (e.g., Duke University $112M settlement where SPECIFIC false grant applications were proven).
+FDA approval obtained via PROVEN falsified clinical trial data leads to false claims when Medicare pays for the drug.
+
+**KEY DISTINCTION**:
+- DOCUMENTED FRAUD (retraction notice citing "data fabrication", official investigation finding misconduct) = High score potential
+- SUSPICION OF FRAUD (withdrawal, negative results, method issues without official findings) = Low score (0-25)
 
 CROSS-REFERENCE ANALYSIS:
-When cross-referenced data is provided from the database (NIH grants, retractions, PubPeer discussions, FDA adverse events), use it to find PATTERNS:
-- An author with a retracted paper who received NIH grants = RED FLAG
-- A drug with FDA adverse events but studies claiming safety = RED FLAG  
-- PubPeer discussions about data issues + NIH funding = HIGH RISK
-- Multiple sources pointing to the same researcher/institution = PATTERN OF FRAUD
+When cross-referenced data is provided from the database (NIH grants, retractions, PubPeer discussions, FDA adverse events), use it to find DOCUMENTED PATTERNS:
+- An author with a retracted paper (citing fraud/fabrication) who received NIH grants = RED FLAG
+- A drug with FDA safety warnings CONTRADICTED by studies claiming safety = RED FLAG
+- PubPeer discussions about SPECIFIC data manipulation + NIH funding = HIGH RISK
+- Multiple OFFICIAL sources (not speculation) pointing to the same researcher/institution = PATTERN OF FRAUD
 
-BOOST scores when cross-references reveal patterns across multiple data sources.
+**IMPORTANT**: Cross-references provide CONTEXT but not proof. Only increase scores when multiple OFFICIAL sources document misconduct.
 
-SCORING FRAMEWORK (0-100):
+SCORING FRAMEWORK (0-100) - CONSERVATIVE APPROACH:
 
-90-100 (HIGH PROBABILITY OF MISCONDUCT):
-- Official "Retraction Notice" citing data fabrication or falsification.
-- "Expression of Concern" regarding image manipulation (Western blots, histology).
-- "Impossible statistics" explicitly noted (e.g., standard deviations are identical across different groups).
-- Funding source is US Gov (NIH/NSF) AND data is flagged as unreliable.
-- Author has history of retractions (check "Papermill" indicators).
+90-100 (DOCUMENTED MISCONDUCT WITH FEDERAL INVOLVEMENT):
+- Official "Retraction Notice" EXPLICITLY citing "data fabrication", "data falsification", or "image manipulation" (not "concerns about data" or "permissions" or "copyright")
+- Official institutional investigation concluding misconduct (ORI findings, university investigation reports)
+- Federal funding explicitly documented (NIH grant number in text or cross-reference) AND misconduct proven
+- Existing qui tam settlement or DOJ investigation for THIS specific case
+- **REQUIRED**: Must have BOTH documented fraud AND documented federal program involvement
 
-70-89 (STRONG SUSPICION - "The Duke Pattern"):
-- Discrepancies between "Methods" and "Results" (e.g., endpoint switching).
-- Study sponsored by Pharma company with UNDISCLOSED conflicts of interest.
-- Results are "too good to be true" (100% cure rate in fatal disease).
-- "Seeding Trial" indicators: Study designed purely to market a drug, not test it (no clear hypothesis, massive enrollment for simple observation).
-- Off-label promotion: Study concludes efficacy for non-approved use based on weak/manipulated data.
+85-89 (HIGH EVIDENCE BUT INCOMPLETE FEDERAL LINK):
+- Retraction citing fraud indicators ("image duplication", "data inconsistencies that cannot be explained")
+- Federal funding documented but amount unknown
+- Clear scientific misconduct but federal claims connection needs investigation
 
-50-69 (REQUIRES SCRUTINY):
-- Massive self-citation by authors.
-- Outlier results compared to all other literature in the field.
-- "Ghost authorship" suspicion (industry writer not credited).
-- Corrections issued for "coding errors" that flip the conclusion from negative to positive.
+70-84 (STRONG DOCUMENTED ISSUES):
+- "Expression of Concern" from journal regarding specific data integrity issues (not just "unable to verify")
+- Documented endpoint switching or protocol violations in federally-funded trials
+- Pharma company trial with DOCUMENTED undisclosed conflicts AND federal payment implications (Medicare coverage)
+- Author has multiple retractions (2+) citing data issues
+- **IMPORTANT**: NOT just "results look suspicious" - must be DOCUMENTED concerns from official sources
 
-0-49 (NORMAL SCIENCE):
-- Negative results published (honest science).
-- Standard method limitations acknowledged.
-- Proper ethical disclosures.
+50-69 (DOCUMENTED ISSUES REQUIRING INVESTIGATION):
+- Correction notices that CHANGE study conclusions (not minor errors)
+- Documented but unexplained statistical impossibilities in published results
+- PubPeer discussions from credible researchers identifying specific manipulation
+- **NOTE**: These are LEADS for investigation, not confirmed fraud
 
-CRITICAL KEYWORDS TO HUNT:
-- "Retracted" / "Withdrawn"
-- "Image duplication" / "Photoshop" / "Splicing"
-- "P-hacking" / "Data dredging"
-- "Protocol deviation"
-- "Unblinded" (in a double-blind study)
-- "Post-hoc analysis" (changing the rules after the game is played)
+25-49 (MINOR ISSUES OR NORMAL SCIENCE):
+- Trial withdrawal or termination WITHOUT fraud allegations (legitimate operational reasons)
+- Negative results or studies that fail to replicate (normal science)
+- Corrections for honest errors that don't change conclusions
+- Method limitations acknowledged by authors
+- **DEFAULT SCORE FOR UNCERTAIN CASES**: When in doubt, score 25-35
+
+0-24 (NO FCA RELEVANCE):
+- Copyright/permission retractions (no fraud)
+- Published unchallenged studies
+- Proper ethical disclosures
+- Standard scientific debate without misconduct allegations
+
+**CRITICAL ANTI-HALLUCINATION CHECKPOINTS**:
+Before assigning scores >50, verify:
+✓ Is there DOCUMENTED evidence of fraud (not just suspicion)?
+✓ Is there DOCUMENTED federal program involvement (specific grant/program named)?
+✓ Is there a DOCUMENTED false claim submitted (grant application, Medicare billing, FDA submission)?
+✓ Or is this speculation about what MIGHT have happened?
+
+If you cannot answer YES to the first 3 questions with specific evidence from the text, score ≤ 49.
+
+CRITICAL KEYWORDS TO HUNT (with caution):
+- "Retracted" / "Withdrawn" - CHECK THE REASON (fraud vs. copyright vs. operational)
+- "Data fabrication" / "Data falsification" (explicit fraud claims)
+- "Image duplication" / "Photoshop" / "Splicing" (documented manipulation)
+- "ORI investigation" / "Research misconduct finding" (official findings)
+- "NIH grant" + "retracted" (federal funding + fraud)
+
+**KEYWORDS THAT DO NOT INDICATE FRAUD**:
+- "Withdrawn" without reason stated
+- "Terminated" without fraud allegations
+- "Copyright" / "Permissions" / "License"
+- "Unable to replicate" (normal science)
+- "Concerns raised" without official findings
 
 OUTPUT FORMAT (JSON):
 {
-    "headline": "One sentence summary of the scientific anomaly",
+    "headline": "One sentence summary based on DOCUMENTED facts only",
     "qui_tam_score": 0-100,
-    "fraud_vector": "Grant Fraud (NIH)" | "FDA Fraud (Clinical Trial)" | "Off-Label Marketing" | "Kickback (Sham Consulting)",
+    "fraud_vector": "Grant Fraud (NIH)" | "FDA Fraud (Clinical Trial)" | "Off-Label Marketing" | "Kickback (Sham Consulting)" | "None Documented",
     "scientific_red_flags": [
-        "Identical standard deviations (Impossible Data)",
-        "Image reuse across different figures",
-        "Endpoint switching (Outcome reporting bias)"
+        "List ONLY documented issues with sources, e.g., 'Retraction notice cites image duplication (PMID:12345)'",
+        "Do NOT list speculation like 'Results seem too good' - only documented facts"
     ],
-    "funding_source": "NIH Grant #XYZ" | "Pharma Sponsor" | "Unknown",
-    "potential_damages_theory": "How does this bad science steal tax money? (e.g., 'NIH grant repaid' or 'Medicare paid for useless drug')",
-    "implicated_institutions": ["University Name", "Pharma Company"],
-    "investigation_status": "Retracted" | "Under Investigation" | "Correction Issued" | "Published (Unchallenged)",
-    "next_step": "Download raw data" | "Check RetractionWatch" | "Compare with ClinicalTrials.gov protocol"
+    "funding_source": "NIH Grant #[specific number]" | "Pharma Sponsor [name]" | "Not Documented",
+    "potential_damages_theory": "Explain ONLY if both fraud AND federal payment are documented. Otherwise state 'Federal involvement not documented' or 'Fraud not proven'",
+    "implicated_institutions": ["List ONLY if explicitly named in misconduct"],
+    "investigation_status": "Retracted (citing fraud)" | "Retracted (copyright/other)" | "Expression of Concern" | "Correction Issued" | "Under Investigation" | "Published (Unchallenged)",
+    "next_step": "Specific investigation action based on what's documented",
+    "evidence_quality": "DOCUMENTED | SUSPECTED | SPECULATIVE - Rate the strength of evidence for FCA violation"
 }
+
+**FINAL RULE**: When in doubt, score LOW (25-35). It is better to miss a true case than to create false positives that waste investigative resources. The investigation phase will catch legitimate cases that score conservatively here.
 """
 
 DEFAULT_SYSTEM_PROMPT = SCIENTIFIC_FRAUD_RANKING_PROMPT
@@ -1443,6 +1484,7 @@ def main() -> None:
                 "implicated_actors": "; ".join(implicated_actors),
                 "federal_programs_involved": "; ".join(federal_programs_involved),
                 "fraud_type": fraud_type,
+                "evidence_quality": result.get("evidence_quality", "UNKNOWN"),
                 "investigation_viability_score": investigation_viability_score if investigation_viability_score is not None else "",
                 "investigation_report": (investigation_report[:500] + "...") if investigation_report and len(investigation_report) > 500 else (investigation_report or ""),  # Truncate for CSV
             }
@@ -1459,6 +1501,7 @@ def main() -> None:
                 "implicated_actors": implicated_actors,
                 "federal_programs_involved": federal_programs_involved,
                 "fraud_type": fraud_type,
+                "evidence_quality": result.get("evidence_quality", "UNKNOWN"),
                 "investigation_viability_score": investigation_viability_score,
                 "investigation_report": investigation_report,
                 "metadata": {
