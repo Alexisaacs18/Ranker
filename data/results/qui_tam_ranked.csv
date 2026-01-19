@@ -1,21 +1,20 @@
 filename,source_row_index,headline,qui_tam_score,reason,key_facts,statute_violations,implicated_actors,federal_programs_involved,fraud_type,investigation_viability_score,investigation_report
-clinical_trial_NCT04204668.html,168,Withdrawn randomized trial on neuroma pain treatments raises suspicion of data integrity issues,75,"If the trial data were fabricated or misrepresented, Medicare and other insurers could have paid for ineffective surgical procedures, resulting in unnecessary costs to taxpayers. | Status: Withdrawn","""Status: WITHDRAWN"" indicates potential serious problems with the study; No publicly available protocol or data to verify randomization and outcome assessment; Lack of disclosed funding source raises concern about undisclosed conflicts or lack of oversight",False Claims Act (FDA Fraud),,,FDA Fraud (Clinical Trial),15,"# Clinical Investigation Report: Withdrawn Neuroma Pain Trial (NCT04204668)
+clinical_trial_NCT04204668.html,168,Withdrawn randomized trial on neuroma pain treatments raises suspicion of data integrity issues,75,"If the trial data were fabricated or misrepresented, Medicare and other insurers could have paid for ineffective surgical procedures, resulting in unnecessary costs to taxpayers. | Status: Withdrawn","""Status: WITHDRAWN"" indicates potential serious problems with the study; No publicly available protocol or data to verify randomization and outcome assessment; Lack of disclosed funding source raises concern about undisclosed conflicts or lack of oversight",False Claims Act (FDA Fraud),,,FDA Fraud (Clinical Trial),10,"# Clinical Investigation Report: Withdrawn randomized trial on neuroma pain treatments raises suspicion of data integrity issues
+
+## 1. Executive Summary
+- **Viability Score:** 10
+- **Conclusion:** Not viable for qui tam action. The trial (NCT04204668) was withdrawn before enrollment began, indicating standard research protocol cessation rather than fraud. No evidence of federal program impact, data fabrication, or systematic misconduct.
+- **Recommended Action:** Not viable - insufficient eviden..."
+europmc_41244351.html,427,Retraction of a study claiming Moringa oleifera mitigates MSG‑induced liver toxicity in rats,95,"NIH grant funds were allegedly used to produce falsified data, potentially leading to misallocation of taxpayer money and undermining trust in federally funded research. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Duplicate publication (original 2018 article retracted); Improbable claim of complete protection against multiple toxic endpoints,False Claims Act (Grant Fraud),Cellular Longevity OMA,,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of a study claiming Moringa oleifera mitigates MSG‑induced liver toxicity in rats
 
 ## 1. Executive Summary
 - **Viability Score:** 15
-- **Conclusion:** Not viable - Insufficient evidence of fraud or federal program impact. Trial was withdrawn before enrollment, indicating responsible conduct rather than misconduct.
-- **Recommended Action:** Not viable - No federal funding identified, no patient enrollment, and withdrawal appears to be appropriate research conduct rather than fraudulent activity.
-
-## 2...."
-europmc_41244351.html,427,Retraction of a study claiming Moringa oleifera mitigates MSG‑induced liver toxicity in rats,95,"NIH grant funds were allegedly used to produce falsified data, potentially leading to misallocation of taxpayer money and undermining trust in federally funded research. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Duplicate publication (original 2018 article retracted); Improbable claim of complete protection against multiple toxic endpoints,False Claims Act (Grant Fraud),Cellular Longevity OMA,,Grant Fraud (NIH),15,"# Clinical Investigation Report: Moringa oleifera MSG Toxicity Study Retraction
-
-## 1. Executive Summary
-- **Viability Score:** 15
-- **Conclusion:** Not viable for qui tam action. No evidence of NIH grant involvement found, no federal programs identified, and insufficient federal nexus established.
-- **Recommended Action:** Not viable - insufficient federal connection and lack of specific grant fraud evidence.
+- **Conclusion:** Not viable - Legacy case with generic fraud description and no specific identifiers for investigation.
+- **Recommended Action:** Not viable - Insufficient specific data to conduct thorough investigation and establish fraud gap timeline.
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
-- **First Indicator of Issue:** Data Not F..."
+
+**CRITICAL LIMITATION:*..."
 europmc_41201294.html,431,Retraction of a 2025 study claiming β3‑adrenoceptor agonists cure oxygen‑induced retinopathy,95,"NIH grant money was misappropriated to support a fraudulent study that could have led to FDA approval and Medicare reimbursement for an ineffective drug, thereby defrauding taxpayers. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and splicing in key figures; Impossible statistics: identical standard deviations across all groups; Endpoint switching from angiogenesis to visual acuity without protocol change,False Claims Act (Grant Fraud),"University of California, San Diego; PharmaCo Inc.",NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of β3‑adrenoceptor agonists study for oxygen‑induced retinopathy
 
 ## 1. Executive Summary

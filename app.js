@@ -1291,8 +1291,12 @@ function runScript(scriptName, options = {}) {
         if (data.returncode !== 0) out += `\n[exit code ${data.returncode}]`;
         if (data.stopped || data.returncode === -9 || data.returncode === 137) {
           out += "\n[Stopped by user]";
-        } else if ((scriptName === "gpt_ranker" || scriptName === "converter") && data.returncode === 0) {
-          out += "\n\n→ Refresh the page to load new results.";
+        } else if ((scriptName === "gpt_ranker" || scriptName === "converter" || scriptName === "rerun_low_score_investigations") && data.returncode === 0) {
+          out += "\n\n→ Refreshing data to load updated results...";
+          // Automatically reload data after a short delay
+          setTimeout(() => {
+            loadData();
+          }, 1000);
         }
         elements.scriptOutputPre.textContent = out || "(no output)";
       } else {
