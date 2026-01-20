@@ -1,8 +1,8 @@
 # Clinical Investigator Optimization Guide
 
-## 🚀 70-80% Reduction in Tavily Tokens + 3x Faster Speed
+## 🚀 ~70% Cost Reduction + 3-4x Faster Speed
 
-This guide explains the optimized clinical investigator that dramatically reduces costs and improves speed while maintaining or improving accuracy.
+This guide explains the optimized clinical investigator that dramatically reduces costs (mainly from Tavily reduction) and improves speed (3-4x faster from parallel execution) while maintaining or improving accuracy with Sonnet 4.5.
 
 ---
 
@@ -49,14 +49,14 @@ python rerun_low_score_investigations.py
 - ✅ Each search returns **3-5 results** (targeted, not spray-and-pray)
 - ✅ **Smart caching** - never re-search same query
 - ✅ **Database-first** - check local fraud_data.db before Tavily
-- ✅ **Haiku 4 model** - 5x cheaper, 3x faster than Sonnet
+- ✅ **Sonnet 4.5 model** - best quality for complex reasoning
 - ✅ **Parallel execution** - multiple searches at once
 - ✅ **Early termination** - stops when definitive info found
 
-**Cost per lead**: ~$0.10-0.20 (Tavily) + ~$0.02-0.03 (Anthropic)
-**Time per lead**: 15-25 seconds
+**Cost per lead**: ~$0.18 (Tavily) + ~$0.12 (Anthropic Sonnet) = ~$0.30
+**Time per lead**: 15-25 seconds (3-4x faster from parallel execution)
 
-**Savings**: 70-80% cost reduction, 3-4x faster
+**Savings**: ~70% cost reduction, 3-4x faster
 
 ---
 
@@ -157,20 +157,25 @@ If critical searches find definitive information, stop immediately:
 
 **Impact**: 20-30% of leads can be scored with only 3-5 searches (vs. always doing all 30-50)
 
-### 6. Haiku 4 Model
+### 6. Sonnet 4.5 Model (Quality Over Speed)
 
-**Sonnet 4.5**:
+**Why Sonnet 4.5?**
+
+Investigation requires sophisticated reasoning:
+- Complex multi-phase protocol (KILL CHECK, FRAUD GAP, FINANCIAL IMPACT)
+- Nuanced judgment: fraud vs. legitimate science
+- Mandatory evidence checklist with audit trail
+- Distinguishing copyright disputes from fraud
+- Following detailed anti-hallucination rules
+
+**Model Choice**:
 - Cost: $15 per million input tokens, $75 per million output
-- Speed: ~2000 tokens/second
+- Quality: Excellent reasoning for complex analysis
 - Context: 200K tokens
 
-**Haiku 4**:
-- Cost: $3 per million input tokens, $15 per million output (5x cheaper)
-- Speed: ~6000 tokens/second (3x faster)
-- Context: 200K tokens (same)
-- Quality: Excellent for structured tasks like investigations
+**Why not Haiku?** While Haiku is 5x cheaper, investigation is the critical accuracy checkpoint. A single false positive wastes hours of investigation time, far outweighing the ~$0.08 savings per lead.
 
-**Impact**: 5x cheaper Anthropic costs, 3x faster generation
+**Impact**: Best quality analysis where it matters most. The bulk of cost savings (70%) comes from reducing Tavily searches, not from model choice.
 
 ---
 
@@ -215,12 +220,12 @@ Skipped: 3 additional searches (not needed)
 
 Results collected: 30
 Time: 19 seconds
-Cost: ~$0.15 (Tavily) + ~$0.02 (Haiku) = ~$0.17
+Cost: ~$0.18 (Tavily) + ~$0.12 (Sonnet) = ~$0.30
 
 Viability Score: 25
 ```
 
-**Savings**: 82% cost reduction, 4x faster, **same accuracy**
+**Savings**: 69% cost reduction, 4x faster, **same accuracy**
 
 ---
 
@@ -232,14 +237,14 @@ Viability Score: 25
 |-----------|-----------|------------|---------|
 | Tavily searches | 42 × $0.02 = $0.84 | 9 × $0.02 = $0.18 | 79% |
 | Tavily results | 400 results × bandwidth | 30 results × bandwidth | 92% |
-| Anthropic (model) | Sonnet: $0.12 | Haiku: $0.02 | 83% |
-| **Total** | **$0.96** | **$0.20** | **79%** |
+| Anthropic (model) | Sonnet: $0.12 | Sonnet: $0.12 | 0% |
+| **Total** | **$0.96** | **$0.30** | **69%** |
 
 ### Dataset-Level Costs (1,000 leads)
 
 | Metric | Old System | New System | Savings |
 |--------|-----------|------------|---------|
-| Total cost | $960 | $200 | $760 (79%) |
+| Total cost | $960 | $300 | $660 (69%) |
 | Total time | 22 hours | 6 hours | 16 hours (73%) |
 | Tavily tokens | ~1.2M | ~0.25M | ~0.95M (79%) |
 
@@ -247,8 +252,8 @@ Viability Score: 25
 
 | Metric | Old System | New System | Savings |
 |--------|-----------|------------|---------|
-| Monthly cost | $9,600 | $2,000 | $7,600/month |
-| Annual cost | $115,200 | $24,000 | **$91,200/year** |
+| Monthly cost | $9,600 | $3,000 | $6,600/month |
+| Annual cost | $115,200 | $36,000 | **$79,200/year** |
 
 ---
 
@@ -580,12 +585,13 @@ In practice, optimized is MORE accurate because it focuses on quality over quant
 
 ### Key Benefits
 
-✅ **70-80% cost reduction** ($960 → $200 per 1K leads)
-✅ **3-4x faster execution** (22 hrs → 6 hrs per 1K leads)
-✅ **Better accuracy** (database enrichment + anti-hallucination rules)
+✅ **~70% cost reduction** ($960 → $300 per 1K leads, $79K annual savings)
+✅ **3-4x faster execution** (22 hrs → 6 hrs per 1K leads from parallel searches)
+✅ **Better accuracy** (Sonnet 4.5 quality + database enrichment + anti-hallucination rules)
 ✅ **Drop-in replacement** (same output format, same commands)
 ✅ **Smart caching** (even faster on reruns)
 ✅ **Free database lookups** (30-40% of info from local DB)
+✅ **Reduced Tavily usage** (79% fewer searches: 8-12 vs 30-50)
 
 ### Recommendation
 
@@ -595,12 +601,12 @@ In practice, optimized is MORE accurate because it focuses on quality over quant
 
 ## Version History
 
-- **v2.0** (2025-01): Optimized investigator with 70-80% cost reduction
+- **v2.0** (2025-01): Optimized investigator with ~70% cost reduction
   - Database-first lookups
   - Smart caching
   - Parallel searches
   - Early termination
-  - Haiku 4 model
+  - Sonnet 4.5 model (quality over cost for complex reasoning)
   - 8-12 targeted searches
 
 - **v1.0** (2024): Original investigator
