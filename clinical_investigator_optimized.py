@@ -555,7 +555,7 @@ def call_claude_haiku(lead_data: Dict[str, Any], search_results: List[dict], db_
     }
 
     payload = {
-        "model": "claude-haiku-4-20250514",  # Haiku 4 - 5x cheaper, 3x faster
+        "model": "claude-3-5-haiku-20241022",  # Haiku 3.5 - 5x cheaper, 3x faster than Sonnet
         "max_tokens": 3000,
         "system": CLINICAL_INVESTIGATOR_PROMPT,
         "messages": [{"role": "user", "content": user_message}]

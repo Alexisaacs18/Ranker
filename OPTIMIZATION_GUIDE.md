@@ -49,7 +49,7 @@ python rerun_low_score_investigations.py
 - ✅ Each search returns **3-5 results** (targeted, not spray-and-pray)
 - ✅ **Smart caching** - never re-search same query
 - ✅ **Database-first** - check local fraud_data.db before Tavily
-- ✅ **Haiku 4 model** - 5x cheaper, 3x faster than Sonnet
+- ✅ **Haiku 3.5 model** - 5x cheaper, 3x faster than Sonnet
 - ✅ **Parallel execution** - multiple searches at once
 - ✅ **Early termination** - stops when definitive info found
 
@@ -157,14 +157,14 @@ If critical searches find definitive information, stop immediately:
 
 **Impact**: 20-30% of leads can be scored with only 3-5 searches (vs. always doing all 30-50)
 
-### 6. Haiku 4 Model
+### 6. Haiku 3.5 Model
 
 **Sonnet 4.5**:
 - Cost: $15 per million input tokens, $75 per million output
 - Speed: ~2000 tokens/second
 - Context: 200K tokens
 
-**Haiku 4**:
+**Haiku 3.5**:
 - Cost: $3 per million input tokens, $15 per million output (5x cheaper)
 - Speed: ~6000 tokens/second (3x faster)
 - Context: 200K tokens (same)
@@ -600,7 +600,7 @@ In practice, optimized is MORE accurate because it focuses on quality over quant
   - Smart caching
   - Parallel searches
   - Early termination
-  - Haiku 4 model
+  - Haiku 3.5 model
   - 8-12 targeted searches
 
 - **v1.0** (2024): Original investigator
