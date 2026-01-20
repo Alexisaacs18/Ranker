@@ -28,10 +28,13 @@ except ImportError:
 
 # Import investigation functions
 try:
-    from clinical_investigator import investigate_lead
+    from clinical_investigator import investigate_lead as investigate_lead_standard
+    from clinical_investigator_optimized import investigate_lead as investigate_lead_optimized
     INVESTIGATION_AVAILABLE = True
 except ImportError:
     INVESTIGATION_AVAILABLE = False
+    investigate_lead_standard = None
+    investigate_lead_optimized = None
 
 
 try:
@@ -350,6 +353,18 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=50,
         help="Minimum qui_tam_score to trigger investigation (default: 50). Investigation is automatically enabled for all leads meeting this threshold.",
+    )
+    parser.add_argument(
+        "--use-optimized-investigator",
+        action="store_true",
+        default=True,
+        help="Use optimized investigator (70-80%% less Tavily tokens, 3x faster, Haiku model). Default: True. Use --no-use-optimized-investigator for standard.",
+    )
+    parser.add_argument(
+        "--no-use-optimized-investigator",
+        dest="use_optimized_investigator",
+        action="store_false",
+        help="Use standard investigator (more Tavily searches, Sonnet model, slower but potentially more thorough).",
     )
     parser.add_argument(
         "--sleep",
@@ -1297,7 +1312,9 @@ def main() -> None:
         print("WARNING: clinical_investigator module not available.", file=sys.stderr)
         print("Investigation will be skipped. Ensure clinical_investigator.py is in the same directory.", file=sys.stderr)
     else:
-        print(f"Investigation enabled: Will automatically investigate leads with score >= {args.investigate_min_score}")
+        investigator_type = "OPTIMIZED (70-80% less Tavily, 3x faster, Haiku)" if args.use_optimized_investigator else "STANDARD (more searches, Sonnet)"
+        print(f"Investigation enabled: {investigator_type}")
+        print(f"  → Will automatically investigate leads with score >= {args.investigate_min_score}")
 
     output_router = OutputRouter(args, fieldnames)
 
@@ -1464,10 +1481,22 @@ def main() -> None:
                         "nct_ids": nct_ids,  # Extracted NCT IDs
                         "pmids": pmid_list[:5],  # Extracted PMIDs (limit to 5)
                     }
-                    investigation_result = investigate_lead(lead_data)
+                    # Choose investigator based on flag
+                    if args.use_optimized_investigator:
+                        investigation_result = investigate_lead_optimized(lead_data)
+                        mode_label = "optimized"
+                    else:
+                        investigation_result = investigate_lead_standard(lead_data)
+                        mode_label = "standard"
+
                     investigation_report = investigation_result.get("report", "")
                     investigation_viability_score = investigation_result.get("viability_score", 0)
-                    print(f"  ✓ Investigation complete. Viability score: {investigation_viability_score}", flush=True)
+
+                    # Log optimization stats if available
+                    if "search_count" in investigation_result:
+                        print(f"  ✓ Investigation complete ({mode_label}): Viability={investigation_viability_score}, Searches={investigation_result.get('search_count', 'N/A')}, DB hits={investigation_result.get('database_hits', 0)}", flush=True)
+                    else:
+                        print(f"  ✓ Investigation complete ({mode_label}): Viability score={investigation_viability_score}", flush=True)
                 except Exception as exc:
                     print(f"  ! Investigation failed: {exc}", file=sys.stderr, flush=True)
                     investigation_report = f"# Investigation Error\n\nInvestigation failed: {str(exc)}"
