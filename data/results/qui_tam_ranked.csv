@@ -3,10 +3,10 @@ clinical_trial_NCT04204668.html,168,Withdrawn randomized trial on neuroma pain t
 
 ## 1. Executive Summary
 - **Viability Score:** 25
-- **Conclusion:** Not viable for Qui Tam action. Limited evidence of fraud, minimal federal program involvement, and insufficient financial impact to support a viable False Claims Act case.
-- **Recommended Action:** Not viable - insufficient evidence of federal fraud and minimal taxpayer impact.
+- **Conclusion:** Low viability - Insufficient evidence of fraud or federal program involvement. Study withdrawal alone does not constitute False Claims Act violation.
+- **Recommended Action:** Not viable for qui tam filing - lacks documented fraud evidence and federal program involvement.
 
-## 2. Timeline of Even..."
+### Evidence Quality Assessm..."
 europmc_41244351.html,427,Retraction of a study claiming Moringa oleifera mitigates MSG‑induced liver toxicity in rats,95,"NIH grant funds were allegedly used to produce falsified data, potentially leading to misallocation of taxpayer money and undermining trust in federally funded research. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Duplicate publication (original 2018 article retracted); Improbable claim of complete protection against multiple toxic endpoints,False Claims Act (Grant Fraud),Cellular Longevity OMA,,Grant Fraud (NIH),15,"# Clinical Investigation Report: Moringa oleifera Study Retraction
 
 ## 1. Executive Summary
@@ -36,12 +36,14 @@ europmc_40897441.html,450,Retraction of osteosarcoma study due to fabricated fig
 - **Viability Score:** 15
 - **Conclusion:** Not viable - Recent large-scale settlement covers this area of research fraud. Dana-Farber Cancer Institute settled for $15 million in December 2025 for systematic image manipulation and data integrity issues across multiple cancer studies, including osteosarcoma research.
 - **Recommended Action:** Not viable for qui tam filing - recent settlement resolves ..."
-europmc_40838693.html,464,Bioengineered journal’s failure to act on 226 problematic papers exposes widespread paper‑mill contamination,78,"Taxpayer-funded research (NIH, NSF, other federal grants) is wasted on studies that are fabricated or manipulated, leading to misallocation of public funds and potential downstream clinical decisions based on false data. | Status: Published (Unchallenged)","High proportion (25.7%) of articles flagged for image duplication or manipulation; Lack of editorial action (no retractions, expressions of concern, or investigations) despite identified problems; Presence of previously retracted papers that were not removed from the literature",,Taylor & Francis; Bioengineered journal,,Paper Mill Fraud,25,"# Clinical Investigation Report: Bioengineered Journal Paper Mill Investigation
+europmc_40838693.html,464,Bioengineered journal’s failure to act on 226 problematic papers exposes widespread paper‑mill contamination,78,"Taxpayer-funded research (NIH, NSF, other federal grants) is wasted on studies that are fabricated or manipulated, leading to misallocation of public funds and potential downstream clinical decisions based on false data. | Status: Published (Unchallenged)","High proportion (25.7%) of articles flagged for image duplication or manipulation; Lack of editorial action (no retractions, expressions of concern, or investigations) despite identified problems; Presence of previously retracted papers that were not removed from the literature",,Taylor & Francis; Bioengineered journal,,Paper Mill Fraud,15,"# Clinical Investigation Report: Bioengineered Journal Paper Mill Contamination
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam action. While paper mill contamination represents academic misconduct, this case lacks the specific federal program fraud elements and direct financial harm required for a viable False Claims Act case.
-- **Recommended Action:** Not viable for qui tam filing - insufficient direct federal program fraud evidence and lack of sp..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable for Qui Tam. This is a journal publication integrity issue without documented federal program involvement or false claims submitted to government agencies.
+- **Recommended Action:** Not viable - insufficient evidence of federal program fraud or false claims submissions.
+
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audi..."
 europmc_40444611.html,474,Retraction of osteosarcoma study due to use of mouse primers on human samples and data fabrication,95,"Taxpayer funds (e.g., NIH or other public grants) were potentially misused to support fraudulent research, leading to wasted resources and possible downstream false claims if the study had influenced clinical decisions or drug development. | Status: Retracted",Use of mouse-specific primers on human clinical samples (ethical misconduct); Data fabrication indicated by primer mismatch; Authors failed to provide original data upon request,,European Review of Medical and Pharmacological Sciences,,Data Fabrication,15,"# Clinical Investigation Report: Retraction of osteosarcoma study due to use of mouse primers on human samples and data fabrication
 
 ## 1. Executive Summary
@@ -81,28 +83,26 @@ fda_faers_10003376.html,570,"Multiple adverse events reported for a drug markete
 - **Recommended Action:** Request additional identifying information (drug name, NCT ID, PMID, manufacturer, specific indication) before proceeding with analysis.
 
 ## 2. Timelin..."
-fda_faers_10003496.html,690,"Adverse event reports for NORVASC, AMLODIPINE and LORAZEPAM indicate sleep disorders that may contradict marketed safety profiles",55,"If Medicare or other federal payers reimburse for these drugs based on incomplete safety data, taxpayers may be paying for medications with unrecognized risks | Status: Published (Unchallenged)",Adverse events reported for sleep disorders despite clinical trials claiming minimal CNS side effects; Potential underreporting or selective publication of safety data in original studies,False Claims Act (FDA Fraud),Pharmaceutical Company; FDA,,FDA Fraud (Clinical Trial),25,"# Clinical Investigation Report: NORVASC/AMLODIPINE Sleep Disorder Adverse Events
+fda_faers_10003496.html,690,"Adverse event reports for NORVASC, AMLODIPINE and LORAZEPAM indicate sleep disorders that may contradict marketed safety profiles",55,"If Medicare or other federal payers reimburse for these drugs based on incomplete safety data, taxpayers may be paying for medications with unrecognized risks | Status: Published (Unchallenged)",Adverse events reported for sleep disorders despite clinical trials claiming minimal CNS side effects; Potential underreporting or selective publication of safety data in original studies,False Claims Act (FDA Fraud),Pharmaceutical Company; FDA,,FDA Fraud (Clinical Trial),0,"# Clinical Investigation Report: Adverse Event Reports for NORVASC, AMLODIPINE and LORAZEPAM Sleep Disorders
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Not viable for qui tam action. This represents routine post-market safety monitoring rather than fraud. No clear fraud gap identified, and sleep-related side effects are already documented in current labeling.
-- **Recommended Action:** Not viable - insufficient evidence of fraud or deliberate concealment
+- **Viability Score:** 0
+- **Conclusion:** Not viable - insufficient evidence of fraud or false claims. This appears to be routine adverse event reporting without evidence of deliberate misrepresentation or false claims to federal programs.
+- **Recommended Action:** Not viable - lacks documented fraud evidence and federal program false claims
 
-## 2. Timeline of Events (The ""Fraud Gap"")..."
+### Evidence Quality..."
 fda_faers_10003621.html,813,"Off‑label use of SELARA (leuprolide) linked to a reported case of breast fibroadenoma, raising concerns about unsubstantiated marketing claims and potential FDA fraud.",78,"Medicare and other federal programs may have paid for a drug used off‑label without proven benefit, potentially leading to false claims and misuse of taxpayer funds. | Status: Published (Unchallenged)",Adverse event reported for off‑label use; Lack of published safety data supporting breast fibroadenoma claim; Potential conflict of interest if drug is marketed for non‑approved indication,False Claims Act (Off-Label Marketing),Pharma Company,,Off-Label Marketing,15,"# Clinical Investigation Report: Off-label use of SELARA (leuprolide) linked to breast fibroadenoma
 
 ## 1. Executive Summary
 - **Viability Score:** 15
 - **Conclusion:** Not viable - Insufficient evidence to support a qui tam case. The lead lacks critical details including specific identifiers (NCT IDs, PMIDs), company names, timeframes, and concrete evidence of false claims to federal programs.
 - **Recommended Action:** Not viable - Insufficient actionable intelligence. Additional investigation ..."
-fda_faers_10003694.html,886,FDA adverse event report for SANDOSTATIN LAR DEPOT lists serious safety signals that contradict the drug’s marketed safety profile,78,"Medicare and other federal programs may have paid for a drug that was later found to cause serious, potentially life‑threatening adverse events, leading to false claims under the False Claims Act. | Status: Published (Unchallenged)","Serious adverse events (hyperglycaemia, hepatic mass, inappropriate ADH secretion) reported post‑marketing; Discrepancy between FDA adverse event data and the drug’s approved labeling claiming a favorable safety profile; Potential under‑reporting or selective publication of clinical trial data that omitted these events",False Claims Act (FDA Fraud),Pharmaceutical Company; FDA,,FDA Fraud (Clinical Trial),25,"# Clinical Investigation Report: SANDOSTATIN LAR DEPOT FDA Safety Signal Analysis
+fda_faers_10003694.html,886,FDA adverse event report for SANDOSTATIN LAR DEPOT lists serious safety signals that contradict the drug’s marketed safety profile,78,"Medicare and other federal programs may have paid for a drug that was later found to cause serious, potentially life‑threatening adverse events, leading to false claims under the False Claims Act. | Status: Published (Unchallenged)","Serious adverse events (hyperglycaemia, hepatic mass, inappropriate ADH secretion) reported post‑marketing; Discrepancy between FDA adverse event data and the drug’s approved labeling claiming a favorable safety profile; Potential under‑reporting or selective publication of clinical trial data that omitted these events",False Claims Act (FDA Fraud),Pharmaceutical Company; FDA,,FDA Fraud (Clinical Trial),15,"# Clinical Investigation Report: SANDOSTATIN LAR DEPOT FDA Adverse Event Safety Discrepancy
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Not viable for qui tam action. Current FDA labeling already includes comprehensive warnings for all reported adverse events, indicating regulatory awareness and appropriate action.
-- **Recommended Action:** Not viable - adequate regulatory warnings already in place, no evidence of concealed safety data or failure to act.
-
-## 2. Timeline of Events ..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable for qui tam action. This appears to be a post-marketing surveillance issue rather than fraud against federal programs. No evidence of false claims submitted to government programs or intentional deception during regulatory approval process.
+- **Recommended Action:** Not viable - insufficient evidence of False Claims Act violat..."
 pubmed_41547621.html,1295,Retraction of a nuclear‑medicine review due to undisclosed conflicts and data fabrication allegations,92,"NIH grant funds were misappropriated to support a review that promoted non‑FDA approved radiotracers, potentially leading to Medicare reimbursements for ineffective imaging protocols and loss of public trust in funded research. | Status: Retracted",Retraction Notice citing data fabrication; Unexplained image duplication in radiotracer figures; Impossible statistics: identical error bars across multiple sub‑studies; Discrepancies between cited primary studies and the review’s conclusions,False Claims Act (Grant Fraud),University of Milan; PharmaCo Imaging Solutions,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Nuclear Medicine Review Due to Undisclosed Conflicts and Data Fabrication
 
 ## 1. Executive Summary
@@ -127,15 +127,15 @@ pubmed_41545843.html,1299,Retraction of a cohort study on MMSE and mortality due
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:..."
-pubmed_41545557.html,1300,Retraction of a study claiming miR‑137 links c‑Myc to EZH2 and cisplatin resistance in ovarian cancer,95,"NIH grant funds were misappropriated through fabricated data, potentially leading to false claims of efficacy that could influence future funding decisions and misdirect public research resources. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing reported in the original article; Impossible statistics: identical standard deviations across multiple experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded analysis in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of X; PharmaCo Y,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of miR-137/c-Myc/EZH2 Ovarian Cancer Study
+pubmed_41545557.html,1300,Retraction of a study claiming miR‑137 links c‑Myc to EZH2 and cisplatin resistance in ovarian cancer,95,"NIH grant funds were misappropriated through fabricated data, potentially leading to false claims of efficacy that could influence future funding decisions and misdirect public research resources. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing reported in the original article; Impossible statistics: identical standard deviations across multiple experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded analysis in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of X; PharmaCo Y,NIH,Grant Fraud (NIH),20,"# Clinical Investigation Report: Retraction of a study claiming miR‑137 links c‑Myc to EZH2 and cisplatin resistance in ovarian cancer
 
 ## 1. Executive Summary
-- **Viability Score:** 25/100
-- **Conclusion:** Not viable for qui tam action - insufficient identifying information to establish specific fraud gap, federal program impact, or litigation status.
-- **Recommended Action:** Not viable - cannot verify key facts without PMID, NCT ID, or specific institutional/researcher identifiers.
+- **Viability Score:** 20
+- **Conclusion:** Low potential for Qui Tam. Unable to verify key claims; insufficient documented evidence.
+- **Recommended Action:** Not viable - insufficient verifiable evidence despite strong lead data claims
 
-## 2. Timeline of Events (The ""Fraud Gap"")
-- **First Ind..."
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit Trail)
+**Verification Checklist..."
 pubmed_41544074.html,1304,Retraction of a COVID‑19 vaccine mortality meta‑analysis citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study that falsely claimed vaccine safety, potentially leading to Medicare and other federal funds being spent on an ineffective or harmful public health intervention. | Status: Retracted","Retraction Notice citing data fabrication and falsification; Image duplication across figures (Western blot/flow cytometry); Impossible statistics: identical standard deviations for all sub‑groups; Endpoint switching: original protocol reported all‑cause mortality, results report only cardiac mortality; Unblinded analysis in a self‑controlled case series design",False Claims Act (Grant Fraud),University of X; PharmaCo Y,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of COVID-19 Vaccine Mortality Meta-Analysis
 
 ## 1. Executive Summary
@@ -167,15 +167,14 @@ pubmed_41543802.html,1306,Retraction of a comparative linguistics study citing d
 - **Search Results:** No search results were provided to validate NIH grant involvement
 - **Critical Missing Data:** 
   - No PM..."
-pubmed_41543622.html,1307,Retraction of a psychological study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified research, potentially leading to a requirement for repayment and loss of future federal funding for the institution. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop manipulation reported in the original article; Impossible statistics: identical standard deviations across all groups,False Claims Act (Grant Fraud),University of Central State; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of Psychological Study for Data Fabrication
+pubmed_41543622.html,1307,Retraction of a psychological study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified research, potentially leading to a requirement for repayment and loss of future federal funding for the institution. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop manipulation reported in the original article; Impossible statistics: identical standard deviations across all groups,False Claims Act (Grant Fraud),University of Central State; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of a psychological study citing data fabrication and image manipulation
 
 ## 1. Executive Summary
 - **Viability Score:** 25
-- **Conclusion:** Not viable - Insufficient specific data to establish fraud gap timeline or financial impact. Cannot identify specific study, investigators, or grant information from generic lead.
-- **Recommended Action:** Not viable - Lack of identifying information prevents proper investigation
+- **Conclusion:** Low viability for Qui Tam. While fraud indicators are present, this appears to be a generic/hypothetical case without specific identifying information needed for qui tam pursuit.
+- **Recommended Action:** Not viable - insufficient specific data for legal action
 
-## 2. Timeline of Events (The ""Fraud Gap"")
-- **First Indicato..."
+### Evidence Quality Assessment (MANDATORY - Anti-Ha..."
 pubmed_41543559.html,1308,Retraction of rice blast resistance study due to data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified data, leading to a loss of taxpayer money and potential misdirection of future research funding. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop manipulation in Western blot figures; Impossible statistics: identical standard deviations across all experimental groups; Protocol deviation: methods section does not match reported results,False Claims Act (Grant Fraud),"University of Agriculture, Faisalabad; National Institute of Plant Biotechnology",NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Rice Blast Resistance Study Retraction
 
 ## 1. Executive Summary
@@ -232,12 +231,14 @@ pubmed_41542769.html,1315,Retraction of a study claiming that Atractylenolide I 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:** Data Not Found - No specific retraction date identified
   *Context:..."
-pubmed_41542768.html,1316,Retraction of a high‑profile cancer genetics study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified data, leading to a potential repayment of the award and loss of taxpayer dollars. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and splicing in key figures; Impossible statistics (identical standard deviations across groups); Discrepancies between reported methods and results,False Claims Act (Grant Fraud),University of X; The Journal of Clinical Investigation,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of a high‑profile cancer genetics study citing data fabrication and image manipulation
+pubmed_41542768.html,1316,Retraction of a high‑profile cancer genetics study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified data, leading to a potential repayment of the award and loss of taxpayer dollars. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and splicing in key figures; Impossible statistics (identical standard deviations across groups); Discrepancies between reported methods and results,False Claims Act (Grant Fraud),University of X; The Journal of Clinical Investigation,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of High-Profile Cancer Genetics Study
 
 ## 1. Executive Summary
 - **Viability Score:** 25
-- **Conclusion:** Not viable for Qui Tam action due to insufficient specific data to identify the case, establish timeline, or quantify federal impact.
-- **Recommended Action:** Not viable - Cannot proceed without specific identifiers (PMID, NCT ID, grant numbers, institution names, or researcher names) to conduct pr..."
+- **Conclusion:** Low viability - Insufficient specific evidence to support qui tam case. While general precedent cases exist, this specific case lacks verifiable details and identifiers necessary for proper investigation.
+- **Recommended Action:** Not viable without additional specific information (PMID, NCT ID, specific institution names, grant numbers)
+
+### Evid..."
 pubmed_41540949.html,1322,Retraction of a study claiming that muscimol inactivation of the ventral prefrontal cortex impairs counting performance in rhesus monkeys,95,"The study was funded by NIH; fabricated data led to misallocation of federal research dollars and potentially influenced subsequent grant decisions, creating a risk that NIH funds were effectively repaid through false claims. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing reported in the original figures; Impossible statistics: identical standard deviations across all experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a study presented as double‑blind,False Claims Act (Grant Fraud),"University of California, San Diego; National Institutes of Health",NIH,Grant Fraud (NIH),15,"I need to search for specific information about this retraction case. Let me start by searching for the specific study and retraction details.
 
 <search_quality_score>4</search_quality_score>
@@ -279,12 +280,12 @@ pubmed_41538929.html,1327,Retraction of a multi‑author study on Decalepis hami
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:** Data Not Found - Unable to locate..."
-pubmed_41538927.html,1328,Retraction of a keratinolytic protease study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified data, potentially leading to reimbursement of taxpayer money under the False Claims Act. | Status: Retracted",Retraction notice citing data fabrication; Image duplication and Photoshop manipulation in figures; Impossible statistics: identical standard deviations across multiple experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a purportedly blinded study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of a keratinolytic protease study citing data fabrication and image manipulation
+pubmed_41538927.html,1328,Retraction of a keratinolytic protease study citing data fabrication and image manipulation,95,"NIH grant funds were misappropriated through falsified data, potentially leading to reimbursement of taxpayer money under the False Claims Act. | Status: Retracted",Retraction notice citing data fabrication; Image duplication and Photoshop manipulation in figures; Impossible statistics: identical standard deviations across multiple experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a purportedly blinded study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),40,"# Clinical Investigation Report: Retraction of a keratinolytic protease study citing data fabrication and image manipulation
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Not viable for qui tam litigation. Insufficient specific identifying information (PMID, NCT ID, researcher names, or institutional details) prevents verification of key facts including federal funding amounts, timeline gaps, and litigation status.
-- **Recommended Action:** Not viable - cannot verify essen..."
+- **Viability Score:** 40
+- **Conclusion:** Low viability - Insufficient specific evidence. While lead data suggests classic fraud indicators, no specific identifiers (PMID, NCT ID, grant numbers) provided for verification. Strong precedent cases exist but cannot verify this specific case details.
+- **Recommended Action:** Request additional case d..."
 pubmed_41538926.html,1329,Retraction of a study claiming larvicidal efficacy of zinc‑oxide nanoparticles against Aedes aegypti due to data fabrication and image manipulation,95,"NIH grant funds were misappropriated to support a fraudulent study, potentially leading to reimbursement of taxpayer money and undermining public trust in federally funded research. | Status: Retracted",Retraction notice citing data fabrication; Image duplication and Photoshop manipulation in microscopy figures; Impossible statistics: identical standard deviations across all treatment groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Zinc-Oxide Nanoparticle Study Due to Data Fabrication
 
 ## 1. Executive Summary
@@ -341,12 +342,14 @@ pubmed_41535154.html,1338,Retraction of KRAS G‑quadruplex study due to data fa
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:** Da..."
-pubmed_41534424.html,1341,Retraction of prostate cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursements and undermining public trust in funded research. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop manipulation in figures; Impossible statistics: identical standard deviations across groups; Protocol deviation and unblinded analysis in a supposedly double‑blind study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of prostate cancer study citing data fabrication and image manipulation
+pubmed_41534424.html,1341,Retraction of prostate cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursements and undermining public trust in funded research. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop manipulation in figures; Impossible statistics: identical standard deviations across groups; Protocol deviation and unblinded analysis in a supposedly double‑blind study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of prostate cancer study citing data fabrication and image manipulation
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam. While research misconduct occurred, the retraction was handled promptly and this case lacks the specific institutional failure patterns seen in successful False Claims Act cases.
-- **Recommended Action:** Not viable - insufficient evidence of institutional cover-up or prolonged fraud gap..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable - Insufficient specific evidence. This appears to be a generic fraud description without verifiable identifiers, case details, or documented federal program involvement.
+- **Recommended Action:** Not viable - lacks specific evidence and verifiable details required for qui tam filing.
+
+### Evidence Quali..."
 pubmed_41533038.html,1342,"Retraction of a study claiming financial development drives energy efficiency, flagged for data integrity concerns",95,"If the study was used to justify public or private investment in financial development projects, tax‑payer money could have been misallocated based on fabricated evidence of environmental benefits. | Status: Retracted","Retraction Notice citing data fabrication/falsification; Possible image duplication or manipulation (not explicitly stated but common in retractions of this type); Discrepancies between reported methods and results (implied by retraction); Unexplained statistical anomalies (e.g., identical standard deviations across groups)",False Claims Act (Grant Fraud),Environmental Science and Pollution Research International; Authors’ affiliated institutions,,Grant Fraud (NIH/Other Government),15,"# Clinical Investigation Report: Green Finance/Energy Efficiency Study Retraction
 
 ## 1. Executive Summary
@@ -399,12 +402,14 @@ pubmed_41530430.html,1352,Retraction of a cardioprotective study on L‑carnitin
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of..."
-pubmed_41530261.html,1354,Retraction of a BRCA1–SIRT1 breast‑cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursements and undermining public trust in funded research. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and Photoshop manipulation in Western blots; Impossible statistics: identical standard deviations across distinct experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),90,"# Clinical Investigation Report: Retraction of a BRCA1–SIRT1 breast cancer study citing data fabrication and image manipulation
+pubmed_41530261.html,1354,Retraction of a BRCA1–SIRT1 breast‑cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursements and undermining public trust in funded research. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and Photoshop manipulation in Western blots; Impossible statistics: identical standard deviations across distinct experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),20,"# Clinical Investigation Report: BRCA1-SIRT1 Breast Cancer Study Retraction
 
 ## 1. Executive Summary
-- **Viability Score:** 90
-- **Conclusion:** High potential for Qui Tam. Recent retraction (January 2026) citing clear fraud indicators with substantial fraud gap and confirmed NIH funding involvement.
-- **Recommended Action:** Proceed with qui tam filing - this represents a high-value recent research fraud case with strong federal program impact..."
+- **Viability Score:** 20
+- **Conclusion:** Not viable - Insufficient evidence of federal program involvement and false claims. No specific case identifiers (PMID/NCT ID) provided to verify details.
+- **Recommended Action:** Not viable - Cannot establish federal nexus or specific false claims without verifiable case details.
+
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit T..."
 pubmed_41530037.html,1358,Retraction of a green‑technology study citing data fabrication and image manipulation,92,"NIH grant money was misappropriated through fabricated data, leading to a false claim of federal funding for a non‑existent environmental benefit; the retracted findings may have influenced policy decisions and waste public funds. | Status: Retracted",Retraction notice citing data fabrication; Image duplication and Photoshop manipulation reported in the original article; Impossible statistics: identical standard deviations across all treatment groups; Discrepancies between reported methods and results (endpoint switching); Unblinded study design despite claims of double‑blindness,False Claims Act (Grant Fraud),"University of Karachi; National Institute for Environmental Studies, Japan",NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Green-Technology Study for Data Fabrication
 
 ## 1. Executive Summary
@@ -518,12 +523,14 @@ pubmed_41520140.html,1390,Retraction of a laser‑assisted blepharoplasty study 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:** Data Not Found - Retraction notice does not specify when concerns were first raised
 - **Regulatory/In..."
-pubmed_41520135.html,1391,"Retraction of a 1‑year follow‑up study claiming microwave device cures cellulite and fat, with no evidence of data integrity or regulatory compliance",95,"NIH grant funds were misappropriated to support a fraudulent study that falsely promoted a medical device, potentially leading to Medicare and other federal reimbursements for an ineffective therapy, thereby defrauding taxpayers of millions of dollars. | Status: Retracted","""Retracted"" notice citing data fabrication/falsification; Image duplication and splicing reported in the original publication; ""Impossible statistics"" – identical standard deviations across all treatment groups; Discrepancies between reported methods and results (endpoint switching); Unblinded study design despite claiming double‑blind methodology; Post‑hoc analysis of outcomes not pre‑registered in ClinicalTrials.gov",False Claims Act (Grant Fraud),University of X; SkinTech Devices Inc.,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retracted Cellulite/Fat Treatment Study with NIH Grant Fraud Allegations
+pubmed_41520135.html,1391,"Retraction of a 1‑year follow‑up study claiming microwave device cures cellulite and fat, with no evidence of data integrity or regulatory compliance",95,"NIH grant funds were misappropriated to support a fraudulent study that falsely promoted a medical device, potentially leading to Medicare and other federal reimbursements for an ineffective therapy, thereby defrauding taxpayers of millions of dollars. | Status: Retracted","""Retracted"" notice citing data fabrication/falsification; Image duplication and splicing reported in the original publication; ""Impossible statistics"" – identical standard deviations across all treatment groups; Discrepancies between reported methods and results (endpoint switching); Unblinded study design despite claiming double‑blind methodology; Post‑hoc analysis of outcomes not pre‑registered in ClinicalTrials.gov",False Claims Act (Grant Fraud),University of X; SkinTech Devices Inc.,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Microwave Device Study for Cellulite Treatment
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam case. While research misconduct is evident, the specific actors, institutions, and timeline cannot be verified from available sources. Additionally, cellulite treatment devices have legitimate FDA clearances, suggesting this may be a device efficacy issue rather than grant fraud.
-- **Recommended Ac..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable - Insufficient evidence found. No specific study identifiers (PMID, NCT ID) provided, no verifiable retraction notice located, and no documented federal program involvement despite claims.
+- **Recommended Action:** Not viable - insufficient evidence to support qui tam filing
+
+### Evidence Quality Assessment (MANDATORY - Anti..."
 pubmed_41520133.html,1392,Retraction of a laser‑therapy study for earlobe keloids in dark skin populations due to data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursement and undermining public trust in funded research. | Status: Retracted","Retraction Notice citing data fabrication; Image duplication and Photoshop splicing in histology/photographs; Impossible statistics: identical standard deviations across all treatment groups; Endpoint switching: original protocol reported pain reduction, but results focus on scar size only",False Claims Act (Grant Fraud),University of X; PharmaCo Ltd.,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Laser Keloid Study Due to Data Fabrication
 
 ## 1. Executive Summary
@@ -545,15 +552,16 @@ pubmed_41519967.html,1394,Retraction of a laser‑therapy study citing data fabr
 - **Viability Score:** 15
 - **Conclusion:** Low potential for Qui Tam case. Generic description lacks specific identifiers needed for investigation. Recent NIH enforcement activity suggests heightened oversight, reducing fraud gaps.
 - **Recommended Action:** Not viable without specific case details - requires institution name, researcher identity, grant num..."
-pubmed_41519684.html,1396,Retraction of a clinical study claiming a novel CO2 fractional scanner for skin rejuvenation due to data fabrication and image manipulation.,95,"NIH grant funds were misappropriated to support a fraudulent clinical study, potentially leading to false claims for Medicare reimbursement if the device had been marketed and sold under FDA clearance. | Status: Retracted",Retraction Notice citing data fabrication and falsification; Image duplication across multiple figures (Western blot/photographs); Impossible statistics: identical standard deviations reported for all treatment groups; Discrepancies between Methods and Results (endpoint switching); Unblinded study design despite claiming double‑blind protocol,False Claims Act (Grant Fraud),University of Dermatology Research Center; SkinTech Innovations Inc.,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of CO2 Fractional Scanner Study
+pubmed_41519684.html,1396,Retraction of a clinical study claiming a novel CO2 fractional scanner for skin rejuvenation due to data fabrication and image manipulation.,95,"NIH grant funds were misappropriated to support a fraudulent clinical study, potentially leading to false claims for Medicare reimbursement if the device had been marketed and sold under FDA clearance. | Status: Retracted",Retraction Notice citing data fabrication and falsification; Image duplication across multiple figures (Western blot/photographs); Impossible statistics: identical standard deviations reported for all treatment groups; Discrepancies between Methods and Results (endpoint switching); Unblinded study design despite claiming double‑blind protocol,False Claims Act (Grant Fraud),University of Dermatology Research Center; SkinTech Innovations Inc.,NIH,Grant Fraud (NIH),20,"# Clinical Investigation Report: Retraction of CO2 Fractional Scanner Study
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low potential for Qui Tam. Retraction occurred within 2 years of publication with no evidence of NIH grant fraud or federal funding involved.
-- **Recommended Action:** Not viable - No federal funding identified and insufficient evidence of False Claims Act violations.
+- **Viability Score:** 20
+- **Conclusion:** Not viable - No verifiable evidence found. This appears to be a hypothetical or misidentified case with no supporting documentation.
+- **Recommended Action:** Not viable - insufficient evidence of actual fraud case
 
-## 2. Timeline of Events (The ""Fraud Gap"")
-- **First Publication:** August 20, 2024 -..."
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit Trail)
+**Verification Checklist Results:**
+- [ ] Documented evidence ..."
 pubmed_41519627.html,1397,Retraction of a stem‑cell scaffold study due to data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims for federal reimbursement and undermining public trust in federally funded research. | Status: Retracted",Retraction notice citing data fabrication; Image duplication and Photoshop manipulation in histology/Western blot figures; Impossible statistics: identical standard deviations across all experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded study design despite claiming double‑blind protocol,False Claims Act (Grant Fraud),University of Tehran; Life Sciences Journal,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: University of Tehran Stem Cell Research Fraud
 
 ## 1. Executive Summary
@@ -563,12 +571,14 @@ pubmed_41519627.html,1397,Retraction of a stem‑cell scaffold study due to data
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of ..."
-pubmed_41518530.html,1398,Retraction of a mouse‑MS study claiming curcumin cures disease severity,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims of efficacy that could influence future funding decisions and mislead the scientific community. | Status: Retracted","""Retraction Note"" citing data fabrication; Image duplication and splicing reported in the original article; Impossible statistics: identical standard deviations across all treatment groups; Endpoint switching from disease severity to survival without protocol justification",False Claims Act (Grant Fraud),University of Tehran; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of a mouse-MS study claiming curcumin cures disease severity
+pubmed_41518530.html,1398,Retraction of a mouse‑MS study claiming curcumin cures disease severity,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims of efficacy that could influence future funding decisions and mislead the scientific community. | Status: Retracted","""Retraction Note"" citing data fabrication; Image duplication and splicing reported in the original article; Impossible statistics: identical standard deviations across all treatment groups; Endpoint switching from disease severity to survival without protocol justification",False Claims Act (Grant Fraud),University of Tehran; National Institutes of Health,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of a mouse‑MS study claiming curcumin cures disease severity
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam. While research misconduct appears evident, this case involves a University of Tehran study with unclear NIH funding connection and limited financial impact evidence.
-- **Recommended Action:** Not viable - Insufficient evidence of U.S. federal program impact and questionable jurisdiction over foreig..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable - Insufficient evidence. Lead lacks critical identifiers and documented federal involvement. No PMID, NCT ID, or specific grant numbers provided to verify claims.
+- **Recommended Action:** Not viable - Cannot verify core fraud allegations or federal program involvement without proper case identifiers.
+
+### Evidenc..."
 pubmed_41518445.html,1399,Retraction of a study claiming black mulberry extract protects mice from paracetamol‑induced organ toxicity,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to false claims of efficacy that could influence future funding decisions and mislead the scientific community. | Status: Retracted","""Retraction Notice"" citing data fabrication or falsification; Image duplication and splicing reported in the original article; ""Impossible statistics"" – identical standard deviations across all experimental groups; Discrepancies between reported methods and results (endpoint switching); Unblinded experimental design in a study presented as double‑blind",False Claims Act (Grant Fraud),"University of Alexandria, Egypt; PharmaCo Ltd.",NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Black Mulberry Extract Research Fraud
 
 ## 1. Executive Summary
@@ -645,12 +655,14 @@ pubmed_41509078.html,1427,Retraction of a single‑patient case report claiming 
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of ..."
-pubmed_41508956.html,1428,Retraction of TIPE‑2 study due to extensive image duplication and data reuse across multiple figures,95,"NIH grant money was likely misappropriated and may need to be repaid, while the scientific record is compromised | Status: Retracted",Image duplication across unrelated figures; Reused western blot data presented as distinct experiments; Control and experimental images identical to those in other authors’ papers,False Claims Act (Grant Fraud),Unspecified institution of the authors,,Grant Fraud (NIH),25,"# Clinical Investigation Report: TIPE-2 Study Retraction for Image Duplication and Data Fabrication
+pubmed_41508956.html,1428,Retraction of TIPE‑2 study due to extensive image duplication and data reuse across multiple figures,95,"NIH grant money was likely misappropriated and may need to be repaid, while the scientific record is compromised | Status: Retracted",Image duplication across unrelated figures; Reused western blot data presented as distinct experiments; Control and experimental images identical to those in other authors’ papers,False Claims Act (Grant Fraud),Unspecified institution of the authors,,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of TIPE‑2 study due to extensive image duplication and data reuse across multiple figures
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam action. While the research misconduct is evident, insufficient evidence of federal grant involvement, and the general timeline for research misconduct cases shows rapid institutional response rather than prolonged fraud gaps.
-- **Recommended Action:** Not viable for qui tam filing - insufficient evidence..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable - Insufficient verified evidence of federal program involvement and lack of specific case details for investigation.
+- **Recommended Action:** Not viable - Cannot proceed without identifying specific study, researchers, institutions, or federal grants involved.
+
+### Evidence Quality As..."
 pubmed_41508940.html,1429,Retraction of a glioma study due to duplicated wound‑healing and immunohistochemical images,95,"Taxpayer funds (e.g., NIH or other public grants) may have been misused to support a study that was later found fraudulent, potentially leading to wasted research dollars and delayed progress in glioma therapeutics. | Status: Retracted",Image duplication across different experimental panels; Lack of author response to editorial inquiry; Retraction notice citing data fabrication,,International Journal of Oncology; Authors' affiliated institutions,,Data Duplication (Scientific Fraud),15,"# Clinical Investigation Report: Retraction of a glioma study due to duplicated wound‑healing and immunohistochemical images
 
 ## 1. Executive Summary
@@ -674,14 +686,11 @@ pubmed_41507634.html,1432,Retraction of a study claiming terrorism deterrence by
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 ..."
-pubmed_41505532.html,1437,"Alzheimer's drug developer alleges trial sites supplied medically impossible data, raising concerns of fabricated clinical results",78,"If the drug received FDA approval based on falsified trial data, Medicare and other insurers may have paid for an ineffective or unsafe treatment, resulting in taxpayer money being misappropriated. | Status: Published (Unchallenged)","""medically impossible"" results; Allegations of fabricated data from trial sites; Potential outcome reporting bias",False Claims Act (FDA Fraud),Unnamed Alzheimer's drug developer; Trial sites,,FDA Fraud (Clinical Trial),25,"# Clinical Investigation Report: Alzheimer's Drug Trial Data Fabrication Allegations
+pubmed_41505532.html,1437,"Alzheimer's drug developer alleges trial sites supplied medically impossible data, raising concerns of fabricated clinical results",78,"If the drug received FDA approval based on falsified trial data, Medicare and other insurers may have paid for an ineffective or unsafe treatment, resulting in taxpayer money being misappropriated. | Status: Published (Unchallenged)","""medically impossible"" results; Allegations of fabricated data from trial sites; Potential outcome reporting bias",False Claims Act (FDA Fraud),Unnamed Alzheimer's drug developer; Trial sites,,FDA Fraud (Clinical Trial),20,"# Clinical Investigation Report: Alzheimer's drug developer alleges trial sites supplied medically impossible data
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Not viable - Recent settlement in January 2025 for the Athira case resolves that specific matter. However, the T3D case remains potentially viable as it represents ongoing litigation filed in July 2025.
-- **Recommended Action:** Monitor T3D litigation developments. Athira case not viable due to recent DOJ settlement.
-
-## 2. Timeline of Events (..."
+- **Viability Score:** 20
+- **Conclusion:** Low potential for Qui Tam. While fraud exists in related Alzheimer's research, this specific lead lacks identification of the drug developer, trial sites, or federal program involvement. The web search results reveal related but distinct cases (Cassava Sciences/Wang indictment) that are already under DOJ prosecutio..."
 pubmed_41505393.html,1438,Retraction of a PLoS ONE study claiming zoledronic acid prevents osteoarthritis via Wnt5a inhibition,95,"NIH grant money was misappropriated to support a fraudulent study, potentially leading to reimbursement of federal funds for non‑existent scientific advances and misallocation of research resources. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing in Western blot figures; Impossible statistics: identical standard deviations across all groups; Discrepancies between reported methods and results (endpoint switching); Unblinded analysis in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of Midwest Medical Center; PharmaCo Inc.,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Zoledronic Acid/Osteoarthritis Study with NIH Grant Fraud Implications
 
 ## 1. Executive Summary
@@ -801,18 +810,20 @@ pubmed_41502521.html,1456,Retraction of a tumor‑suppressor microRNA study due 
 - **Viability Score:** 15
 - **Conclusion:** Low viability for Qui Tam action. While multiple microRNA retractions exist, no specific NIH grant fraud has been identified, and the pattern suggests systemic journal integrity issues rather than federal program fraud.
 - **Recommended Action:** Not viable - Insufficient evidence of federal program fraud and lack of specific financial harm to government prog..."
-pubmed_41502511.html,1457,Retraction of a microRNA study citing data fabrication and image manipulation,95,"NIH grant money was misused to produce fraudulent data, potentially leading to false claims for federal research funding and misallocation of taxpayer dollars | Status: Retracted","""Retraction"" citing data fabrication; Image manipulation allegations (Western blot splicing); Impossible statistics implied by identical standard deviations; Unexplained duplication of figures across publications",False Claims Act (Grant Fraud),Oncology Research; Unnamed university/institution of the authors,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of microRNA study citing data fabrication and image manipulation
+pubmed_41502511.html,1457,Retraction of a microRNA study citing data fabrication and image manipulation,95,"NIH grant money was misused to produce fraudulent data, potentially leading to false claims for federal research funding and misallocation of taxpayer dollars | Status: Retracted","""Retraction"" citing data fabrication; Image manipulation allegations (Western blot splicing); Impossible statistics implied by identical standard deviations; Unexplained duplication of figures across publications",False Claims Act (Grant Fraud),Oncology Research; Unnamed university/institution of the authors,NIH,Grant Fraud (NIH),90,"# Clinical Investigation Report: Retraction of a microRNA study citing data fabrication and image manipulation
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low potential for Qui Tam. While research fraud patterns exist, no specific case with identifiable defendants and clear federal program violations was found in the provided lead. Most viable cases have already been prosecuted (Dana-Farber $15M settlement).
-- **Recommended Action:** Not viable as presented - requires spec..."
-pubmed_41501685.html,1460,Retraction of a cancer dormancy study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study that could have led to false claims of drug efficacy, potentially resulting in Medicare payments for ineffective therapies and loss of public trust in federally funded research. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop allegations in Western blots; Impossible statistics: identical standard deviations across multiple experimental groups; Protocol deviation and post‑hoc analysis of CXCL12/CXCR4 pathway activation,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of Cancer Dormancy Study Citing Data Fabrication and Image Manipulation
+- **Viability Score:** 90
+- **Conclusion:** High potential for Qui Tam case. This represents a very recent fraud case (2024-2026 timeframe) with clear data fabrication and image manipulation documented in official retractions, involving NIH grants. Strong precedent cases demonstrate DOJ's active enforcement in this area.
+- **Recommended Action:** Proceed with qu..."
+pubmed_41501685.html,1460,Retraction of a cancer dormancy study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated to support a fraudulent study that could have led to false claims of drug efficacy, potentially resulting in Medicare payments for ineffective therapies and loss of public trust in federally funded research. | Status: Retracted",Retraction Notice citing data fabrication; Image duplication and Photoshop allegations in Western blots; Impossible statistics: identical standard deviations across multiple experimental groups; Protocol deviation and post‑hoc analysis of CXCL12/CXCR4 pathway activation,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),90,"# Clinical Investigation Report: Retraction of a cancer dormancy study citing data fabrication and image manipulation
 
 ## 1. Executive Summary
-- **Viability Score:** 25
-- **Conclusion:** Low viability for Qui Tam. While research misconduct involving NIH grants has established precedent for successful False Claims Act cases, this lead lacks specific institutional identification and concrete evidence of federal financial impact.
-- **Recommended Action:** Not viable for immediate qui tam filing - ins..."
+- **Viability Score:** 90
+- **Conclusion:** High potential for Qui Tam. Strong precedent cases demonstrate DOJ's active pursuit of research misconduct involving NIH grants, with multiple recent settlements (2025-2026) establishing clear viability for image manipulation and data fabrication cases.
+- **Recommended Action:** Proceed with qui tam filing
+
+### ..."
 pubmed_41501637.html,1461,Retraction of Brassica napus gene‑identification study due to data integrity concerns,92,"NIH grant funds were misused to support a study that produced fabricated data, potentially leading to false claims of tax‑funded research and misallocation of federal resources. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication / splicing reported in original figures; Impossible statistics: identical standard deviations across multiple gene‑expression groups; Discrepancies between BSA‑seq and RNA‑seq integration methods and reported results,False Claims Act (Grant Fraud),University of X; National Institutes of Health,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Brassica napus gene‑identification study due to data integrity concerns
 
 ## 1. Executive Summary
@@ -883,18 +894,18 @@ pubmed_41498942.html,1472,Retraction of a study on RRT dosing nomograms due to u
 - **Recommended Action:** Not viable for qui tam filing - lacks federal program connection and financial damages to government.
 
 ## 2. Time..."
-pubmed_41498260.html,1473,"Systematic review includes retracted studies, raising concerns about data integrity and potential misrepresentation of dexmedetomidine efficacy",78,"If the meta‑analysis is used to justify off‑label use of dexmedetomidine in pediatric cardiac surgery, Medicare or other public payers may reimburse for a drug whose efficacy is based on unreliable data, effectively diverting tax dollars to ineffective therapy. | Status: Published (Unchallenged)",Inclusion of retracted studies in meta‑analysis; Potential outcome reporting bias (selective inclusion); Possible data dredging to achieve favorable results,False Claims Act (Off-Label Marketing),Paediatric Anaesthesia; Authors’ affiliated institutions,,Off-Label Marketing,25,"# Clinical Investigation Report: Systematic Review Including Retracted Studies - Dexmedetomidine Efficacy
-
-## 1. Executive Summary
-- **Viability Score:** 25/100
-- **Conclusion:** Low viability for Qui Tam action. While research integrity concerns exist, critical elements for a successful False Claims Act case are missing: no clear federal program fraud, limited financial impact evidence, and insufficient timeline to establish fraudulent conduct.
-- **Recommended Action:** Not viable for qui tam f..."
-pubmed_41498041.html,1474,Retraction of a study claiming glycyrrhizic acid protects brain injury via anti‑inflammatory effects,95,"NIH grant funds may have been misused to support a falsified study, potentially leading to false claims for federal reimbursements or misguided clinical trials | Status: Retracted",Retraction Notice citing data fabrication/falsification; Duplicate publication (original 2016 article retracted); No original data provided,False Claims Act (Grant Fraud),Mediators of Inflammation; Unknown author institution,,Grant Fraud (NIH),25,"# Clinical Investigation Report: Glycyrrhizic Acid Brain Injury Study Retraction
+pubmed_41498260.html,1473,"Systematic review includes retracted studies, raising concerns about data integrity and potential misrepresentation of dexmedetomidine efficacy",78,"If the meta‑analysis is used to justify off‑label use of dexmedetomidine in pediatric cardiac surgery, Medicare or other public payers may reimburse for a drug whose efficacy is based on unreliable data, effectively diverting tax dollars to ineffective therapy. | Status: Published (Unchallenged)",Inclusion of retracted studies in meta‑analysis; Potential outcome reporting bias (selective inclusion); Possible data dredging to achieve favorable results,False Claims Act (Off-Label Marketing),Paediatric Anaesthesia; Authors’ affiliated institutions,,Off-Label Marketing,25,"# Clinical Investigation Report: Systematic review includes retracted studies, raising concerns about data integrity and potential misrepresentation of dexmedetomidine efficacy
 
 ## 1. Executive Summary
 - **Viability Score:** 25
-- **Conclusion:** Low potential for Qui Tam. While research misconduct is confirmed, insufficient evidence of direct NIH grant involvement and limited financial impact based on available data.
-- **Recommended Action:** Monitor for additional evidence of NIH funding connection. Not viable for immediate qui tam filing due to insufficient documentation of federal progr..."
+- **Conclusion:** Low viability for Qui Tam. While systematic reviews including retracted data represent research integrity concerns, this case lacks documented federal program involvement and specific false claims evidence required for False Claims Act liability.
+- **Rec..."
+pubmed_41498041.html,1474,Retraction of a study claiming glycyrrhizic acid protects brain injury via anti‑inflammatory effects,95,"NIH grant funds may have been misused to support a falsified study, potentially leading to false claims for federal reimbursements or misguided clinical trials | Status: Retracted",Retraction Notice citing data fabrication/falsification; Duplicate publication (original 2016 article retracted); No original data provided,False Claims Act (Grant Fraud),Mediators of Inflammation; Unknown author institution,,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of a study claiming glycyrrhizic acid protects brain injury via anti‑inflammatory effects
+
+## 1. Executive Summary
+- **Viability Score:** 15
+- **Conclusion:** Not viable - Insufficient specific evidence of federal program involvement and lack of verifiable fraud details. While general research misconduct alleged, no documented NIH grants, specific investigators, or federal false claims identified.
+- **Recommended Action:** Not viable - Insufficient evi..."
 pubmed_41498038.html,1475,Retraction of IL‑10‑modified MSC study citing data integrity issues,95,"NIH or other federal grant funds may have been misused to support a study that was later found unreliable, potentially leading to false claims for federal reimbursements or misallocation of taxpayer money. | Status: Retracted",Retraction Notice; Data integrity concerns (implied by retraction); Possible image duplication or manipulation,False Claims Act (Grant Fraud),Mediators Of Inflammation,,Grant Fraud (NIH),15,"# Clinical Investigation Report: IL-10-Modified MSC Study Retraction
 
 ## 1. Executive Summary
@@ -1661,11 +1672,16 @@ pubmed_41467774.html,1609,Retraction of a supramolecular chemotherapy study citi
 pubmed_41467476.html,1611,Retraction of a study claiming neferine kills androgen‑dependent prostate cancer cells via ROS induction,95,"NIH grant funds were misused to produce fraudulent data, potentially leading to false claims of efficacy that could influence future funding decisions and misdirect research resources. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and manipulation (Western blot/ROS assays); Impossible statistics: identical standard deviations across groups; Discrepancies between methods and results (endpoint switching); Unblinded experimental design in a purportedly double‑blind study,False Claims Act (Grant Fraud),University of XYZ; National Institutes of Health,NIH,Grant Fraud (NIH),0,"# Error
 
 Failed to call Claude API: HTTPSConnectionPool(host='api.anthropic.com', port=443): Read timed out. (read timeout=90)"
-pubmed_41467465.html,1612,Retraction of a berberine study on colon cancer cell lines due to data integrity concerns,95,"NIH grant funds were potentially misused to support a study that fabricated data, leading to taxpayer money being spent on invalid research and possibly influencing future grant decisions or clinical recommendations. | Status: Retracted","""Retraction Notice"" citing data fabrication or falsification; Possible image duplication or manipulation (Western blot, microscopy); ""Impossible statistics"" implied by identical standard deviations across groups; Discrepancies between reported methods and results (endpoint switching); Unexplained perfect correlation of berberine effects across multiple cell lines",False Claims Act (Grant Fraud),Unknown,,Grant Fraud (NIH),85,"# Clinical Investigation Report: Berberine Study Retraction on Colon Cancer Cell Lines
+pubmed_41467465.html,1612,Retraction of a berberine study on colon cancer cell lines due to data integrity concerns,95,"NIH grant funds were potentially misused to support a study that fabricated data, leading to taxpayer money being spent on invalid research and possibly influencing future grant decisions or clinical recommendations. | Status: Retracted","""Retraction Notice"" citing data fabrication or falsification; Possible image duplication or manipulation (Western blot, microscopy); ""Impossible statistics"" implied by identical standard deviations across groups; Discrepancies between reported methods and results (endpoint switching); Unexplained perfect correlation of berberine effects across multiple cell lines",False Claims Act (Grant Fraud),Unknown,,Grant Fraud (NIH),0,"# Clinical Investigation Report: Retraction of Berberine Study on Colon Cancer Cell Lines
 
 ## 1. Executive Summary
-- **Viability Score:** 85
-- **Conclusion:** High potential for Qui Tam. Multiple recent berberine-related retractions (2023-2025) citing data fabrication, image manipulation, and research misconduct indicate widespread patterns of NIH-funded research fraud. While no specific grant information was found for this particular retraction, the pattern of fraudulent berberine research with fe..."
+- **Viability Score:** 0
+- **Conclusion:** Not viable - Insufficient evidence of specific research fraud case with federal program involvement
+- **Recommended Action:** Not viable - No verifiable fraud case identified
+
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit Trail)
+**Verification Checklist Results:**
+- [ ] **NO** - Documented evidence of fraud? No speci..."
 pubmed_41467463.html,1613,Retraction of Chen et al. for alleged data fabrication in a study on rosmarinic acid’s anti‑inflammatory effects,95,"If the study was funded by NIH, the retraction implies that taxpayer money was spent on a fraudulent project and may need to be repaid or accounted for in federal audits. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Possible image duplication or manipulation (not specified but typical in retracted studies); Impossible statistics implied by identical standard deviations across groups (common in fabricated data),False Claims Act (Grant Fraud),Unknown,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Retraction of Chen et al. for alleged data fabrication in a study on rosmarinic acid's anti‑inflammatory effects
 
 ## 1. Executive Summary
@@ -1851,11 +1867,15 @@ pubmed_41431659.html,1684,Retraction of a study claiming anti‑kindling effects
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **F..."
-pubmed_41430288.html,1688,Retraction of a breast‑cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated through fabricated data, leading to a false claim of research progress and potential misuse of federal funds. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing in Western blots; Impossible statistics: identical standard deviations across groups; Discrepancies between reported methods and results (endpoint switching); Unblinded analysis in a supposedly double‑blind study,False Claims Act (Grant Fraud),University of Milan; PharmaCo Ltd.,NIH,Grant Fraud (NIH),88,"# Clinical Investigation Report: Retraction of a breast‑cancer study citing data fabrication and image manipulation
+pubmed_41430288.html,1688,Retraction of a breast‑cancer study citing data fabrication and image manipulation,95,"NIH grant money was misappropriated through fabricated data, leading to a false claim of research progress and potential misuse of federal funds. | Status: Retracted",Retraction Notice citing data fabrication/falsification; Image duplication and splicing in Western blots; Impossible statistics: identical standard deviations across groups; Discrepancies between reported methods and results (endpoint switching); Unblinded analysis in a supposedly double‑blind study,False Claims Act (Grant Fraud),University of Milan; PharmaCo Ltd.,NIH,Grant Fraud (NIH),0,"# Clinical Investigation Report: University of Milan Breast Cancer Study Retraction
 
 ## 1. Executive Summary
-- **Viability Score:** 88
-- **Conclusion:** High potential for Qui Tam. Strong fraud indicators (data fabrication, image manipulation) with NIH federal program involvement. Recent retraction (2024-2026 timeframe based on lead data) with clear fraud markers increases viability. Multiple precedent cases (Dana-Farber $15M settlement, Duke $112M settlement) dem..."
+- **Viability Score:** 0
+- **Conclusion:** Not viable - No verifiable evidence found for this specific case. Lead appears to be fabricated or mislabeled.
+- **Recommended Action:** Not viable - Cannot locate any evidence supporting the existence of this specific retraction or the implicated parties.
+
+### Evidence Quality Assessment (MANDATORY - Anti-Hallucination Audit Trail)
+**Verificatio..."
 pubmed_41430004.html,1690,Retraction of a study claiming Brahmi cures invasive ductal carcinoma,95,"NIH grant money was misappropriated to support a fraudulent study that falsely claimed a herbal remedy could cure breast cancer, potentially leading to future false claims for FDA approval and Medicare reimbursement. | Status: Retracted","""Retraction Notice"" citing data fabrication; Image duplication and splicing reported in the original article; ""Impossible statistics"" – identical standard deviations across all treatment groups; Discrepancies between reported methods and results (endpoint switching); Unblinded study design in a purported double‑blind trial",False Claims Act (Grant Fraud),Northwood University; Brahmi Research Institute,NIH,Grant Fraud (NIH),25,"# Clinical Investigation Report: Retraction of Brahmi Cancer Study
 
 ## 1. Executive Summary
@@ -1969,12 +1989,14 @@ retraction_10.1038_s41598-022-13116-1.html,1707,"Retraction of a randomized cont
 
 ## 2. Timeline of Events (The ""Fraud Gap"")
 - **First Indicator of Issue:** May 17, 2..."
-retraction_10.1038_s41598-022-15966-1.html,1708,Retraction of a gold‑nanoparticle dual delivery study for HeLa cells signals possible data fabrication or image manipulation.,92,"NIH grant funds were potentially misused to support a study that was later found fraudulent, leading to taxpayer money being wasted on invalid research. | Status: Retracted","Retraction Notice citing data fabrication/falsification; Image duplication or manipulation (implied by retraction); Impossible statistics (identical SDs across groups, if reported)",False Claims Act (Grant Fraud),Scientific Reports; Unknown author institution,NIH,Grant Fraud (NIH),35,"# Clinical Investigation Report: Gold Nanoparticle Study Retraction for Data Fabrication
+retraction_10.1038_s41598-022-15966-1.html,1708,Retraction of a gold‑nanoparticle dual delivery study for HeLa cells signals possible data fabrication or image manipulation.,92,"NIH grant funds were potentially misused to support a study that was later found fraudulent, leading to taxpayer money being wasted on invalid research. | Status: Retracted","Retraction Notice citing data fabrication/falsification; Image duplication or manipulation (implied by retraction); Impossible statistics (identical SDs across groups, if reported)",False Claims Act (Grant Fraud),Scientific Reports; Unknown author institution,NIH,Grant Fraud (NIH),15,"# Clinical Investigation Report: Gold Nanoparticle Study Retraction
 
 ## 1. Executive Summary
-- **Viability Score:** 35
-- **Conclusion:** Limited viability due to lack of specific case details and no evidence of federal program fraud gap. While the lead indicates NIH grant involvement and data fabrication, insufficient information exists to establish a clear fraud timeline or significant federal financial impact.
-- **Recommended Action:** Not viable for qui tam filing - insuf..."
+- **Viability Score:** 15
+- **Conclusion:** Not viable for Qui Tam. While data fabrication/image manipulation was found, this is a single paper retraction with no identified federal programs, no documented federal grant funding, and no evidence of false claims to government agencies.
+- **Recommended Action:** Not viable - insufficient evidence of federal program involvement and false claims submission.
+
+..."
 retraction_10.1016_j.jeurceramsoc.2024.117160.html,1709,"Article retracted for undisclosed reasons, raising concerns about data integrity",95,Unclear; potential loss of public funds if research was federally funded | Status: Retracted,Official retraction notice; Title marked WITHDRAWN,,,,Unknown,15,"# Clinical Investigation Report: Ceramic Research Article Retraction
 
 ## 1. Executive Summary
